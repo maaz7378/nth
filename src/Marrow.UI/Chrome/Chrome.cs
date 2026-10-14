@@ -481,11 +481,13 @@ namespace Marrow.UI.Chrome
 
         // `shape.fill(.clear).glassEffect(in: shape)` (:243-245, :252-254): the default glass, no tint, no .interactive()
         // and no container, drawn over the app-owned backdrop (OD-0005, ADR-0002 Glass (b)).
-        private static SwiftShapeBorder GlassLayer()
+        private static SwiftShapeBorder GlassLayer(bool overWallpaper = false)
         {
             var layer = Fill();
-            // ED-NEW-glass-alive-1 (rows #87, #32): nearly clear over the wallpaper, so the live wallpaper reads vivid and the panels' rims have it to bend.
-            SwiftGlass.SetEffect(layer, GlassEffect.Regular(GlassShape.RoundedRectangle(0, RoundedCornerStyle.Continuous)).WithLook(GlassLook.WallpaperClear)); // the rectangle: see Fill
+            var glass = GlassEffect.Regular(GlassShape.RoundedRectangle(0, RoundedCornerStyle.Continuous)); // the rectangle: see Fill
+            // ED-NEW-glass-alive-1 (rows #87, #32): nearly clear over the wallpaper, so the live wallpaper reads vivid and the panels' rims have it to
+            // bend; over the desktop alone the default glass stays (OD-0005).
+            SwiftGlass.SetEffect(layer, overWallpaper ? glass.WithLook(GlassLook.WallpaperClear) : glass);
             return layer;
         }
 
@@ -520,7 +522,7 @@ namespace Marrow.UI.Chrome
             if (wallpaperOverlay is { } overlay)
             {
                 // :241-247 `.overlay { if !isSolid { ... } }`
-                if (!isSolid && overlay.Children.Count == 0) overlay.Children.Add(GlassLayer());
+                if (!isSolid && overlay.Children.Count == 0) overlay.Children.Add(GlassLayer(overWallpaper: true));
                 else if (isSolid && overlay.Children.Count != 0) overlay.Children.Clear();
             }
         }
