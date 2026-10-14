@@ -143,6 +143,23 @@ public sealed class GlassSettingsTests
         Assert.Equal((0d, 0.48, 1d), (blue.R, blue.G, blue.B));
     }
 
+    [Fact]
+    [Trait("Decision", "ED-NEW-glass-alive-2")] // rows #87, #32: the desktop behind the window is clear by default and still writes {}; Frosted is kept as a setting and reads back; anything else reads as Clear
+    public void The_desktop_is_clear_by_default_and_frosted_reads_back()
+    {
+        Assert.Equal(DesktopBackdrop.Clear, GlassSettings.Default.Desktop);
+        Assert.Equal("{}", Json(GlassSettings.Default));
+        var frosted = GlassSettings.Default with { Desktop = DesktopBackdrop.Frosted };
+        Assert.Equal("{\"desktop\":\"frosted\"}", Json(frosted));
+        Assert.Equal(frosted, Read(Json(frosted)));
+        Assert.Equal(DesktopBackdrop.Clear, Read("{\"desktop\":\"clear\"}").Desktop);
+        Assert.Equal(DesktopBackdrop.Clear, Read("{\"desktop\":\"mica\"}").Desktop);
+        Assert.Equal(DesktopBackdrop.Clear, Read("{\"desktop\":1}").Desktop);
+        Assert.Equal(DesktopBackdrop.Clear, (GlassSettings.Default with { Desktop = (DesktopBackdrop)7 }).Held().Desktop);
+        Assert.Equal(DesktopBackdrop.Frosted, GlassSettings.Default.At(80).Toward(frosted, 0.5).Desktop);
+        Assert.Equal(DesktopBackdrop.Frosted, frosted.At(GlassVariant.Tinted).Desktop);
+    }
+
     [Theory]
     [Trait("Decision", "OD-0147")] // range clamps: a value past its range is held to it, set or read (the anti-plastic clamps: frost never under 20, a fringe of 1 px at most, a rim line of 1 at most, a tint of 0.5 at most)
     [InlineData("refraction", 9, 2.4)]

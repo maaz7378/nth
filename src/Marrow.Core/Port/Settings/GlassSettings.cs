@@ -39,6 +39,15 @@ public enum GlassTintColour
     Green,
 }
 
+/// <summary>ED-NEW-glass-alive-2 (rows #87, #32): what the window lets through from the desktop behind it, from Windows' own compositor (DWM).</summary>
+public enum DesktopBackdrop
+{
+    /// <summary>The default: the desktop shows through the window clear, and only the app's own glass frosts it.</summary>
+    Clear,
+    /// <summary>Windows blurs the desktop behind the window (Acrylic), as before.</summary>
+    Frosted,
+}
+
 /// <summary>
 /// The <c>glass</c> setting: compact JSON of what differs from <see cref="Default"/>. Lenient read, as <see cref="WorkingDotsSettings"/>: a missing,
 /// mistyped or out-of-range value keeps its default or is held to its range, and unreadable data as a whole is the default. The three accessibility
@@ -95,6 +104,9 @@ public sealed record GlassSettings
 
     /// <summary>Translucent sidebar: the window behind tints the sidebar; off, the sidebar is all but solid.</summary>
     public bool TranslucentSidebar { get; init; } = true;
+
+    /// <summary>ED-NEW-glass-alive-2: the desktop behind the window, clear (the default) or frosted by Windows.</summary>
+    public DesktopBackdrop Desktop { get; init; } = DesktopBackdrop.Clear;
 
     /// <summary>The shipped glass: Regular, every value the canvas's default, the switches following Windows.</summary>
     public static GlassSettings Default { get; } = new();
@@ -222,6 +234,7 @@ public sealed record GlassSettings
         {
             Transparency = TransparencyKnob.Hold(Transparency),
             TintColour = Enum.IsDefined(TintColour) ? TintColour : GlassTintColour.None,
+            Desktop = Enum.IsDefined(Desktop) ? Desktop : DesktopBackdrop.Clear,
         };
         foreach (var knob in Knobs) held = held.With(knob.Id, held.Get(knob.Id));
         return held;
@@ -263,6 +276,7 @@ public sealed record GlassSettings
             if (held.IncreaseContrast is { } contrast) w.WriteBoolean("increaseContrast", contrast);
             if (held.ReduceTransparency is { } reduce) w.WriteBoolean("reduceTransparency", reduce);
             if (!held.TranslucentSidebar) w.WriteBoolean("translucentSidebar", false);
+            if (held.Desktop == DesktopBackdrop.Frosted) w.WriteString("desktop", "frosted");
             w.WriteEndObject();
         }
         return stream.ToArray();
@@ -292,6 +306,8 @@ public sealed record GlassSettings
             {
                 IncreaseContrast = Flag(root, "increaseContrast"), ReduceTransparency = Flag(root, "reduceTransparency"),
                 TranslucentSidebar = Flag(root, "translucentSidebar") ?? true,
+                Desktop = root.TryGetProperty("desktop", out var desktop) && desktop.ValueKind == JsonValueKind.String && desktop.GetString() == "frosted"
+                    ? DesktopBackdrop.Frosted : DesktopBackdrop.Clear,
             };
         }
         catch (Exception e) when (e is JsonException or InvalidOperationException or ArgumentException)
