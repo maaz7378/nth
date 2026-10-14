@@ -39,8 +39,9 @@
 //     UIKit's normal deceleration rate, 0.998 per ms (UNVERIFIED, parked: no trackpad in the reference videos);
 //   * every motion ends exactly on its stop: it aims a hair past it (2 points a second's worth) and rests the moment it
 //     gets there, so the last step is the smallest, never a settle jump;
-//   * the ends: no overscroll (every Mac case measured stops at the end, section 6). A motion headed past an end keeps
-//     its speed until it is within 12 ms of it and then brakes onto it (about 40 ms), where the Mac stops in one frame;
+//   * the ends: the offset never overscrolls (every Mac case measured stops at the end, section 6). A motion headed past an end keeps
+//     its speed until it is within 12 ms of it and then brakes onto it (about 40 ms), where the Mac stops in one frame. A wheel
+//     that pushes on past the end stretches the content by a render transform and springs back (ElasticEdge, ED-NEW-glass-alive-4);
 //   * keyboard (Page Up/Down, Home/End, when the focused control leaves them unhandled) and programmatic scrolls animate
 //     along a SwiftUI curve, `.smooth(duration: 0.25)` for keys, and carry a running speed in;
 //   * reduce motion (\.accessibilityReduceMotion, ED-084): every input steps the offset at once;
@@ -1251,6 +1252,18 @@ public static class SoftScroll
             for (var visual = e.Source as Visual; visual is not null; visual = visual.GetVisualParent())
                 if (visual is ScrollViewer moving && Drivers.TryGetValue(moving, out var driver) && driver.IsMoving && CanScrollAlong(moving, delta))
                     e.Handled = true;
+            // ED-NEW-glass-alive-4 (row #87): the innermost soft scroll view that scrolls that way gives at its end and springs back
+            // (ElasticEdge); the report itself goes on as before.
+            for (var visual = e.Source as Visual; visual is not null; visual = visual.GetVisualParent())
+                if (visual is ScrollViewer edge && Drives(edge) && CanScrollAlong(edge, delta))
+                {
+                    var notch = SystemWheel.Shared.Current;
+                    ElasticEdge.Pull(edge, kind == WheelKind.Touchpad
+                        ? new Vector(CanScroll(edge, horizontal: true) ? -delta.X * ScrollPhysics.WheelLine : 0, CanScroll(edge, horizontal: false) ? -delta.Y * ScrollPhysics.WheelLine : 0)
+                        : new Vector(CanScroll(edge, horizontal: true) ? -delta.X * notch.Notch(edge.Viewport.Width) : 0,
+                            CanScroll(edge, horizontal: false) ? -delta.Y * notch.Notch(edge.Viewport.Height) : 0));
+                    break;
+                }
             return;
         }
         e.Handled = true;
