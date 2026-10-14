@@ -484,7 +484,8 @@ namespace Marrow.UI.Chrome
         private static SwiftShapeBorder GlassLayer()
         {
             var layer = Fill();
-            SwiftGlass.SetEffect(layer, GlassEffect.Regular(GlassShape.RoundedRectangle(0, RoundedCornerStyle.Continuous))); // the rectangle: see Fill
+            // ED-NEW-glass-alive-1 (rows #87, #32): nearly clear over the wallpaper, so the live wallpaper reads vivid and the panels' rims have it to bend.
+            SwiftGlass.SetEffect(layer, GlassEffect.Regular(GlassShape.RoundedRectangle(0, RoundedCornerStyle.Continuous)).WithLook(GlassLook.WallpaperClear)); // the rectangle: see Fill
             return layer;
         }
 

@@ -293,6 +293,23 @@ public sealed class GlassLookTests(HeadlessSession headless)
     });
 
     [Fact]
+    [Trait("Decision", "ED-NEW-glass-alive-1")] // rows #87 (a), #32: the window's layer over a wallpaper keeps the wallpaper's detail, where the sheet's canvas glass washed it out
+    public void The_window_layer_over_a_wallpaper_keeps_the_wallpapers_detail() => headless.OnUiThread(() =>
+    {
+        const int width = 400, height = 200;
+        var rectangle = GlassShape.RoundedRectangle(0, RoundedCornerStyle.Continuous);
+        Border[] Stripes() => Enumerable.Range(0, 10).Select(i => Bar(i * 40, 0, 20, height, 230)).ToArray();
+        var canvas = Render(Backdrop(40, Stripes()), Piece(rectangle, 0, 0, width, height), width, height);
+        var clear = Render(Backdrop(40, Stripes()), Piece(rectangle, 0, 0, width, height, GlassLook.WallpaperClear), width, height);
+        const int y = height / 2;
+        double Swing(Func<int, int, Color> at) => Enumerable.Range(120, 160).Max(x => Luma(at(x, y))) - Enumerable.Range(120, 160).Min(x => Luma(at(x, y)));
+        var washed = Swing(canvas);
+        var kept = Swing(clear);
+        Assert.True(kept >= 2 * washed, $"the stripes swing {kept:F0} levels through the clear layer against {washed:F0} through the sheet's glass");
+        Assert.True(kept >= 60, $"and {kept:F0} levels is the wallpaper still reading");
+    });
+
+    [Fact]
     [Trait("Req", "PR-WIN-180")] // OD-0108: the warm-up's programs are the draw's, with both backdrops (the blur and the clear rim's) bound
     public void The_warm_up_programs_take_the_blur_and_the_clear_rim() => headless.OnUiThread(() =>
     {

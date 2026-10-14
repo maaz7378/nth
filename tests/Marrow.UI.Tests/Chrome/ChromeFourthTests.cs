@@ -464,7 +464,8 @@ public sealed class ChromeFourthTests(HeadlessSession headless)
         var window = Show(backdrop, ThemeVariant.Dark, 400, 300);
 
         var layer = Assert.Single(BackdropGlass(backdrop));
-        Assert.Equal(GlassEffect.Regular(GlassShape.RoundedRectangle(0, RoundedCornerStyle.Continuous)), SwiftGlass.GetEffect(layer)); // the window's rectangle (ED-338)
+        // ED-NEW-glass-alive-1: the same rectangle (ED-338), now with the nearly clear wallpaper look; exact equality, as before.
+        Assert.Equal(GlassEffect.Regular(GlassShape.RoundedRectangle(0, RoundedCornerStyle.Continuous)).WithLook(GlassLook.WallpaperClear), SwiftGlass.GetEffect(layer));
         Assert.Equal(new Rect(backdrop.Bounds.Size), BoundsIn(layer, backdrop));
         var image = Assert.Single(VisualQuery.Descendants<Image>(backdrop));
         var all = VisualQuery.Descendants<Visual>(backdrop).ToList();

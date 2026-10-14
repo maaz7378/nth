@@ -76,6 +76,13 @@ public sealed record GlassLook(double Clarity = 0, double Bend = 1, double Band 
     public static GlassLook TintedCandidate { get; } = new(Clarity: 0.5, Bend: 1, Fringe: 1, Rim: 1, Blur: 1, Tint: 1.8, Saturation: 1, Shadow: 0.8,
         Profile: 1, Glow: 0, Hairline: 1, FringeCap: 1, Lift: 0, Depth: 0.14);
 
+    /// <summary>ED-NEW-glass-alive-1 (row #87 (a), row #32): the window's glass layer over a wallpaper (Chrome's WindowBackdrop overlay). The canvas
+    /// drew it as the Settings sheet's glass, the widest frost and the heaviest tint, so the wallpaper was washed out before any panel's lens read it
+    /// and the rims had nothing bright to bend. This look keeps the layer (the same one pass, no new program) but nearly clear: a quarter of the
+    /// blur, a fifth of the film, a 1.15 saturation lift, and no bend, fringe, rim, inner light or contact line at the window's own edge.</summary>
+    public static GlassLook WallpaperClear { get; } = new(Clarity: 1, Bend: 0, Fringe: 0, Rim: 0, Blur: 0.25, Tint: 0.2, Saturation: 1.15, Shadow: 0,
+        Glow: 0);
+
     /// <summary>The look <paramref name="t"/> of the way from this one to <paramref name="to"/> (a Look's crossfade): every knob in between; at 1 exactly <paramref name="to"/>.</summary>
     public GlassLook Toward(GlassLook to, double t)
     {
