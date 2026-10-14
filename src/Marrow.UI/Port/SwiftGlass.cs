@@ -135,7 +135,11 @@ public static class SwiftGlass
 
     static SwiftGlass()
     {
-        EffectProperty.Changed.AddClassHandler<Control>((control, _) => GlassMaterial.Attach(control));
+        EffectProperty.Changed.AddClassHandler<Control>((control, _) =>
+        {
+            RoundFill(control);
+            GlassMaterial.Attach(control);
+        });
         UsesDesktopBackdropProperty.Changed.AddClassHandler<Control>((control, _) => GlassMaterial.Attach(control));
         ContainerSpacingProperty.Changed.AddClassHandler<Control>((control, _) => GlassMaterial.Attach(control));
         StandsAloneProperty.Changed.AddClassHandler<Control>((control, _) => GlassMaterial.Attach(control));
@@ -144,6 +148,25 @@ public static class SwiftGlass
     }
 
     public static GlassEffect? GetEffect(Control control) => control.GetValue(EffectProperty);
+
+    // ED-NEW-glass-alive-3 (round glass buttons drew square): the glass shape rounds only the material, so a Border's own fill (a tint, a press
+    // colour) under a Capsule or Circle glass drew to the Border's square corners. While its effect is round, the Border's corner is half its
+    // shorter side, so its fill keeps the glass's outline at every size; a Border whose effect leaves the round shapes keeps the corner it is given.
+    private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<Border, object> roundFills = new();
+
+    private static bool IsRound(GlassEffect? effect) => effect?.Shape.Kind is GlassShapeKind.Capsule or GlassShapeKind.Circle;
+
+    private static void RoundFill(Control control)
+    {
+        if (control is not Border border || !IsRound(GetEffect(border))) return;
+        border.CornerRadius = new CornerRadius(SwiftShapes.CapsuleCornerRadius(border.Bounds.Size));
+        if (roundFills.TryGetValue(border, out _)) return;
+        roundFills.Add(border, new object());
+        border.SizeChanged += (_, e) =>
+        {
+            if (IsRound(GetEffect(border))) border.CornerRadius = new CornerRadius(SwiftShapes.CapsuleCornerRadius(e.NewSize));
+        };
+    }
 
     public static void SetEffect(Control control, GlassEffect? effect) => control.SetValue(EffectProperty, effect);
 
