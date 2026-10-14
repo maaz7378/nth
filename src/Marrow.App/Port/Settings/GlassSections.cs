@@ -38,6 +38,7 @@ internal sealed class GlassSections
     internal CzToggleRow IncreaseContrast { get; }
     internal CzToggleRow ReduceTransparency { get; }
     internal CzToggleRow TranslucentSidebar { get; }
+    internal CzSegmentRow Desktop { get; }
     internal CzCapsuleButton Reset { get; }
 
     /// <param name="read">The app's glass setting; read inside a tracked read by the page.</param>
@@ -107,6 +108,15 @@ internal sealed class GlassSections
         TranslucentSidebar = new CzToggleRow(GlassText.TranslucentSidebar, GlassText.TranslucentSidebarDetail,
             () => read().TranslucentSidebar, on => Switch(s => s with { TranslucentSidebar = on }));
         rows.Add(TranslucentSidebar.Row);
+        // ED-NEW-glass-alive-2 (rows #87, #32): the desktop behind the window, Clear (the default) or Frosted by Windows (the Acrylic it was).
+        Desktop = new CzSegmentRow(GlassText.Desktop, GlassText.DesktopDetail, [("clear", GlassText.DesktopClear), ("frosted", GlassText.DesktopFrosted)],
+            DesktopId(settings), id =>
+            {
+                if (glide.IsMoving) glide.Jump(1);
+                write(read() with { Desktop = id == "frosted" ? DesktopBackdrop.Frosted : DesktopBackdrop.Clear });
+                commit();
+            });
+        rows.Add(Desktop.Row);
 
         Reset = new CzCapsuleButton(GlassText.Reset, detail: GlassText.ResetDetail);
         Reset.Invoked += () => Glide(GlassSettings.Default);
@@ -165,6 +175,8 @@ internal sealed class GlassSections
             if (TintColour.SelectedId != tint) TintColour.Show(tint);
             var motion = ReducedMotion(settings) ? "reduced" : "full";
             if (Motion.Control.SelectedId != motion) Motion.Apply(motion, GlassText.MotionDetail);
+            var desktop = DesktopId(settings);
+            if (Desktop.Control.SelectedId != desktop) Desktop.Apply(desktop, GlassText.DesktopDetail);
         }
         finally { showing = false; }
         var custom = read().IsCustom;
@@ -172,6 +184,8 @@ internal sealed class GlassSections
         FineTuning.SetDetail(GlassText.FineTuningDetail(custom));
         Reset.Dimmed = read().Held() == GlassSettings.Default;
     }
+
+    private static string DesktopId(GlassSettings settings) => settings.Desktop == DesktopBackdrop.Frosted ? "frosted" : "clear";
 
     private void Pick(string id)
     {
@@ -235,6 +249,10 @@ internal static class GlassText
     internal const string ReduceTransparencyDetail = "Solid surfaces instead of glass.";
     internal const string TranslucentSidebar = "Translucent sidebar";
     internal const string TranslucentSidebarDetail = "Let the window behind tint the sidebar.";
+    internal const string Desktop = "Desktop behind the window";
+    internal const string DesktopDetail = "Clear shows the desktop as it is; Frosted lets Windows blur it.";
+    internal const string DesktopClear = "Clear";
+    internal const string DesktopFrosted = "Frosted";
     internal const string Defaults = "Defaults";
     internal const string Reset = "Reset to defaults";
     internal const string ResetDetail = "Regular, every value at its default, the switches following Windows.";
