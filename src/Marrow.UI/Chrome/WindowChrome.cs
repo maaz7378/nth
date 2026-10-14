@@ -7,6 +7,7 @@ using Avalonia.Media;
 using Marrow.Core.Localisation;
 using Marrow.Core.Models;
 using Marrow.Core.Port;
+using Marrow.Core.Port.Settings;
 using Marrow.UI.Port;
 using PortAnimation = Marrow.UI.Port.Animation;
 
@@ -147,6 +148,39 @@ public static class WindowChrome
     public static IReadOnlyList<WindowTransparencyLevel> GlassBackdrop { get; } =
         [WindowTransparencyLevel.AcrylicBlur, WindowTransparencyLevel.Transparent];
 
+    /// <summary>
+    /// ED-NEW-glass-alive-2 (rows #87, #32): the clear desktop, the default. Windows' compositor (DWM) lets the desktop through the window
+    /// unblurred, and only the app's own glass frosts it (Transparent is the level every Windows the app runs on supports, so the list
+    /// never falls to an opaque window).
+    /// </summary>
+    public static IReadOnlyList<WindowTransparencyLevel> ClearBackdrop { get; } = [WindowTransparencyLevel.Transparent];
+
+    /// <summary>ED-NEW-glass-alive-2: the backdrop hint for the Glass setting's desktop: <see cref="ClearBackdrop"/> for Clear,
+    /// <see cref="GlassBackdrop"/> (ED-236's Acrylic) for Frosted.</summary>
+    public static IReadOnlyList<WindowTransparencyLevel> BackdropFor(DesktopBackdrop desktop) =>
+        desktop == DesktopBackdrop.Frosted ? GlassBackdrop : ClearBackdrop;
+
+    private static bool followingDesktop;
+
+    // ED-NEW-glass-alive-2: a change of the Glass setting's desktop reaches every configured window; DWM swaps its backdrop on its own
+    // compositor, so the app draws no extra frame for it.
+    private static void FollowDesktopSetting()
+    {
+        if (followingDesktop) return;
+        followingDesktop = true;
+        GlassLooks.Changed += () =>
+        {
+            void Apply()
+            {
+                var hint = BackdropFor(GlassLooks.Tuning.Desktop);
+                foreach (var (window, state) in states)
+                    if (state.Configured && !window.TransparencyLevelHint.SequenceEqual(hint)) window.TransparencyLevelHint = hint;
+            }
+            if (Avalonia.Threading.Dispatcher.UIThread.CheckAccess()) Apply();
+            else Avalonia.Threading.Dispatcher.UIThread.Post(Apply);
+        };
+    }
+
     /// <summary>:107-132 <c>static func configure(_ window: NSWindow)</c>.</summary>
     public static void Configure(Window window)
     {
@@ -167,7 +201,10 @@ public static class WindowChrome
         // ED-236 (OD-0005, OD-0014, closes WindowManager STOP #5): the clear window's material over the desktop. AppKit's
         // clear window shows the desktop through the glass blurred; here the window itself composites Acrylic and the
         // app-drawn scrim (Chrome.WindowBackdrop, SwiftGlass) lies on it, as probe P3 requires.
-        window.TransparencyLevelHint = GlassBackdrop;
+        // ED-NEW-glass-alive-2 (rows #87, #32): Acrylic is now the Glass setting's Frosted desktop; the default, Clear, lets the
+        // desktop through unblurred so the wallpaper and the desktop read vivid behind the glass.
+        window.TransparencyLevelHint = BackdropFor(GlassLooks.Tuning.Desktop);
+        FollowDesktopSetting();
         // OD-0017 adopts ED-101 for every resizable top-level window after its first native frame.
         // Settings remains on Avalonia's presentation because its factory sets CanResize = false.
         if (window.CanResize) _ = ResizeStretch.Attach(window);
