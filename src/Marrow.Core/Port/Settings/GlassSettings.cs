@@ -108,6 +108,13 @@ public sealed record GlassSettings
     /// <summary>ED-NEW-glass-alive-2: the desktop behind the window, clear (the default) or frosted by Windows.</summary>
     public DesktopBackdrop Desktop { get; init; } = DesktopBackdrop.Clear;
 
+    /// <summary>ED-NEW-glass-alive-5: the engine every glass surface draws with: the approved canvas material by default (OD-0147), or
+    /// rizzytoday/liquid-glass with its own options.</summary>
+    public GlassEngine Engine { get; init; } = GlassEngine.Canvas;
+
+    /// <summary>ED-NEW-glass-alive-5: rizzytoday/liquid-glass's own options (its Balanced preset by default), kept while another engine draws.</summary>
+    public RizzyGlass Rizzy { get; init; } = RizzyGlass.Of(GlassEnginePreset.Balanced);
+
     /// <summary>The shipped glass: Regular, every value the canvas's default, the switches following Windows.</summary>
     public static GlassSettings Default { get; } = new();
 
@@ -146,6 +153,13 @@ public sealed record GlassSettings
         ("pink", "Pink", GlassTintColour.Pink, 1, 0.18, 0.33), ("orange", "Orange", GlassTintColour.Orange, 1, 0.58, 0),
         ("green", "Green", GlassTintColour.Green, 0.2, 0.78, 0.35),
     ];
+
+    /// <summary>ED-NEW-glass-alive-5: the engines in the page's order, with their ids (the store's) and names.</summary>
+    public static IReadOnlyList<(string Id, string Name, GlassEngine Value)> Engines { get; } =
+        [("canvas", "Canvas", GlassEngine.Canvas), ("rizzy", "liquid-glass", GlassEngine.Rizzy)];
+
+    /// <summary>An engine's id.</summary>
+    public static string IdOf(GlassEngine engine) => Engines.First(e => e.Value == engine).Id;
 
     /// <summary>A Look's id.</summary>
     public static string IdOf(GlassVariant look) => Looks.First(l => l.Value == look).Id;
@@ -235,6 +249,8 @@ public sealed record GlassSettings
             Transparency = TransparencyKnob.Hold(Transparency),
             TintColour = Enum.IsDefined(TintColour) ? TintColour : GlassTintColour.None,
             Desktop = Enum.IsDefined(Desktop) ? Desktop : DesktopBackdrop.Clear,
+            Engine = Enum.IsDefined(Engine) ? Engine : Default.Engine,
+            Rizzy = (Rizzy ?? Default.Rizzy).Held(),
         };
         foreach (var knob in Knobs) held = held.With(knob.Id, held.Get(knob.Id));
         return held;
@@ -252,6 +268,7 @@ public sealed record GlassSettings
         {
             Transparency = M(Transparency, to.Transparency), Refraction = M(Refraction, to.Refraction), Bezel = M(Bezel, to.Bezel), Frost = M(Frost, to.Frost),
             Fringe = M(Fringe, to.Fringe), Rim = M(Rim, to.Rim), Tint = M(Tint, to.Tint), Saturation = M(Saturation, to.Saturation), Shadow = M(Shadow, to.Shadow),
+            Rizzy = (Rizzy ?? Default.Rizzy).Toward(to.Rizzy ?? Default.Rizzy, t),
         };
     }
 
@@ -277,6 +294,13 @@ public sealed record GlassSettings
             if (held.ReduceTransparency is { } reduce) w.WriteBoolean("reduceTransparency", reduce);
             if (!held.TranslucentSidebar) w.WriteBoolean("translucentSidebar", false);
             if (held.Desktop == DesktopBackdrop.Frosted) w.WriteString("desktop", "frosted");
+            if (held.Engine != Default.Engine) w.WriteString("engine", IdOf(held.Engine));
+            if (held.Rizzy != Default.Rizzy)
+            {
+                w.WriteStartObject("rizzy");
+                held.Rizzy.Write(w, Default.Rizzy);
+                w.WriteEndObject();
+            }
             w.WriteEndObject();
         }
         return stream.ToArray();
@@ -308,6 +332,9 @@ public sealed record GlassSettings
                 TranslucentSidebar = Flag(root, "translucentSidebar") ?? true,
                 Desktop = root.TryGetProperty("desktop", out var desktop) && desktop.ValueKind == JsonValueKind.String && desktop.GetString() == "frosted"
                     ? DesktopBackdrop.Frosted : DesktopBackdrop.Clear,
+                Engine = root.TryGetProperty("engine", out var engine) && engine.ValueKind == JsonValueKind.String && Engines.FirstOrDefault(e => e.Id == engine.GetString()) is { Id: not null } named
+                    ? named.Value : Default.Engine,
+                Rizzy = root.TryGetProperty("rizzy", out var rizzy) ? RizzyGlass.Read(rizzy, Default.Rizzy) : Default.Rizzy,
             };
         }
         catch (Exception e) when (e is JsonException or InvalidOperationException or ArgumentException)
