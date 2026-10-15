@@ -463,6 +463,10 @@ namespace Marrow.UI.Chrome
         // :220-224 `opacity >= 0.98`: from here up the window is a solid fill, not glass under a scrim (Draw, and the corner wedge's fill).
         public static bool IsSolid(double opacity) => opacity >= 0.98;
 
+        /// <summary>ED-NEW-glass-layers-1: the scrim of a sheet's glass over the app: 0.4 of the window's, so the sheet reads in the main screen's
+        /// shade family (the app under it already carries the window's own); solid stays solid.</summary>
+        public static double SheetScrim(double @for, bool isDark) => IsSolid(@for) ? Scrim(@for, isDark) : 0.4 * Scrim(@for, isDark);
+
         // :211-215 static func scrim(for:isDark:)
         public static double Scrim(double @for, bool isDark)
         {
@@ -518,7 +522,7 @@ namespace Marrow.UI.Chrome
                 picture.Opacity = opacity; // :238
             }
             if (libraryView is not null) { libraryView.Selection = library; libraryView.Opacity = opacity; }
-            if (scrim is not null) { scrimGlide ??= new AnimatedScalar(this, 0, value => { if (scrim is { } layer) layer.Opacity = value; }); scrimGlide.Set(Scrim(opacity, isDark), null); } // :258 (a running glide stops here)
+            if (scrim is not null) { scrimGlide ??= new AnimatedScalar(this, 0, value => { if (scrim is { } layer) layer.Opacity = value; }); scrimGlide.Set(overAppContent ? SheetScrim(opacity, isDark) : Scrim(opacity, isDark), null); } // :258 (a running glide stops here)
             if (wallpaperOverlay is { } overlay)
             {
                 // :241-247 `.overlay { if !isSolid { ... } }`
@@ -570,7 +574,14 @@ namespace Marrow.UI.Chrome
             scrim = Fill();
             scrim.Background = SwiftColor.Dynamic(light: SwiftColor.White, dark: SwiftColor.Black).Brush(scrim); // :256-257
             var glass = GlassLayer();
-            if (!overAppContent)
+            if (overAppContent)
+            {
+                // ED-NEW-glass-layers-1: a sheet's glass over the app (Settings, the scripts editor) is a panel on the window's glass, layer 2: it
+                // lenses the app under it, and its scrim is a light one in the main screen's shade (the full scrim, 0.70 black at the default
+                // Transparency, made Settings open far darker than the window it sits on).
+                SwiftGlass.SetLayer(glass, 2);
+            }
+            else
             {
                 SwiftGlass.SetUsesDesktopBackdrop(glass, true); // OD-0014 keeps upstream's clear default.
                 // ED-358: the window's edge under the scrim; sheets keep their app-content material.

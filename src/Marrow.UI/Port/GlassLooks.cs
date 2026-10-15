@@ -282,7 +282,7 @@ public static class GlassLooks
     // ED-NEW-glass-alive-5, -8: the canvas material's look drawn by the user's engine with its own options (the canvas with Liquid glass off).
     private static GlassLook Engined(GlassLook look, GlassSettings settings) =>
         settings.Drawn != GlassEngine.Canvas && look.Canvas is { } canvas
-            ? look with { Canvas = canvas with { Engine = settings.Drawn, Rizzy = settings.Rizzy, Dasher = settings.Dasher, GlassHq = settings.GlassHq } } : look;
+            ? look with { Canvas = canvas with { Engine = settings.Drawn, Rizzy = settings.Rizzy, Dasher = settings.Dasher, GlassHq = settings.GlassHq, Intensity = settings.Intensity } } : look;
 
     /// <summary>ED-NEW-glass-alive-5, -8: the engine's options every surface is drawn with now (a glide's in between; the engine and the switch are
     /// the tuning's).</summary>
@@ -423,18 +423,31 @@ public sealed record GlassCanvas(GlassKind Kind, GlassTuning Tuning)
     /// <summary>ED-NEW-glass-alive-8: a piece on glass is a second lens (the compound lens: its bend times 1.3, its centre magnified 4.5 %).</summary>
     internal bool Nested => Kind == GlassKind.Flat;
 
-    /// <summary>ED-NEW-glass-alive-8: the nested lens's gain on the bend.</summary>
-    internal double NestedGain => Nested ? 1.3 : 1;
+    /// <summary>ED-NEW-glass-layers-1: the piece's optical layer: 1 the window's glass and what is part of it (the sidebar), 2 a panel, sheet,
+    /// popover or the composer on it, 3 a control on one of those (the pill, a thumb). 0 when the piece was not placed in a window (a test's
+    /// lone piece): then a flat control is a second lens and anything else the first, as before.</summary>
+    public int Layer { get; init; }
 
-    /// <summary>ED-NEW-glass-alive-8: the nested lens's magnification of its centre (the shift toward its centre per pt from it).</summary>
-    internal double NestedMagnify => Nested ? 0.045 : 0;
+    /// <summary>ED-NEW-glass-layers-1: the layer the lens is drawn as (1 to 3).</summary>
+    internal int Depth => Layer > 0 ? Math.Clamp(Layer, 1, 3) : Nested ? 2 : 1;
+
+    /// <summary>ED-NEW-glass-layers-1: the Glass intensity setting (a multiple of the engine's bend, fringe and rim; 1 the engine's own).</summary>
+    public double Intensity { get; init; } = 1;
+
+    /// <summary>ED-NEW-glass-alive-8, ED-NEW-glass-layers-1: the lens's gain on the bend: each layer past the first bends 1.3 times the one under
+    /// it (COMPOUND_GLASS's nested scale), so layer 2 is 1.3 and layer 3 1.69.</summary>
+    internal double NestedGain => Math.Pow(1.3, Depth - 1);
+
+    /// <summary>ED-NEW-glass-alive-8, ED-NEW-glass-layers-1: the lens's magnification of its centre (the shift toward its centre per pt from it):
+    /// 4.5 % per layer past the first.</summary>
+    internal double NestedMagnify => 0.045 * (Depth - 1) * Intensity;
 
     /// <summary>ED-NEW-glass-alive-8: whether the liquid engines draw the shared finish (the readability veil and the rim light) over their own
     /// model. Always on in the app; an engine's own pixel tests turn it off to measure the repository's model alone.</summary>
     internal static bool Finish { get; set; } = true;
 
     /// <summary>ED-NEW-glass-alive-8: the rim light every liquid engine draws (the Glass settings' Rim light; more with Increase contrast).</summary>
-    internal double RimLight => Math.Clamp(Tuning.Rim + 0.2 * Tuning.Contrast, 0, 1.2);
+    internal double RimLight => Math.Clamp((Tuning.Rim + 0.2 * Tuning.Contrast) * Math.Min(Intensity, 1.6), 0, 1.2);
 
     /// <summary>ED-NEW-glass-alive-8: the readability veil of the kind (over the bend, under the text), and what it adds where the window behind
     /// it is clear (the bare desktop: its icons must never fight the text). The sidebar is all but solid with Translucent sidebar off.</summary>
@@ -470,7 +483,7 @@ public sealed record GlassCanvas(GlassKind Kind, GlassTuning Tuning)
         get
         {
             var r = Rizzy.Held();
-            var g = NestedGain;
+            var g = NestedGain * Intensity;
             var (sr, sg, sb) = ((r.Scale + r.AberrationR) * g, (r.Scale + r.AberrationG) * g, (r.Scale + r.AberrationB) * g);
             var most = 0.5 * Math.Max(Math.Abs(sr), Math.Max(Math.Abs(sg), Math.Abs(sb)));
             var k = most > LiquidReach ? LiquidReach / most : 1;
@@ -481,7 +494,7 @@ public sealed record GlassCanvas(GlassKind Kind, GlassTuning Tuning)
     /// <summary>ED-NEW-glass-alive-8: how far the engine's bend reads (pt), for the material's reach.</summary>
     internal double LiquidBend => Engine switch
     {
-        GlassEngine.GlassHq => GlassHq.Held().Refraction * 1.2 * 0.5 + 16,
+        GlassEngine.GlassHq => Math.Min(LiquidReach, GlassHq.Held().Refraction * NestedGain * Intensity * 1.2 * 0.5 + 16),
         GlassEngine.Dasher => LiquidReach,
         _ => 0.5 * Math.Max(Math.Abs(LiquidScales.R), Math.Max(Math.Abs(LiquidScales.G), Math.Abs(LiquidScales.B))),
     };

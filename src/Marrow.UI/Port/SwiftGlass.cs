@@ -125,6 +125,15 @@ public static class SwiftGlass
 
     /// <summary>OD-0147: the surface a piece's glass is on when its effect names none, kept beside the effect so the effect stays the source's own
     /// .glassEffect value (the floating sidebar's .regular is drawn as the canvas's sidebar glass).</summary>
+    /// <summary>ED-NEW-glass-layers-1: the optical layer a piece is drawn as when its place in the tree does not say it (a sheet's glass drawn
+    /// over the app's own content is a panel on the window, layer 2, though its rectangle reads as a window's glass).</summary>
+    public static readonly AttachedProperty<int?> LayerProperty =
+        AvaloniaProperty.RegisterAttached<Control, int?>("Layer", typeof(SwiftGlass));
+
+    public static int? GetLayer(Control control) => control.GetValue(LayerProperty);
+
+    public static void SetLayer(Control control, int? value) => control.SetValue(LayerProperty, value);
+
     public static readonly AttachedProperty<GlassSurface?> SurfaceProperty =
         AvaloniaProperty.RegisterAttached<Control, GlassSurface?>("Surface", typeof(SwiftGlass));
 
@@ -184,6 +193,18 @@ public static class SwiftGlass
     /// <summary>OD-0147 (no glass on glass): whether <paramref name="control"/> lies inside another glass piece: a visual ancestor with a glass
     /// effect of its own that is not the desktop's backdrop. What lies on glass is a control on glass (GlassSurface.Inner): a glyph or a label
     /// with a quiet capsule under the pointer, no glass of its own.</summary>
+    /// <summary>ED-NEW-glass-layers-1: the optical layer of a glass piece in its window: the window's own glass and the sidebar (part of it) are
+    /// layer 1, any other piece sitting on the window is layer 2 (a panel, sheet, popover, the composer, a button), and each glass piece it lies
+    /// inside adds one, up to 3 (the Settings pill on the sheet, a slider thumb on a card). The window's desktop layer is Windows' and counts none.</summary>
+    public static int LayerOf(Control control, GlassSurface surface)
+    {
+        var inside = 0;
+        for (var v = Avalonia.VisualTree.VisualExtensions.GetVisualParent(control); v is not null; v = Avalonia.VisualTree.VisualExtensions.GetVisualParent(v))
+            if (v is Control c && GetEffect(c) is not null && !GetUsesDesktopBackdrop(c)) inside++;
+        var own = GetLayer(control) ?? (surface is GlassSurface.Window or GlassSurface.Sidebar ? 1 : 2);
+        return Math.Clamp(own + inside, 1, 3);
+    }
+
     public static bool IsInsideGlass(Control control)
     {
         for (var v = Avalonia.VisualTree.VisualExtensions.GetVisualParent(control); v is not null; v = Avalonia.VisualTree.VisualExtensions.GetVisualParent(v))

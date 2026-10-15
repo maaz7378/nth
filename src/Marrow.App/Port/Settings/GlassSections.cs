@@ -55,6 +55,9 @@ internal sealed class GlassSections
     internal CzToggleRow HqInteractive { get; }
     internal CzSegmentRow HqMotion { get; }
     internal IReadOnlyDictionary<string, CzSlider> HqSliders { get; }
+    internal CzSlider Intensity { get; }
+    internal CzSlider SeeThrough { get; }
+    private readonly Func<double> readSeeThrough;
 
     // ED-NEW-glass-alive-8: each engine's rows, shown only under its engine (the picker's choice), folding in and out.
     private readonly List<(CzRowSlot Slot, GlassEngine Engine)> engineRows = [];
@@ -62,7 +65,9 @@ internal sealed class GlassSections
     /// <param name="read">The app's glass setting; read inside a tracked read by the page.</param>
     /// <param name="write">Puts a new glass setting in the app's settings (live: the material follows at once).</param>
     /// <param name="commit">The settings' coalesced write goes out now (a drag, a key or a glide has ended).</param>
-    internal GlassSections(Func<GlassSettings> read, Action<GlassSettings> write, Action commit)
+    /// <param name="seeThrough">ED-NEW-glass-layers-1: how much of the desktop shows behind the whole app, 0 solid to 1 fully see-through (the
+    /// window's Transparency, read the other way round), and where a new value goes; null in a page that has none.</param>
+    internal GlassSections(Func<GlassSettings> read, Action<GlassSettings> write, Action commit, (Func<double> Read, Action<double> Write)? seeThrough = null)
     {
         this.read = read;
         this.write = write;
@@ -87,6 +92,18 @@ internal sealed class GlassSections
         // ED-NEW-glass-alive-8: the Liquid glass switch, for the whole UI (off: the classic canvas material whatever the engine)
         LiquidGlass = new CzToggleRow(GlassText.LiquidGlass, GlassText.LiquidGlassDetail, () => read().Liquid, on => Switch(s => s with { Liquid = on }));
         rows.Add(LiquidGlass.Row);
+        // ED-NEW-glass-layers-1: Glass intensity (the liquid engines' bend, fringe and rim, as a multiple of their own) and See-through (the desktop
+        // behind the whole app), for every engine
+        var ik = GlassSettings.IntensityKnob;
+        Intensity = Slider(ik, settings.Intensity, value => write(read() with { Intensity = value }));
+        Avalonia.Automation.AutomationProperties.SetName(Intensity, ik.Name);
+        rows.Add(new CzRow(ik.Name, ik.Description, Intensity, dimmed => Intensity.Dimmed = dimmed));
+        var (readSee, writeSee) = seeThrough ?? (() => 1 - GlassSeeThrough.DefaultOpacity, static _ => { });
+        readSeeThrough = readSee;
+        var sk = GlassSeeThrough.Knob;
+        SeeThrough = Slider(sk, readSee(), value => writeSee(sk.Hold(value)));
+        Avalonia.Automation.AutomationProperties.SetName(SeeThrough, sk.Name);
+        rows.Add(new CzRow(sk.Name, sk.Description, SeeThrough, dimmed => SeeThrough.Dimmed = dimmed));
         CzRowSlot For(GlassEngine engine, Avalonia.Controls.Control row, bool caption = false)
         {
             var slot = rows.Add(row, caption, open: settings.Drawn == engine);
@@ -295,6 +312,8 @@ internal sealed class GlassSections
         try
         {
             if (Transparency.Value != settings.Transparency) Transparency.Update(settings.Transparency, null);
+            if (Intensity.Value != settings.Intensity) Intensity.Update(settings.Intensity, null);
+            if (SeeThrough.Value != readSeeThrough()) SeeThrough.Update(readSeeThrough(), null);
             foreach (var (id, slider) in Sliders)
             {
                 var value = settings.Get(id);
@@ -403,6 +422,21 @@ internal sealed class GlassSections
 }
 
 /// <summary>The words of the Glass section: the design canvas's (OD-0147).</summary>
+/// <summary>ED-NEW-glass-layers-1: the See-through slider: the window's Transparency (its backdrop's opacity) read the other way round, so it and
+/// the Window page's Transparency are one setting.</summary>
+internal static class GlassSeeThrough
+{
+    internal const double DefaultOpacity = 0.8;
+
+    internal static GlassKnob Knob { get; } = new("seeThrough", "See-through",
+        "How much of the Windows desktop shows behind the whole app, from solid to fully see-through", 0, 1, 0.01, GlassUnit.Plain3);
+
+    /// <summary>The slider's value for a backdrop opacity, and back.</summary>
+    internal static double Of(double opacity) => Math.Clamp(1 - opacity, 0, 1);
+
+    internal static double OpacityOf(double seeThrough) => Math.Clamp(1 - seeThrough, 0, 1);
+}
+
 internal static class GlassText
 {
     internal const string Look = "Look";

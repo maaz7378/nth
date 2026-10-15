@@ -370,6 +370,8 @@ internal static partial class GlassMaterial
             var look = GlassLooks.Of(e.Surface is null && SwiftGlass.GetSurface(control) is { } beside ? e.OnSurface(beside) : e, Nested(control));
             // OD-0147: a piece that casts its own shadow draws none of the canvas's past its edge
             if (look.Canvas is { } canvas && SwiftGlass.GetCastsOwnShadow(control)) look = look with { Canvas = canvas with { Tuning = canvas.Tuning with { Shadow = 0 } } };
+            // ED-NEW-glass-layers-1: the piece's optical layer in its window (1 the window's glass, 2 a panel on it, 3 a control on that)
+            if (look.Canvas is { } layered) look = look with { Canvas = layered with { Layer = SwiftGlass.LayerOf(control, e.Surface ?? SwiftGlass.GetSurface(control) ?? GlassLooks.SurfaceOf(e)) } };
             if (look.Quiet) return null;
             var a = AttachmentFor(control);
             var (darkness, tint) = a.Appearance(control, this, e, resolved);
@@ -2135,13 +2137,14 @@ internal static partial class GlassMaterial
                 var o = canvas.Dasher.Held();
                 // its bend is a share of the page: held together so that it stays inside GlassCanvas.LiquidReach
                 var page = Math.Max(Math.Max(pageWidth, pageHeight), 1f);
-                var most = (o.EdgeIntensity + o.RimIntensity + (o.Warp ? o.BaseIntensity : 0) + o.CornerBoost + o.RippleEffect * 0.5) * canvas.NestedGain * page;
+                var most = (o.EdgeIntensity + o.RimIntensity + (o.Warp ? o.BaseIntensity : 0) + o.CornerBoost + o.RippleEffect * 0.5) * canvas.NestedGain * canvas.Intensity * page;
                 var limit = Math.Min(GlassCanvas.LiquidReach, sizeReach);
                 var hold = (float)(most > limit ? limit / most : 1);
+                var gain = canvas.NestedGain * canvas.Intensity;
                 return
                 [
                     [4f, (float)Corner(o.BorderRadius), o.Warp ? 1f : 0f, canvas.Sigma > 0.05 ? 1f : 0f],
-                    [(float)(o.EdgeIntensity * canvas.NestedGain), (float)(o.RimIntensity * canvas.NestedGain), (float)(o.BaseIntensity * canvas.NestedGain), (float)o.CornerBoost],
+                    [(float)(o.EdgeIntensity * gain), (float)(o.RimIntensity * gain), (float)(o.BaseIntensity * gain), (float)(o.CornerBoost * canvas.Intensity)],
                     [(float)o.EdgeDistance, (float)o.RimDistance, (float)o.BaseDistance, (float)o.RippleEffect],
                     [(float)o.TintOpacity, (pageWidth > 0 ? pageWidth : 1000f) * hold, (pageHeight > 0 ? pageHeight : 700f) * hold, toDrawing],
                     new float[4], lA, lB, new float[4], new float[4],
@@ -2152,7 +2155,8 @@ internal static partial class GlassMaterial
                 var o = canvas.GlassHq.Held();
                 var darkHq = o.Appearance switch { GlassHqAppearance.Light => 0f, GlassHqAppearance.Dark => 1f, _ => dark };
                 var m = GlassCanvas.HqMaterial(darkHq > 0.5f);
-                var refraction = o.Refraction * (1 + (o.Motion == GlassHqMotion.Full ? 0.2 * r.PressAmount : 0));
+                // ED-NEW-glass-layers-1: each layer bends 1.3 times the one under it, times the Glass intensity
+                var refraction = o.Refraction * canvas.NestedGain * canvas.Intensity * (1 + (o.Motion == GlassHqMotion.Full ? 0.2 * r.PressAmount : 0));
                 if (canvas.Kind == GlassKind.Flat && o.Concentric) refraction = Math.Min(refraction, o.Inset);
                 refraction = Math.Min(refraction, 2 * sizeReach);
                 var c = GlassSettings.TintColours.First(t => t.Value == o.Tint);

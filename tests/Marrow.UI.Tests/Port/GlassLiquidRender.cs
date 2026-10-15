@@ -50,15 +50,64 @@ internal static class GlassLiquidRender
     /// <summary>The wallpaper's stripes: alternating dark blue and warm white, 12 px wide, so a bend shows as stripes that move.</summary>
     public static Color Stripe(int x) => (x / StripeWidth) % 2 == 0 ? Color.FromRgb(20, 40, 120) : Color.FromRgb(240, 220, 190);
 
+    /// <summary>ED-NEW-glass-layers-1: the stripes' magnification seen through a frame over <paramref name="area"/>: on each row the edges between
+    /// dark and light stripes (where the luma crosses the row's own midpoint, so a tint or a veil does not move them) are fitted to a line, edge
+    /// index against position; its slope over the stripes' true 12 px is how many times wider they look (1 unbent, above 1 magnified).</summary>
+    public static double Magnification(LiquidFrame f, PixelRect area)
+    {
+        var slopes = new List<double>();
+        for (var y = area.Y; y < area.Bottom; y++)
+        {
+            var row = Enumerable.Range(area.X, area.Width).Select(x => LiquidFrame.Luma(f.At(x, y))).ToArray();
+            var mid = (row.Min() + row.Max()) / 2;
+            if (row.Max() - row.Min() < 20) continue;
+            var edges = new List<double>();
+            for (var i = 1; i < row.Length; i++)
+                if ((row[i - 1] - mid) * (row[i] - mid) < 0) edges.Add(area.X + i - 1 + (mid - row[i - 1]) / (row[i] - row[i - 1]));
+            if (edges.Count < 4) continue;
+            var n = edges.Count;
+            var mx = (n - 1) / 2.0;
+            var my = edges.Average();
+            double sxy = 0, sxx = 0;
+            for (var i = 0; i < n; i++) { sxy += (i - mx) * (edges[i] - my); sxx += (i - mx) * (i - mx); }
+            slopes.Add(sxy / sxx / StripeWidth);
+        }
+        return slopes.Count == 0 ? double.NaN : slopes.OrderBy(v => v).ElementAt(slopes.Count / 2);
+    }
+
+    /// <summary>ED-NEW-glass-layers-1: how far the frame's stripe edges sit from where they lie on the wallpaper, in px (mean over the edges found
+    /// in <paramref name="area"/>, each against its nearest true edge, so up to half a stripe): the bend itself, not a tint.</summary>
+    public static double EdgeShift(LiquidFrame f, PixelRect area)
+    {
+        double sum = 0;
+        var n = 0;
+        for (var y = area.Y; y < area.Bottom; y++)
+        {
+            var row = Enumerable.Range(area.X, area.Width).Select(x => LiquidFrame.Luma(f.At(x, y))).ToArray();
+            var mid = (row.Min() + row.Max()) / 2;
+            if (row.Max() - row.Min() < 20) continue;
+            for (var i = 1; i < row.Length; i++)
+                if ((row[i - 1] - mid) * (row[i] - mid) < 0)
+                {
+                    // a pixel's colour is its centre's: an edge between x and x + 1 at the true stripe boundary sits at x + 0.5
+                    var at = area.X + i - 1 + (mid - row[i - 1]) / (row[i] - row[i - 1]) + 0.5;
+                    var r = at / StripeWidth;
+                    sum += Math.Abs(r - Math.Round(r)) * StripeWidth;
+                    n++;
+                }
+        }
+        return n == 0 ? 0 : sum / n;
+    }
+
     public static LiquidFrame Render(HeadlessSession headless, GlassSettings settings, GlassSurface surface = GlassSurface.Panel, bool nested = false,
-        bool light = false, bool stripes = true, bool finish = true, Action<Panel>? decorate = null, double corner = 28)
+        bool light = false, bool stripes = true, bool finish = true, Action<Panel>? decorate = null, double corner = 28, int? layer = null)
     {
         LiquidFrame? frame = null;
-        headless.OnUiThread(() => frame = OnUi(settings, surface, nested, light, stripes, finish, decorate, corner));
+        headless.OnUiThread(() => frame = OnUi(settings, surface, nested, light, stripes, finish, decorate, corner, layer));
         return frame!;
     }
 
-    private static LiquidFrame OnUi(GlassSettings settings, GlassSurface surface, bool nested, bool light, bool stripes, bool finish, Action<Panel>? decorate, double corner)
+    private static LiquidFrame OnUi(GlassSettings settings, GlassSurface surface, bool nested, bool light, bool stripes, bool finish, Action<Panel>? decorate, double corner, int? layer)
     {
         var (tuning, system, shared) = (GlassLooks.Tuning, GlassLooks.System, GlassCanvas.Finish);
         GlassLooks.System = new FixedGlassSystem();
@@ -70,6 +119,7 @@ internal static class GlassLiquidRender
             HorizontalAlignment = HorizontalAlignment.Left, VerticalAlignment = VerticalAlignment.Top, Margin = new Thickness(Piece.X, Piece.Y, 0, 0),
         };
         SwiftGlass.SetEffect(piece, GlassEffect.Regular(GlassShape.RoundedRectangle(corner, RoundedCornerStyle.Continuous)).OnSurface(surface));
+        if (layer is { } depth) SwiftGlass.SetLayer(piece, depth); // ED-NEW-glass-layers-1: the piece drawn as layer 1, 2 or 3
         var root = new Panel();
         var wall = new Panel { Background = stripes ? StripeBrush() : new SolidColorBrush(Color.FromRgb(128, 128, 128)) };
         root.Children.Add(wall);
@@ -102,7 +152,7 @@ internal static class GlassLiquidRender
             try { bitmap.CopyPixels(new PixelRect(size), handle.AddrOfPinnedObject(), bytes.Length, size.Width * 4); }
             finally { handle.Free(); }
             var frame = new LiquidFrame(size.Width, size.Height, bytes, bitmap.Format == Avalonia.Platform.PixelFormat.Rgba8888);
-            if (Environment.GetEnvironmentVariable("NTH_GLASS_DUMP") is { Length: > 0 } dir) Dump(frame, Path.Combine(dir, $"{settings.Drawn}-{surface}-{(nested ? "nested" : "flat")}-{(light ? "light" : "dark")}-{Guid.NewGuid():N}.png"));
+            if (Environment.GetEnvironmentVariable("NTH_GLASS_DUMP") is { Length: > 0 } dir) Dump(frame, Path.Combine(dir, $"{settings.Drawn}-{surface}-{(nested ? "nested" : "flat")}-L{layer?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "-"}-{(light ? "light" : "dark")}-{Guid.NewGuid():N}.png"));
             return frame;
         }
         finally

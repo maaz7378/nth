@@ -63,6 +63,7 @@ internal sealed class CustomizationSettingsPage : Decorator, ISettingsPageChrome
         this.Track(() => AppEnvironment.GetAppModel(this), Build);
         this.Track(() => { var settings = AppEnvironment.GetAppModel(this).Settings; return (Light: settings.ComposerLight, settings.Accent, settings.WorkingDots, settings.VoiceOrb, settings.VoiceTyping); }, shown => Apply(shown.Light));
         this.Track(() => AppEnvironment.GetAppModel(this).Settings.Glass, _ => Glass?.Apply()); // ED-NEW-glasslook-2: the Glass rows follow the setting (a glide, a reset, another window)
+        this.Track(() => AppEnvironment.GetAppModel(this).Settings.BackdropOpacity, _ => Glass?.Apply()); // ED-NEW-glass-layers-1: See-through follows the Transparency
     }
 
     /// <inheritdoc />
@@ -122,7 +123,8 @@ internal sealed class CustomizationSettingsPage : Decorator, ISettingsPageChrome
         // PORT-ONLY (multi-account step 3a, OD-0115, OD-0119): "Pill in the composer" follows the sticky sections, where the pinned block has let go; Speech stays the first section there (CZ-3.5.3), so it goes after Speech
         Rest.Children.Add(new Marrow.App.Port.MultiAccount.Capsule.PillCapsuleSection(settings.CapsuleStyle));
         // PORT-ONLY, owner-requested (OD-0107, ED-NEW-glasslook-2): Glass, after the composer's pill, where the pinned block has let go
-        Glass = new GlassSections(() => settings.Glass, value => settings.Glass = value, settings.FlushPendingWrites);
+        Glass = new GlassSections(() => settings.Glass, value => settings.Glass = value, settings.FlushPendingWrites,
+            (() => GlassSeeThrough.Of(settings.BackdropOpacity), value => settings.BackdropOpacity = GlassSeeThrough.OpacityOf(value)));
         Rest.Children.Add(Glass.Section);
 
         // the chrome row's Preview state control is the session's pick (CZ-3.2, CZ-4.6); the session can move it too (touching Working dots)

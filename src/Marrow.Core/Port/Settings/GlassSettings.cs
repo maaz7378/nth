@@ -128,6 +128,14 @@ public sealed record GlassSettings
     /// <summary>ED-NEW-glass-alive-7: Glass-HQ/liquid-glass's own options (the repository's), kept while another engine draws.</summary>
     public GlassHqGlass GlassHq { get; init; } = GlassHqGlass.Repo;
 
+    /// <summary>ED-NEW-glass-layers-1: Glass intensity, how strongly every liquid engine bends, splits colour and lights its rim, as a multiple
+    /// of the engine's own (1, today's look, by default; 0 flat glass, 2 twice the bend).</summary>
+    public double Intensity { get; init; } = 1;
+
+    /// <summary>ED-NEW-glass-layers-1: the Glass intensity slider's range.</summary>
+    public static GlassKnob IntensityKnob { get; } = new("intensity", "Glass intensity",
+        "How strongly the liquid glass bends what is behind it, splits its colours and lights its rim", 0, 2, 0.05, GlassUnit.Times);
+
     /// <summary>The shipped glass: Regular, every value the canvas's default, the switches following Windows.</summary>
     public static GlassSettings Default { get; } = new();
 
@@ -267,6 +275,7 @@ public sealed record GlassSettings
             Rizzy = (Rizzy ?? Default.Rizzy).Held(),
             Dasher = (Dasher ?? Default.Dasher).Held(),
             GlassHq = (GlassHq ?? Default.GlassHq).Held(),
+            Intensity = IntensityKnob.Hold(Intensity),
         };
         foreach (var knob in Knobs) held = held.With(knob.Id, held.Get(knob.Id));
         return held;
@@ -287,6 +296,7 @@ public sealed record GlassSettings
             Rizzy = (Rizzy ?? Default.Rizzy).Toward(to.Rizzy ?? Default.Rizzy, t),
             Dasher = (Dasher ?? Default.Dasher).Toward(to.Dasher ?? Default.Dasher, t),
             GlassHq = (GlassHq ?? Default.GlassHq).Toward(to.GlassHq ?? Default.GlassHq, t),
+            Intensity = M(Intensity, to.Intensity),
         };
     }
 
@@ -320,6 +330,7 @@ public sealed record GlassSettings
                 w.WriteEndObject();
             }
             if (!held.Liquid) w.WriteBoolean("liquid", false);
+            if (held.Intensity != Default.Intensity) w.WriteNumber(IntensityKnob.Id, held.Intensity);
             if (held.Dasher != Default.Dasher)
             {
                 w.WriteStartObject("dasher");
@@ -367,6 +378,7 @@ public sealed record GlassSettings
                     ? named.Value : Default.Engine,
                 Rizzy = root.TryGetProperty("rizzy", out var rizzy) ? RizzyGlass.Read(rizzy, Default.Rizzy) : Default.Rizzy,
                 Liquid = Flag(root, "liquid") ?? true,
+                Intensity = Number(root, IntensityKnob.Id) is { } intensity ? IntensityKnob.Hold(intensity) : Default.Intensity,
                 Dasher = root.TryGetProperty("dasher", out var dasher) ? DasherGlass.Read(dasher, Default.Dasher) : Default.Dasher,
                 GlassHq = root.TryGetProperty("glassHq", out var hq) ? GlassHqGlass.Read(hq, Default.GlassHq) : Default.GlassHq,
             };
