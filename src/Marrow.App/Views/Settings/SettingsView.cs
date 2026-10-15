@@ -572,7 +572,10 @@ internal sealed class SmallSwitch : Control, Avalonia.Rendering.ICustomHitTest
         Height = TrackHeight;
         Focusable = true;
         Cursor = new Cursor(StandardCursorType.Hand);
-        Action<double> redraw = _ => InvalidateVisual();
+        Action<double> redraw = _ => { InvalidateVisual(); InvalidateArrange(); };
+        // ED-NEW-glass-controls-1 (Maaz, 2026-10-15: keep the dark track lit when on, give it a liquid glass thumb): a drop of liquid glass over
+        // the dome that lenses it and the track, squashing along its slide with its speed and settling with a small wobble
+        VisualChildren.Add(Thumb); LogicalChildren.Add(Thumb);
         position = new AnimatedScalar(this, isOn.Value ? 1 : 0, redraw);
         lights = new AnimatedScalar(this, isOn.Value ? 1 : 0, redraw) { RunsUnderReduceMotion = true };
         scale = new AnimatedScalar(this, 1, redraw);
@@ -641,6 +644,16 @@ internal sealed class SmallSwitch : Control, Avalonia.Rendering.ICustomHitTest
         if (deep is null) return;
         if (change.Property == IsEffectivelyEnabledProperty && !IsEffectivelyEnabled) EndPress();
         if (change.Property == IsPointerOverProperty || change.Property == IsEffectivelyEnabledProperty) Shade();
+    }
+
+    /// <summary>ED-NEW-glass-controls-1: the liquid glass thumb over the dome.</summary>
+    internal Marrow.UI.Port.Settings.GlassThumb Thumb { get; } = new(KnobSize / 2 + 1);
+
+    protected override Size ArrangeOverride(Size finalSize)
+    {
+        Thumb.Place(KnobNow().Inflate(1));
+        Thumb.Arrange(Thumb.Rect);
+        return finalSize;
     }
 
     /// <summary>The state drawn now; no allocation.</summary>
