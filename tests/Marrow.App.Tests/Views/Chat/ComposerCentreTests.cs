@@ -25,7 +25,7 @@ public sealed class ComposerCentreTests(HeadlessSession headless)
     public void It_rises_to_the_middle_and_comes_down_to_the_bottom_when_work_starts() => headless.OnUiThread(() =>
     {
         var composer = new Border { Height = 120 };
-        var window = new Window { Content = composer, Width = 600, Height = 700 };
+        var window = new Avalonia.Controls.Window { Content = composer, Width = 600, Height = 700 };
         window.Show();
         try
         {
