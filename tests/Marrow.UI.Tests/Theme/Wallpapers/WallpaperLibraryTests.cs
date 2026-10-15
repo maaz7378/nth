@@ -96,10 +96,12 @@ public sealed class WallpaperLibraryTests
     [Trait("Rule", "R-TEST-1")]
     public void Catalogue_has_162_wallpapers_810_dual_palettes_and_source_labels()
     {
-        Assert.Equal(90, WallpaperCatalogue.All.Count(x => x.Kind == WallpaperKind.Static));
-        Assert.Equal(72, WallpaperCatalogue.All.Count(x => x.Kind == WallpaperKind.Animated));
-        Assert.Equal(810, WallpaperCatalogue.All.Sum(x => x.Packs.Length));
-        foreach (var w in WallpaperCatalogue.All)
+        // The design's own library: nth's live wallpapers (tier "live") are counted on their own, in Live_wallpapers_are_exactly_nths_own.
+        var design = WallpaperCatalogue.All.Where(x => x.Tier != "live").ToArray();
+        Assert.Equal(90, design.Count(x => x.Kind == WallpaperKind.Static));
+        Assert.Equal(72, design.Count(x => x.Kind == WallpaperKind.Animated));
+        Assert.Equal(810, design.Sum(x => x.Packs.Length));
+        foreach (var w in design)
         {
             Assert.NotEmpty(w.Name); Assert.NotEmpty(w.Desc); Assert.Contains(w.Tier, new[] { "vibrant", "balanced", "minimal" });
             Assert.Equal(5, w.Packs.Length); Assert.Equal(2, w.Options.Length);
@@ -113,6 +115,27 @@ public sealed class WallpaperLibraryTests
         var first = WallpaperCatalogue.Get(WallpaperKind.Static, "riptide");
         Assert.Equal("Riptide", first.Name); Assert.Equal("Grain", first.Options[0].Label);
         Assert.Equal(0.3, first.Options[0].Default); Assert.Equal("Shadow", first.Options[1].Label);
+    }
+
+    /// <summary>ED-NEW-ocean-wallpaper-1: exactly nth's own live wallpapers, by id, each animated, in the design's format (5 packs of 6 dark
+    /// and 6 light colours, named options), so the design's 72 stay exact beside them.</summary>
+    [Fact]
+    [Trait("Rule", "R-TEST-1")]
+    public void Live_wallpapers_are_exactly_nths_own()
+    {
+        var live = WallpaperCatalogue.All.Where(x => x.Tier == "live").Select(x => x.Id).ToArray();
+        Assert.Equal(new[] { "ocean", "gradient-plane", "gradient-water", "gradient-sphere", "plasma" }, live);
+        foreach (var w in WallpaperCatalogue.All.Where(x => x.Tier == "live"))
+        {
+            Assert.Equal(WallpaperKind.Animated, w.Kind); Assert.NotEmpty(w.Name); Assert.NotEmpty(w.Desc);
+            Assert.Equal(5, w.Packs.Length); Assert.Equal(5, w.Packs.Select(p => p.Id).Distinct().Count());
+            foreach (var p in w.Packs)
+            {
+                Assert.Equal(6, p.Dark.Length); Assert.Equal(6, p.Light.Length);
+                foreach (var c in p.Dark.Concat(p.Light)) Assert.Matches("^#[a-fA-F0-9]{6}$", c);
+            }
+            foreach (var o in w.Options) { Assert.NotEmpty(o.Label); Assert.InRange(o.Default, o.Min, o.Max); }
+        }
     }
 
     [Fact]

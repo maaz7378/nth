@@ -112,6 +112,66 @@
       "#1c2836",
       "#a9d7ff"
      ]
+    },
+    {
+     "id": "deep-night",
+     "name": "Deep Night",
+     "dark": [
+      "#01040c",
+      "#04162e",
+      "#3f7fb8",
+      "#141c26",
+      "#020509",
+      "#2a5a8c"
+     ],
+     "light": [
+      "#06213f",
+      "#18507e",
+      "#a8d4f2",
+      "#7d7a6c",
+      "#0e1824",
+      "#78aee0"
+     ]
+    },
+    {
+     "id": "murky",
+     "name": "Murky",
+     "dark": [
+      "#0a120c",
+      "#24382a",
+      "#9fb48a",
+      "#4a4a36",
+      "#0f1610",
+      "#6f8a62"
+     ],
+     "light": [
+      "#2c4430",
+      "#5e7c5a",
+      "#dbe6c2",
+      "#a99c74",
+      "#1e2a20",
+      "#b4c89a"
+     ]
+    },
+    {
+     "id": "sunlit",
+     "name": "Sunlit",
+     "dark": [
+      "#04223a",
+      "#11729a",
+      "#d8fbff",
+      "#7a6a4a",
+      "#10202a",
+      "#9feaf6"
+     ],
+     "light": [
+      "#1679a8",
+      "#5cc8e6",
+      "#ffffff",
+      "#e8d6a8",
+      "#2a3a44",
+      "#e2fcff"
+     ]
     }
    ],
    "dynamic": {
@@ -439,7 +499,7 @@
      1.0
     ]
    },
-   "glsl": "// Ocean: nth's own. Deep water seen from below the surface: light falls in shafts from a rippling surface, caustics dance over a sandy floor,\n// particles drift, and a shark glides across the window once a loop, a dark silhouette with a swaying tail that the glass bends as it passes.\n// Palette: 0 the deep, 1 the shallows, 2 the surface light, 3 the sand, 4 the shark, 5 the shafts.\n// Options: x = motion (waves and caustics), y = shark (0 none, 1 close and large).\nconst float T = 40.0;\n\nfloat caustic(vec2 q, float a) {\n  float c = 0.0;\n  for (int i = 0; i < 3; i++) {\n    float f = float(i);\n    vec2 r = q * (2.2 + f * 1.3) + vec2(cos(a + f * 2.1), sin(a * 1.0 + f)) * 0.6;\n    c += abs(sin(r.x + sin(r.y * 1.3 + a)) * sin(r.y + sin(r.x * 1.1 - a)));\n  }\n  return pow(sat(1.0 - c / 1.6), 3.0);\n}\n\nfloat sharkShape(vec2 q, float a) {\n  // body: a tapered ellipse along +x, the head at x > 0\n  float len = 0.62;\n  float x = q.x / len;\n  float sway = 0.06 * sin(a * 6.0 - q.x * 7.0) * smoothstep(0.1, -0.9, x);\n  float y = q.y - sway;\n  float half_ = 0.11 * sqrt(sat(1.0 - x * x)) * (x > 0.0 ? 1.0 - 0.35 * x * x : 1.0 - 0.75 * x * x);\n  float body = smoothstep(u_px * 2.0, -u_px * 2.0, abs(y) - half_) * step(-1.0, x) * step(x, 1.0);\n  // dorsal fin, pectoral fin and the tail fork\n  vec2 d = vec2(q.x + 0.02, y - 0.09);\n  float dorsal = step(0.0, d.y) * step(d.y, 0.13) * step(abs(d.x - d.y * 0.6), 0.07 * (1.0 - d.y / 0.13));\n  vec2 pc = vec2(q.x - 0.1, y + 0.08);\n  float pect = step(pc.y, 0.0) * step(-0.11, pc.y) * step(abs(pc.x + pc.y * 0.9), 0.05 * (1.0 + pc.y / 0.11));\n  vec2 tq = vec2(q.x + len + 0.02, y);\n  float tail = step(-0.15, tq.x) * step(tq.x, 0.0) * step(abs(abs(tq.y) - (-tq.x) * 0.9), 0.035);\n  return sat(max(max(body, dorsal), max(pect, tail)));\n}\n\nvec3 wall(vec2 p, float t) {\n  float a = TAU * t / T;\n  float m = mix(0.3, 1.5, u_opt.x);\n  float sharkAmt = u_opt.y;\n  float depth = sat(0.5 - 0.5 * p.y);\n  vec3 col = mix(u_pal[1], u_pal[0], smoothstep(-0.2, 1.0, depth));\n  // the surface: a bright rippling band at the top\n  float surf = smoothstep(0.55, 1.05, p.y + 0.04 * sin(p.x * 6.0 + a * 2.0) * m + 0.02 * lnoise(vec2(p.x * 2.0, 1.0), a, 0.5));\n  col = mix(col, u_pal[2], surf * 0.7);\n  // light shafts from the surface, swaying\n  vec2 tp = p + tiltD(0.6);\n  float shafts = 0.0;\n  for (int i = 0; i < 4; i++) {\n    float f = float(i);\n    float x0 = -1.3 + f * 0.85 + 0.15 * sin(a + f * 1.7) * m;\n    float w = 0.08 + 0.05 * sin(f * 2.3 + a * 2.0);\n    float s = gauss(tp.x - x0 - (1.0 - tp.y) * 0.25, w) * smoothstep(-1.0, 0.9, tp.y);\n    shafts += s * (0.5 + 0.5 * sin(a * 3.0 + f));\n  }\n  col = mix(col, u_pal[5], sat(shafts * 0.35));\n  // the sandy floor with caustics\n  float floorY = -0.72 + 0.04 * sin(p.x * 3.0 + 1.0);\n  float onFloor = smoothstep(floorY + 0.04, floorY - 0.04, p.y);\n  vec3 sand = u_pal[3];\n  sand.x += 0.12 * caustic(vec2(p.x, p.y * 2.5) + tiltD(-0.8), a * m);\n  col = mix(col, sand, onFloor);\n  col.x += 0.06 * caustic(p * 0.8, a * m) * (1.0 - depth) * (1.0 - onFloor);\n  // drifting particles\n  vec2 g = p * 9.0 + vec2(0.0, a * 0.6);\n  vec2 id = floor(g);\n  vec3 h = hash33(vec3(id, 5.0)) * 0.5 + 0.5;\n  float dot_ = smoothstep(0.08, 0.0, length(fract(g) - h.xy)) * step(0.8, h.z);\n  col.x += dot_ * 0.08;\n  // the shark: crosses once a loop, its depth by the option\n  if (sharkAmt > 0.01) {\n    float scale = mix(0.55, 1.35, sharkAmt);\n    float phase = fract(t / T);\n    vec2 c = vec2(mix(-2.6, 2.6, phase), -0.05 + 0.12 * sin(a));\n    vec2 q = (p - c - tiltD(1.2)) / scale;\n    float s = sharkShape(q, a);\n    vec3 sk = u_pal[4];\n    sk.x += 0.08 * smoothstep(0.0, -0.08, q.y); // a paler belly\n    float haze = mix(0.55, 0.0, sharkAmt);\n    col = mix(col, mix(sk, col, haze), s);\n  }\n  return outLab(col);\n}\n"
+   "glsl": "// Ocean: nth's own. Deep water seen from below the surface: light falls in shafts from a rippling surface, caustics dance over a sandy floor,\n// particles drift, and a shark glides across the window once a loop, a dark silhouette with a swaying tail that the glass bends as it passes.\n// Palette: 0 the deep, 1 the shallows, 2 the surface light, 3 the sand, 4 the shark, 5 the shafts.\n// Options: x = motion (waves and caustics), y = shark (0 none, 1 close and large).\nconst float T = 40.0;\n\nfloat caustic(vec2 q, float a) {\n  float c = 0.0;\n  for (int i = 0; i < 3; i++) {\n    float f = float(i);\n    vec2 r = q * (2.2 + f * 1.3) + vec2(cos(a + f * 2.1), sin(a * 1.0 + f)) * 0.6;\n    c += abs(sin(r.x + sin(r.y * 1.3 + a)) * sin(r.y + sin(r.x * 1.1 - a)));\n  }\n  return pow(sat(1.0 - c / 1.6), 3.0);\n}\n\nfloat sharkShape(vec2 q, float a) {\n  // body: a tapered ellipse along +x, the head at x > 0\n  float len = 0.62;\n  float x = q.x / len;\n  float sway = 0.06 * sin(a * 6.0 - q.x * 7.0) * smoothstep(0.1, -0.9, x);\n  float y = q.y - sway;\n  float half_ = 0.11 * sqrt(sat(1.0 - x * x)) * (x > 0.0 ? 1.0 - 0.35 * x * x : 1.0 - 0.75 * x * x);\n  float body = smoothstep(u_px * 2.0, -u_px * 2.0, abs(y) - half_) * step(-1.0, x) * step(x, 1.0);\n  // dorsal fin, pectoral fin and the tail fork\n  vec2 d = vec2(q.x + 0.02, y - 0.09);\n  float dorsal = step(0.0, d.y) * step(d.y, 0.13) * step(abs(d.x - d.y * 0.6), 0.07 * (1.0 - d.y / 0.13));\n  vec2 pc = vec2(q.x - 0.1, y + 0.08);\n  float pect = step(pc.y, 0.0) * step(-0.11, pc.y) * step(abs(pc.x + pc.y * 0.9), 0.05 * (1.0 + pc.y / 0.11));\n  vec2 tq = vec2(q.x + len + 0.02, y);\n  float tail = step(-0.15, tq.x) * step(tq.x, 0.0) * step(abs(abs(tq.y) - (-tq.x) * 0.9), 0.035);\n  return sat(max(max(body, dorsal), max(pect, tail)));\n}\n\nvec3 wall(vec2 p, float t) {\n  float a = TAU * t / T;\n  float m = mix(0.3, 1.5, u_opt.x);\n  float sharkAmt = u_opt.y;\n  float depth = sat(0.5 - 0.5 * p.y);\n  vec3 col = mix(u_pal[1], u_pal[0], smoothstep(-0.2, 1.0, depth));\n  // the surface: a bright rippling band at the top\n  float surf = smoothstep(0.55, 1.05, p.y + 0.04 * sin(p.x * 6.0 + a * 2.0) * m + 0.02 * lnoise(vec2(p.x * 2.0, 1.0), a, 0.5));\n  col = mix(col, u_pal[2], surf * 0.7);\n  // light shafts from the surface, swaying\n  vec2 tp = p + tiltD(0.6);\n  float shafts = 0.0;\n  for (int i = 0; i < 4; i++) {\n    float f = float(i);\n    float x0 = -1.3 + f * 0.85 + 0.15 * sin(a + f * 1.7) * m;\n    float w = 0.08 + 0.05 * sin(f * 2.3 + a * 2.0);\n    float s = gauss(tp.x - x0 - (1.0 - tp.y) * 0.25, w) * smoothstep(-1.0, 0.9, tp.y);\n    shafts += s * (0.5 + 0.5 * sin(a * 3.0 + f));\n  }\n  col = mix(col, u_pal[5], sat(shafts * 0.35));\n  // the sandy floor with caustics\n  float floorY = -0.72 + 0.04 * sin(p.x * 3.0 + 1.0);\n  float onFloor = smoothstep(floorY + 0.04, floorY - 0.04, p.y);\n  vec3 sand = u_pal[3];\n  sand.x += 0.12 * m * caustic(vec2(p.x, p.y * 2.5) + tiltD(-0.8), a);\n  col = mix(col, sand, onFloor);\n  col.x += 0.06 * m * caustic(p * 0.8, a) * (1.0 - depth) * (1.0 - onFloor);\n  // drifting particles\n  vec2 g = p * 9.0 + vec2(0.0, 18.0 * t / T); // 18 whole cells a loop, and the cells repeat every 18, so the motes join up\n  vec2 id = floor(g); id.y = mod(id.y, 18.0);\n  vec3 h = hash33(vec3(id, 5.0)) * 0.5 + 0.5;\n  float dot_ = smoothstep(0.08, 0.0, length(fract(g) - h.xy)) * step(0.8, h.z);\n  col.x += dot_ * 0.08;\n  // the shark: crosses once a loop, its depth by the option\n  if (sharkAmt > 0.01) {\n    float scale = mix(0.55, 1.35, sharkAmt);\n    float phase = fract(t / T);\n    vec2 c = vec2(mix(-2.6, 2.6, phase), -0.05 + 0.12 * sin(a));\n    vec2 q = (p - c - tiltD(1.2)) / scale;\n    float s = sharkShape(q, a);\n    vec3 sk = u_pal[4];\n    sk.x += 0.08 * smoothstep(0.0, -0.08, q.y); // a paler belly\n    float haze = mix(0.55, 0.0, sharkAmt);\n    col = mix(col, mix(sk, col, haze), s);\n  }\n  return outLab(col);\n}\n"
   },
   {
    "id": "gradient-plane",
@@ -567,6 +627,46 @@
       "#6bf5ff",
       "#ffffff",
       "#dff7f2",
+      "#ffffff",
+      "#ffffff"
+     ]
+    },
+    {
+     "id": "dusk",
+     "name": "Dusk",
+     "dark": [
+      "#ff0561",
+      "#db959f",
+      "#bcc1e1",
+      "#0f1224",
+      "#ffe6ea",
+      "#ffffff"
+     ],
+     "light": [
+      "#ff3d81",
+      "#f3c2c9",
+      "#dbdff2",
+      "#cbcee4",
+      "#ffffff",
+      "#ffffff"
+     ]
+    },
+    {
+     "id": "lagoon",
+     "name": "Lagoon",
+     "dark": [
+      "#1effd2",
+      "#9cd9db",
+      "#e0e1c0",
+      "#242411",
+      "#e8ffff",
+      "#ffffff"
+     ],
+     "light": [
+      "#50ffdf",
+      "#c7f2f3",
+      "#f2f2dd",
+      "#e3e4cd",
       "#ffffff",
       "#ffffff"
      ]
@@ -1028,6 +1128,46 @@
       "#ffffff",
       "#ffffff"
      ]
+    },
+    {
+     "id": "dusk",
+     "name": "Dusk",
+     "dark": [
+      "#ff0561",
+      "#db959f",
+      "#bcc1e1",
+      "#0f1224",
+      "#ffe6ea",
+      "#ffffff"
+     ],
+     "light": [
+      "#ff3d81",
+      "#f3c2c9",
+      "#dbdff2",
+      "#cbcee4",
+      "#ffffff",
+      "#ffffff"
+     ]
+    },
+    {
+     "id": "lagoon",
+     "name": "Lagoon",
+     "dark": [
+      "#1effd2",
+      "#9cd9db",
+      "#e0e1c0",
+      "#242411",
+      "#e8ffff",
+      "#ffffff"
+     ],
+     "light": [
+      "#50ffdf",
+      "#c7f2f3",
+      "#f2f2dd",
+      "#e3e4cd",
+      "#ffffff",
+      "#ffffff"
+     ]
     }
    ],
    "dynamic": {
@@ -1486,6 +1626,46 @@
       "#ffffff",
       "#ffffff"
      ]
+    },
+    {
+     "id": "dusk",
+     "name": "Dusk",
+     "dark": [
+      "#ff0561",
+      "#db959f",
+      "#bcc1e1",
+      "#0f1224",
+      "#ffe6ea",
+      "#ffffff"
+     ],
+     "light": [
+      "#ff3d81",
+      "#f3c2c9",
+      "#dbdff2",
+      "#cbcee4",
+      "#ffffff",
+      "#ffffff"
+     ]
+    },
+    {
+     "id": "lagoon",
+     "name": "Lagoon",
+     "dark": [
+      "#1effd2",
+      "#9cd9db",
+      "#e0e1c0",
+      "#242411",
+      "#e8ffff",
+      "#ffffff"
+     ],
+     "light": [
+      "#50ffdf",
+      "#c7f2f3",
+      "#f2f2dd",
+      "#e3e4cd",
+      "#ffffff",
+      "#ffffff"
+     ]
     }
    ],
    "dynamic": {
@@ -1813,7 +1993,7 @@
      1.0
     ]
    },
-   "glsl": "// Gradient Sphere: nth's own, its parameters inspired by ruucm/shadergradient (no licence, so its ideas only: a lit sphere deformed by flowing\n// noise, coloured by three colours, with grain). Palette: 0 to 2 the three colours, 3 the shadow, 4 the light, 5 the grain tint.\n// Options: x = strength (how far the noise moves the surface), y = density (its frequency).\nconst float T = 36.0;\n\nvec3 wall(vec2 p, float t) {\n  float a = TAU * t / T;\n  float strength = mix(0.15, 1.6, u_opt.x);\n  float density = mix(0.6, 3.2, u_opt.y);\n  vec2 q = p + tiltD(0.8);\n  float r = length(q) / 0.82;\n  float mask = smoothstep(1.0 + u_px * 3.0, 1.0 - u_px * 3.0, r);\n  float z = sqrt(sat(1.0 - r * r));\n  vec2 uv = q / max(0.35, z + 0.35) * 0.8 + vec2(a * 0.1, 0.0);\n  float shade = 0.5 + 0.8 * z;\n  float h = fbm3(vec3(uv * density, 0.0) + vec3(cos(a), sin(a), 0.0) * 0.6) * strength;\n  float g = sat(0.5 + 0.5 * (uv.y * 0.6 + h));\n  vec3 c = mix(u_pal[0], u_pal[1], smoothstep(0.0, 0.55, g));\n  c = mix(c, u_pal[2], smoothstep(0.45, 1.0, g));\n  float e = 0.02;\n  float hx = fbm3(vec3((uv + vec2(e, 0.0)) * density, 0.0) + vec3(cos(a), sin(a), 0.0) * 0.6) * strength - h;\n  float hy = fbm3(vec3((uv + vec2(0.0, e)) * density, 0.0) + vec3(cos(a), sin(a), 0.0) * 0.6) * strength - h;\n  vec3 nrm = normalize(vec3(-hx / e * 0.15, -hy / e * 0.15, 1.0));\n  float lit = sat(dot(nrm, normalize(vec3(-0.4, 0.6, 0.7))));\n  c.x += (lit - 0.6) * 0.18 * shade;\n  c = mix(c, u_pal[4], pow(lit, 24.0) * 0.25 * shade);\n  vec3 gr = hash33(vec3(floor(p / u_px), 2.0));\n  c.x += gr.x * 0.01;\n  return outLab(c) * mask + outLab(u_pal[3]) * (1.0 - mask);\n}\n"
+   "glsl": "// Gradient Sphere: nth's own, its parameters inspired by ruucm/shadergradient (no licence, so its ideas only: a lit sphere deformed by flowing\n// noise, coloured by three colours, with grain). Palette: 0 to 2 the three colours, 3 the shadow, 4 the light, 5 the grain tint.\n// Options: x = strength (how far the noise moves the surface), y = density (its frequency).\nconst float T = 36.0;\n\nvec3 wall(vec2 p, float t) {\n  float a = TAU * t / T;\n  float strength = mix(0.15, 1.6, u_opt.x);\n  float density = mix(0.6, 3.2, u_opt.y);\n  vec2 q = p + tiltD(0.8);\n  float r = length(q) / 0.82;\n  float mask = smoothstep(1.0 + u_px * 3.0, 1.0 - u_px * 3.0, r);\n  float z = sqrt(sat(1.0 - r * r));\n  vec2 uv = q / max(0.35, z + 0.35) * 0.8 + vec2(0.25 * sin(a), 0.0);\n  float shade = 0.5 + 0.8 * z;\n  float h = fbm3(vec3(uv * density, 0.0) + vec3(cos(a), sin(a), 0.0) * 0.6) * strength;\n  float g = sat(0.5 + 0.5 * (uv.y * 0.6 + h));\n  vec3 c = mix(u_pal[0], u_pal[1], smoothstep(0.0, 0.55, g));\n  c = mix(c, u_pal[2], smoothstep(0.45, 1.0, g));\n  float e = 0.02;\n  float hx = fbm3(vec3((uv + vec2(e, 0.0)) * density, 0.0) + vec3(cos(a), sin(a), 0.0) * 0.6) * strength - h;\n  float hy = fbm3(vec3((uv + vec2(0.0, e)) * density, 0.0) + vec3(cos(a), sin(a), 0.0) * 0.6) * strength - h;\n  vec3 nrm = normalize(vec3(-hx / e * 0.15, -hy / e * 0.15, 1.0));\n  float lit = sat(dot(nrm, normalize(vec3(-0.4, 0.6, 0.7))));\n  c.x += (lit - 0.6) * 0.18 * shade;\n  c = mix(c, u_pal[4], pow(lit, 24.0) * 0.25 * shade);\n  vec3 gr = hash33(vec3(floor(p / u_px), 2.0));\n  c.x += gr.x * 0.01;\n  return outLab(c) * mask + outLab(u_pal[3]) * (1.0 - mask);\n}\n"
   },
   {
    "id": "plasma",
@@ -1922,6 +2102,66 @@
       "#ff8a3d",
       "#c0430f",
       "#4a1405",
+      "#ffffff"
+     ]
+    },
+    {
+     "id": "aurora",
+     "name": "Aurora",
+     "dark": [
+      "#000000",
+      "#0a4a2a",
+      "#18be70",
+      "#5cffb4",
+      "#d9fff3",
+      "#ffffff"
+     ],
+     "light": [
+      "#ecfff4",
+      "#b8ffd9",
+      "#5ef0a3",
+      "#18be70",
+      "#0a663a",
+      "#ffffff"
+     ]
+    },
+    {
+     "id": "ocean",
+     "name": "Ocean",
+     "dark": [
+      "#000000",
+      "#0a354a",
+      "#1882be",
+      "#5cc2ff",
+      "#d9ebff",
+      "#ffffff"
+     ],
+     "light": [
+      "#ecfaff",
+      "#b8eaff",
+      "#5ec3f0",
+      "#1882be",
+      "#0a4566",
+      "#ffffff"
+     ]
+    },
+    {
+     "id": "rose",
+     "name": "Rose",
+     "dark": [
+      "#000000",
+      "#4a0a35",
+      "#be1882",
+      "#ff5cc2",
+      "#ffd9eb",
+      "#ffffff"
+     ],
+     "light": [
+      "#ffecfa",
+      "#ffb8ea",
+      "#f05ec3",
+      "#be1882",
+      "#660a45",
       "#ffffff"
      ]
     }
