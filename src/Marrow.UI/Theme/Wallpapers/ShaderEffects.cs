@@ -10,6 +10,10 @@ namespace Marrow.UI.Theme.Wallpapers;
 /// <summary>One option of a shader effect.</summary>
 public sealed record ShaderEffectProp(string Id, string Label, string Kind, string Detail, double Min, double Max, double Step, double Number, string Colour, IReadOnlyList<string> Choices)
 {
+    /// <summary>ED-NEW-shader-effects-2: other options' values under which this option's effect shows (its "probe": a brick's shade varies only
+    /// on a brick that is not black), and "@lo"/"@hi", the two values of its own that show it (a light from behind lights nothing); only tests read it.</summary>
+    public IReadOnlyDictionary<string, string> Probe { get; init; } = new Dictionary<string, string>();
+
     /// <summary>How many floats it takes in u_e (a colour four, anything else one).</summary>
     public int Width => Kind == "color" ? 4 : 1;
 }
@@ -88,7 +92,12 @@ public static class ShaderEffects
                 props.Add(new ShaderEffectProp(p.GetProperty("id").GetString()!, p.GetProperty("label").GetString()!, kind,
                     p.TryGetProperty("detail", out var d) ? d.GetString()! : "",
                     N("min", 0), N("max", kind == "select" ? Math.Max(0, choices.Length - 1) : 1), N("step", 1),
-                    kind == "color" ? 0 : N("default", 0), kind == "color" ? p.GetProperty("default").GetString()! : "", choices));
+                    kind == "color" ? 0 : N("default", 0), kind == "color" ? p.GetProperty("default").GetString()! : "", choices)
+                {
+                    Probe = p.TryGetProperty("probe", out var probe) && probe.ValueKind == JsonValueKind.Object
+                        ? probe.EnumerateObject().ToDictionary(x => x.Name, x => x.Value.ValueKind == JsonValueKind.String ? x.Value.GetString()! : x.Value.GetRawText())
+                        : new Dictionary<string, string>(),
+                });
             }
             list.Add(new ShaderEffect(w.GetProperty("id").GetString()!, w.GetProperty("name").GetString()!, w.GetProperty("desc").GetString()!, props));
         }
