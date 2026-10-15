@@ -184,6 +184,7 @@ public static class Program
         Marrow.App.Port.Settings.ProviderSwitchRepair.RunOnce(settings); // ED-NEW-providersmerge-switch-repair-1: once, before AppSettings reads it, the providers the dead switch of older builds wrote off are on again
         // ED-NEW-perf-startup-structure-5: the store (made on first use from UserDefaults.Standard, which is bound above) checks a saved wallpaper against the whole catalogue; that catalogue is read on the pool,
         // so the first window's build finds it made, and with no wallpaper saved nothing is read. The explicit SetProcessDefault(new(settings)) that made the store here, on the UI thread before any window, is gone.
+        Marrow.UI.Theme.Wallpapers.FirstWallpaper.Seed(settings); // ED-NEW-glass-alive-9: a fresh profile starts with a live wallpaper behind the glass
         StartupPrimes.PrimeWallpapers(settings, StartupPrimes.Pool);
         AppDomain.CurrentDomain.UnhandledException += (_, _) => settings.Synchronize();
         // Storage.swift:19-48's roots (OD-0008 C7: %LOCALAPPDATA%\Marrow Code; OD-0012 F1: %USERPROFILE%\.marrow)

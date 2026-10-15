@@ -344,7 +344,9 @@ public sealed partial class AppSettings : MainActorModel, ProviderSettings, Acco
     }
 
     // :299
-    public const double DefaultBackdropOpacity = 0.5;
+    // ED-NEW-glass-alive-9 (Maaz, 2026-10-15): the live wallpaper sits over the desktop at 0.8, so the desktop shows faintly behind it (the
+    // three layers: the desktop, nth's wallpaper, the glass); it was 0.5, where the desktop's icons read as clearly as the wallpaper.
+    public const double DefaultBackdropOpacity = 0.8;
 
     // :407-415
     private sealed record StoredKey
