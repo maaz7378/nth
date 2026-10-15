@@ -1,5 +1,5 @@
 // PORT-ONLY: ED-NEW-glass-alive-9 (Maaz, 2026-10-15: "a good live wallpaper is ON by default on a fresh profile, so the liquid glass has something
-// to bend"): once, on a profile that has never chosen a wallpaper (no library choice, no picture of its own), the library's default live wallpaper
+// to bend"): once, on a profile that has never chosen a wallpaper (no library choice, no picture of its own), the default live wallpaper
 // is chosen, as if the user had picked it. A profile that has chosen anything, None included, is never touched, and the seed is written once
 // whatever happens next, so choosing None later sticks.
 using Marrow.Core.Port;
@@ -9,8 +9,9 @@ namespace Marrow.UI.Theme.Wallpapers;
 /// <summary>The live wallpaper a fresh profile starts with.</summary>
 public static class FirstWallpaper
 {
-    /// <summary>The default: Borealis, the library's aurora (moving light and colour that bends visibly through the glass).</summary>
-    public const string DefaultId = "borealis";
+    /// <summary>The default: Ocean (ED-NEW-ocean-wallpaper-1), light shafts and caustics with a shark gliding across, which the glass bends
+    /// visibly as it passes.</summary>
+    public const string DefaultId = "ocean";
 
     internal const string SeededKey = "wallpaperLibrarySeeded", LibraryKey = "wallpaperLibrary", PictureKey = "wallpaperFile";
 

@@ -24,10 +24,15 @@ public static class WallpaperCatalogue
     private static IReadOnlyList<WallpaperDefinition> Load()
     {
         var list = new List<WallpaperDefinition>();
-        foreach (var kind in new[] { WallpaperKind.Static, WallpaperKind.Animated })
+        // ED-NEW-ocean-wallpaper-1: nth's own live wallpapers (live-wallpapers.json) join the animated collection, on its common code
+        using var animatedData = Resource("animated");
+        using var liveData = Resource("live");
+        foreach (var (kind, file) in new[] { (WallpaperKind.Static, "static"), (WallpaperKind.Animated, "animated"), (WallpaperKind.Animated, "live") })
         {
-            using var data = Resource(kind == WallpaperKind.Static ? "static" : "animated");
+            using var own = file == "static" ? Resource("static") : null;
+            var data = own ?? (file == "live" ? liveData : animatedData);
             var root = data.RootElement;
+            var commonRoot = animatedData.RootElement;
             foreach (var w in root.GetProperty("wallpapers").EnumerateArray())
             {
                 var packs = w.GetProperty("packs").EnumerateArray().Select(p => new WallpaperPack(
@@ -45,7 +50,7 @@ public static class WallpaperCatalogue
                 var source = kind == WallpaperKind.Static
                     ? root.GetProperty("contract").GetProperty("lib").GetString() + "\n" + w.GetProperty("src").GetString()
                         + "\n" + root.GetProperty("contract").GetProperty("main").GetString()
-                    : root.GetProperty("common").GetString() + "\n" + w.GetProperty("glsl").GetString();
+                    : commonRoot.GetProperty("common").GetString() + "\n" + w.GetProperty("glsl").GetString();
                 list.Add(new(kind, w.GetProperty("id").GetString()!, w.GetProperty("name").GetString()!,
                     w.GetProperty("tier").GetString()!, w.GetProperty("desc").GetString()!, packs, options,
                     kind == WallpaperKind.Animated ? w.GetProperty("period").GetDouble() : 0, source,

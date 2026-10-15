@@ -19,7 +19,10 @@ public sealed class WallpaperAnimatedCollectionTests
     [Trait("Rule", "R-TEST-1")]
     public void The_animated_collection_is_72_wallpapers_24_to_a_tier_with_unique_ids()
     {
-        var all = WallpaperCatalogue.All.Where(w => w.Kind == WallpaperKind.Animated).ToArray();
+        // ED-NEW-ocean-wallpaper-1: the design's collection is 72; nth's own live wallpapers (tier "live") join it with ids of their own
+        var everything = WallpaperCatalogue.All.Where(w => w.Kind == WallpaperKind.Animated).ToArray();
+        Assert.Equal(everything.Length, everything.Select(w => w.Id).Distinct().Count());
+        var all = everything.Where(w => w.Tier != "live").ToArray();
         Assert.Equal(72, all.Length); Assert.Equal(72, all.Select(w => w.Id).Distinct().Count());
         foreach (var tier in new[] { "vibrant", "balanced", "minimal" }) Assert.Equal(24, all.Count(w => w.Tier == tier));
     }
@@ -44,7 +47,7 @@ public sealed class WallpaperAnimatedCollectionTests
     [Trait("Rule", "R-TEST-1")]
     public void Layered_wallpapers_default_perspective_on_and_flat_ones_off()
     {
-        var all = WallpaperCatalogue.All.Where(w => w.Kind == WallpaperKind.Animated).ToArray();
+        var all = WallpaperCatalogue.All.Where(w => w.Kind == WallpaperKind.Animated && w.Tier != "live").ToArray();
         Assert.Equal(41, all.Count(w => w.Premium!.Perspective.Mode == "layers")); Assert.Equal(31, all.Count(w => w.Premium!.Perspective.Mode == "pan"));
         Assert.All(all, w => Assert.Equal(w.Premium!.Perspective.Mode == "layers", w.Premium.Perspective.Default));
     }

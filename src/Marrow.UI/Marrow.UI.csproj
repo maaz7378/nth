@@ -24,6 +24,7 @@
     <!-- OD-0110: ship the source catalogue verbatim; shaders are mechanically translated at load time. -->
     <EmbeddedResource Include="../../porting/first-release/design-src/wallpaper-library/static/wallpapers.json" LogicalName="Marrow.Wallpapers.static.json" />
     <EmbeddedResource Include="../../porting/first-release/design-src/wallpaper-library/animated/wallpapers.json" LogicalName="Marrow.Wallpapers.animated.json" />
+    <EmbeddedResource Include="Theme/Wallpapers/live-wallpapers.json" LogicalName="Marrow.Wallpapers.live.json" />
   </ItemGroup>
 
   <PropertyGroup>
