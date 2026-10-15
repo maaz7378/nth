@@ -2492,6 +2492,504 @@
     ]
    },
    "glsl": "// Plasma: after shader-effects-inc/shaders' Plasma (MIT, THIRD_PARTY_NOTICES \"shader-effects-inc shaders\"): domain-warped noise on a slab of\n// volume, tone-shaped (a glow, a contrast and a balance) and ramped through two colours, here the pack.\n// Palette: 0 the dark end, 1 to 4 the ramp, 5 the glow.\n// Options: x = warp (how much the flow swirls), y = density.\nconst float T = 50.0;\n\nvec3 wall(vec2 p, float t) {\n  float a = TAU * t / T;\n  float warp = mix(0.0, 1.0, u_opt.x);\n  float density = mix(0.8, 3.6, u_opt.y);\n  vec3 q = vec3(p * density * 0.5 + tiltD(0.5), 0.0);\n  vec3 loop = vec3(cos(a), sin(a), 0.0) * 0.5;\n  vec3 w = vec3(fbm3(q + loop), fbm3(q + vec3(5.2, 1.3, 0.0) - loop), 0.0);\n  float n = fbm3(q + w * 4.0 * warp + loop * 0.5);\n  float v = sat(0.5 + 0.5 * n);\n  v = sat((v - 0.5) * 1.6 + 0.5);\n  v = 1.0 - v;\n  vec3 c = mix(u_pal[0], u_pal[1], smoothstep(0.0, 0.3, v));\n  c = mix(c, u_pal[2], smoothstep(0.25, 0.55, v));\n  c = mix(c, u_pal[3], smoothstep(0.5, 0.8, v));\n  c = mix(c, u_pal[4], smoothstep(0.75, 1.0, v));\n  c.x += 0.08 * pow(v, 4.0) * mix(0.6, 1.0, u_dark);\n  c = mix(c, u_pal[5], 0.15 * pow(v, 6.0));\n  return outLab(c);\n}\n"
+  },
+  {
+   "id": "shader-gradient",
+   "name": "Gradient",
+   "tier": "live",
+   "period": 40,
+   "desc": "Every shadergradient option, live: a plane, sphere or water plane in three colours, its flow, light, camera and grain all set in Appearance's Gradient section.",
+   "defaults": {
+    "pack": "halo",
+    "speed": 1.0,
+    "motion": 0.5,
+    "second": 0.55,
+    "dynamic": false,
+    "perspective": true,
+    "focus": 0.0
+   },
+   "options": [
+    {
+     "id": "motion",
+     "label": "Motion",
+     "lo": "Calm",
+     "hi": "Lively",
+     "default": 0.5
+    },
+    {
+     "id": "depth",
+     "label": "Depth",
+     "lo": "Flat",
+     "hi": "Deep",
+     "default": 0.5
+    }
+   ],
+   "roles": [
+    [
+     0.24,
+     0.08,
+     0.9,
+     0.04
+    ],
+    [
+     0.32,
+     0.11,
+     0.84,
+     0.07
+    ],
+    [
+     0.42,
+     0.13,
+     0.78,
+     0.09
+    ],
+    [
+     0.54,
+     0.13,
+     0.72,
+     0.1
+    ],
+    [
+     0.66,
+     0.12,
+     0.66,
+     0.11
+    ],
+    [
+     0.92,
+     0.05,
+     0.98,
+     0.03
+    ]
+   ],
+   "packs": [
+    {
+     "id": "halo",
+     "name": "Halo",
+     "dark": [
+      "#ff5005",
+      "#dbba95",
+      "#d0bce1",
+      "#1a0f24",
+      "#fff3e6",
+      "#ffffff"
+     ],
+     "light": [
+      "#ff7a3d",
+      "#f3dcc2",
+      "#e6dbf2",
+      "#d9cbe4",
+      "#ffffff",
+      "#ffffff"
+     ]
+    },
+    {
+     "id": "pensive",
+     "name": "Pensive",
+     "dark": [
+      "#606080",
+      "#8d7dca",
+      "#212121",
+      "#0b0b12",
+      "#e8e4ff",
+      "#ffffff"
+     ],
+     "light": [
+      "#8a8ab0",
+      "#b7a9f0",
+      "#dcdcec",
+      "#cfcfe0",
+      "#ffffff",
+      "#ffffff"
+     ]
+    },
+    {
+     "id": "mint",
+     "name": "Mint",
+     "dark": [
+      "#94ffd1",
+      "#6bf5ff",
+      "#ffffff",
+      "#0a1f1c",
+      "#ffffff",
+      "#ffffff"
+     ],
+     "light": [
+      "#94ffd1",
+      "#6bf5ff",
+      "#ffffff",
+      "#dff7f2",
+      "#ffffff",
+      "#ffffff"
+     ]
+    },
+    {
+     "id": "dusk",
+     "name": "Dusk",
+     "dark": [
+      "#ff0561",
+      "#db959f",
+      "#bcc1e1",
+      "#0f1224",
+      "#ffe6ea",
+      "#ffffff"
+     ],
+     "light": [
+      "#ff3d81",
+      "#f3c2c9",
+      "#dbdff2",
+      "#cbcee4",
+      "#ffffff",
+      "#ffffff"
+     ]
+    },
+    {
+     "id": "lagoon",
+     "name": "Lagoon",
+     "dark": [
+      "#1effd2",
+      "#9cd9db",
+      "#e0e1c0",
+      "#242411",
+      "#e8ffff",
+      "#ffffff"
+     ],
+     "light": [
+      "#50ffdf",
+      "#c7f2f3",
+      "#f2f2dd",
+      "#e3e4cd",
+      "#ffffff",
+      "#ffffff"
+     ]
+    }
+   ],
+   "dynamic": {
+    "light": {
+     "dawn": {
+      "dL": [
+       -0.015,
+       -0.015,
+       -0.015,
+       -0.015,
+       -0.015,
+       -0.015
+      ],
+      "kC": [
+       1.1,
+       1.1,
+       1.1,
+       1.1,
+       1.1,
+       1.1
+      ],
+      "dh": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "tint": [
+       355.0,
+       0.24
+      ]
+     },
+     "day": {
+      "dL": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "kC": [
+       1.0,
+       1.0,
+       1.0,
+       1.0,
+       1.0,
+       1.0
+      ],
+      "dh": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "tint": [
+       0.0,
+       0.0
+      ]
+     },
+     "dusk": {
+      "dL": [
+       -0.035,
+       -0.035,
+       -0.035,
+       -0.035,
+       -0.035,
+       -0.035
+      ],
+      "kC": [
+       1.16,
+       1.16,
+       1.16,
+       1.16,
+       1.16,
+       1.16
+      ],
+      "dh": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "tint": [
+       335.0,
+       0.3
+      ]
+     },
+     "night": {
+      "dL": [
+       -0.105,
+       -0.105,
+       -0.105,
+       -0.105,
+       -0.105,
+       -0.105
+      ],
+      "kC": [
+       0.9,
+       0.9,
+       0.9,
+       0.9,
+       0.9,
+       0.9
+      ],
+      "dh": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "tint": [
+       262.0,
+       0.46
+      ]
+     }
+    },
+    "dark": {
+     "dawn": {
+      "dL": [
+       0.03,
+       0.03,
+       0.03,
+       0.03,
+       0.03,
+       0.03
+      ],
+      "kC": [
+       1.12,
+       1.12,
+       1.12,
+       1.12,
+       1.12,
+       1.12
+      ],
+      "dh": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "tint": [
+       355.0,
+       0.24
+      ]
+     },
+     "day": {
+      "dL": [
+       0.085,
+       0.085,
+       0.085,
+       0.085,
+       0.085,
+       0.085
+      ],
+      "kC": [
+       0.92,
+       0.92,
+       0.92,
+       0.92,
+       0.92,
+       0.92
+      ],
+      "dh": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "tint": [
+       232.0,
+       0.18
+      ]
+     },
+     "dusk": {
+      "dL": [
+       0.03,
+       0.03,
+       0.03,
+       0.03,
+       0.03,
+       0.03
+      ],
+      "kC": [
+       1.18,
+       1.18,
+       1.18,
+       1.18,
+       1.18,
+       1.18
+      ],
+      "dh": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "tint": [
+       335.0,
+       0.32
+      ]
+     },
+     "night": {
+      "dL": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "kC": [
+       1.0,
+       1.0,
+       1.0,
+       1.0,
+       1.0,
+       1.0
+      ],
+      "dh": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "tint": [
+       0.0,
+       0.0
+      ]
+     }
+    },
+    "sun": {
+     "dawn": [
+      0.0,
+      0.0
+     ],
+     "day": [
+      0.0,
+      0.0
+     ],
+     "dusk": [
+      0.0,
+      0.0
+     ],
+     "night": [
+      0.0,
+      0.0
+     ]
+    }
+   },
+   "perspective": {
+    "mode": "layers",
+    "default": true
+   },
+   "focus": {
+    "default": 0.0
+   },
+   "match": {
+    "off": [
+     22.5,
+     12.5,
+     0.0,
+     -15.0,
+     -30.0,
+     -1.5
+    ],
+    "hero": 2,
+    "ck": 1.0,
+    "lk": 1.0,
+    "dark_warm": {
+     "band": [
+      -10,
+      15,
+      100,
+      120
+     ],
+     "ground_hue": 330,
+     "mid_hue": 355,
+     "ground_below": 0.32,
+     "mid_below": 0.62,
+     "mid_amount": 1.0,
+     "kc": 1.3,
+     "dl": 0.03,
+     "bright_dl": 0.06,
+     "bright_kc": 1.15
+    },
+    "dl": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "dc": [
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "cm": [
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "glsl": "// Gradient: nth's own drawing of ruucm/shadergradient's options (no licence, so its option set and defaults only): a plane, a sphere or a water\n// plane, lifted and folded by flowing noise and waves, coloured by three colours, lit by a 3D light or an environment, mirrored by its reflection,\n// seen through an orbiting camera (azimuth, polar angle, distance, zoom, field of view), placed and turned by its position and rotation, with grain\n// and a wireframe. Every option is a uniform the host fills from the Gradient settings (u_g); the flow travels round a closed loop in noise space,\n// so the picture repeats exactly every T seconds (speed is how far round the loop it travels, animate off stills it, a range keeps it between\n// its start and end).\n// Options (the library card's two): x = motion (how far round the loop the flow travels, times the speed), y = depth (times the lift).\n// u_g[0]: shape (0 plane, 1 sphere, 2 water), speed (0 when not animated), strength, density\n// u_g[1]: frequency, amplitude, brightness, reflection\n// u_g[2]: grain amount (0 off), lighting (0 3D light, 1 environment), environment (0 city, 1 dawn, 2 lobby), wireframe\n// u_g[3]: camera azimuth, polar angle (radians), distance, zoom\n// u_g[4]: position x, y, z, field of view (radians)\n// u_g[5]: rotation x, y, z (radians), range on\n// u_g[6], u_g[7], u_g[8]: colour 1, 2, 3 (linear rgb), then range start, range end (seconds), 0\nconst float T = 40.0;\n\nvec3 rotX(vec3 p, float a) { float c = cos(a); float s = sin(a); return vec3(p.x, c * p.y - s * p.z, s * p.y + c * p.z); }\nvec3 rotY(vec3 p, float a) { float c = cos(a); float s = sin(a); return vec3(c * p.x + s * p.z, p.y, -s * p.x + c * p.z); }\nvec3 rotZ(vec3 p, float a) { float c = cos(a); float s = sin(a); return vec3(c * p.x - s * p.y, s * p.x + c * p.y, p.z); }\n// world to the surface's own space: the position taken off, then the rotation undone (Z, then Y, then X: the inverse of X, Y, Z)\nvec3 toLocal(vec3 p) { return rotX(rotY(rotZ(p, -u_g[5].z), -u_g[5].y), -u_g[5].x); }\nvec3 toWorldDir(vec3 d) { return rotZ(rotY(rotX(d, u_g[5].x), u_g[5].y), u_g[5].z); }\n\n// the lift at a point of the surface's own 2D coordinates, at flow angle a\nfloat lift(vec2 q, float a) {\n  float r = u_g[0].y * 0.9 * mix(0.5, 1.5, u_opt.x);\n  float n = gnoise(loop3(q * u_g[0].w * 0.45, a, r) + vec3(0.0, 0.0, 3.7));\n  float w = sin(q.x * u_g[1].x * 0.35 + r * 2.0 * sin(a) + n * 1.5) * u_g[1].y * 0.06;\n  return (n * u_g[0].z * 0.09 + w) * mix(0.5, 1.5, u_opt.y);\n}\n\nvec3 envColour(vec3 n) {\n  float e = u_g[2].z;\n  vec3 skyC = e < 0.5 ? vec3(0.55, 0.62, 0.72) : (e < 1.5 ? vec3(0.95, 0.62, 0.42) : vec3(0.92, 0.90, 0.86));\n  vec3 groundC = e < 0.5 ? vec3(0.16, 0.17, 0.20) : (e < 1.5 ? vec3(0.28, 0.16, 0.18) : vec3(0.42, 0.38, 0.34));\n  return mix(groundC, skyC, sat(0.5 + 0.5 * n.y));\n}\n\nvec3 wall(vec2 p, float t) {\n  float a = TAU * t / T;\n  // a range: the flow swings between its start and end and back once a loop\n  if (u_g[5].w > 0.5) a = TAU * (u_g[6].w + (u_g[7].w - u_g[6].w) * (0.5 - 0.5 * cos(a))) / T;\n  vec3 c1 = u_g[6].xyz; vec3 c2 = u_g[7].xyz; vec3 c3 = u_g[8].xyz;\n  // the camera: orbiting the origin, looking at it\n  float az = u_g[3].x; float po = clamp(u_g[3].y, 0.02, 3.12); float dist = u_g[3].z;\n  vec3 ro = dist * vec3(sin(po) * sin(az), cos(po), sin(po) * cos(az));\n  vec3 fw = normalize(-ro);\n  vec3 rt = normalize(cross(fw, vec3(0.0, 1.0, 0.0)));\n  vec3 up = cross(rt, fw);\n  float focal = 1.0 / tan(0.5 * u_g[4].w) * u_g[3].w;\n  vec2 q = p + tiltD(0.6);\n  vec3 rd = normalize(fw * focal + rt * q.x + up * q.y);\n  // into the surface's own space\n  vec3 lo = toLocal(ro - u_g[4].xyz);\n  vec3 ld = toLocal(rd);\n  float shape = u_g[0].x;\n  bool hit = false;\n  vec3 hp = vec3(0.0);\n  vec3 nrm = vec3(0.0, 0.0, 1.0);\n  vec2 uv = vec2(0.0);\n  if (shape < 0.5 || shape > 1.5) {\n    // a plane (z = 0; the water plane lies flat, y = 0, and rolls with longer waves) lifted along its normal: the ray's height test, refined\n    vec3 o = lo; vec3 d = ld;\n    if (shape > 1.5) { o = vec3(lo.x, lo.z, lo.y); d = vec3(ld.x, ld.z, ld.y); }\n    if (abs(d.z) > 0.0005) {\n      float tt = -o.z / d.z;\n      for (int i = 0; i < 5; i++) {\n        vec3 s = o + d * tt;\n        float h = lift(s.xy * (shape > 1.5 ? 0.6 : 1.0), a);\n        tt = (h - o.z) / d.z;\n      }\n      vec3 s = o + d * tt;\n      if (tt > 0.0 && abs(s.x) < 5.0 && abs(s.y) < 5.0) {\n        hit = true;\n        float k = shape > 1.5 ? 0.6 : 1.0;\n        float e = 0.02;\n        float h0 = lift(s.xy * k, a);\n        float hx = lift((s.xy + vec2(e, 0.0)) * k, a) - h0;\n        float hy = lift((s.xy + vec2(0.0, e)) * k, a) - h0;\n        vec3 n = normalize(vec3(-hx / e, -hy / e, 1.0));\n        if (dot(n, d) > 0.0) n = -n;\n        nrm = shape > 1.5 ? vec3(n.x, n.z, n.y) : n;\n        uv = s.xy * 0.1 + 0.5;\n        hp = s;\n      }\n    }\n  } else {\n    // a sphere of radius 1 lifted along its radius\n    float r = 1.0;\n    for (int i = 0; i < 4; i++) {\n      float b = dot(lo, ld); float c = dot(lo, lo) - r * r; float disc = b * b - c;\n      if (disc < 0.0) { r = -1.0; break; }\n      vec3 s = lo + ld * (-b - sqrt(disc));\n      vec3 sn = normalize(s);\n      r = 1.0 + lift(vec2(atan(sn.z, sn.x) * 1.6, sn.y * 2.6), a);\n    }\n    if (r > 0.0) {\n      float b = dot(lo, ld); float c = dot(lo, lo) - r * r; float disc = b * b - c;\n      if (disc >= 0.0) {\n        hit = true;\n        vec3 s = lo + ld * (-b - sqrt(disc));\n        vec3 sn = normalize(s);\n        vec2 sq = vec2(atan(sn.z, sn.x) * 1.6, sn.y * 2.6);\n        float e = 0.02;\n        float h0 = lift(sq, a);\n        float hx = lift(sq + vec2(e, 0.0), a) - h0;\n        float hy = lift(sq + vec2(0.0, e), a) - h0;\n        nrm = normalize(sn - 0.6 * (hx / e) * normalize(cross(vec3(0.0, 1.0, 0.0), sn) + vec3(1e-4)) - 0.6 * (hy / e) * vec3(0.0, 1.0, 0.0));\n        uv = vec2(sq.x * 0.1 + 0.5, sn.y * 0.5 + 0.5);\n        hp = s;\n      }\n    }\n  }\n  vec3 col;\n  if (!hit) {\n    // past the surface: a quiet field of its colours\n    col = mix(c3, c2, sat(0.5 + 0.5 * p.y)) * 0.35;\n  } else {\n    float h = lift(hp.xy, a);\n    float g = sat(0.5 + h * 2.2 + (uv.y - 0.5) * 0.8);\n    col = mix(c1, c2, smoothstep(0.0, 0.55, g));\n    col = mix(col, c3, smoothstep(0.45, 1.0, g));\n    vec3 n = toWorldDir(nrm);\n    vec3 v = -rd;\n    vec3 light;\n    if (u_g[2].y < 0.5) {\n      vec3 l = normalize(vec3(-0.4, 0.7, -0.6));\n      float diff = sat(dot(n, l));\n      float spec = pow(sat(dot(reflect(-l, n), v)), 24.0);\n      light = col * (0.35 + 0.75 * diff) + vec3(spec) * 0.35;\n    } else {\n      light = col * envColour(n) * 1.25;\n    }\n    float fres = pow(1.0 - sat(abs(dot(n, v))), 3.0);\n    light = mix(light, envColour(reflect(-v, n)), sat(u_g[1].w * (0.25 + 0.75 * fres)));\n    col = light * u_g[1].z;\n    // the wireframe: the surface's grid lines\n    if (u_g[2].w > 0.5) {\n      vec2 gl = abs(fract(uv * 24.0) - 0.5);\n      float line = 1.0 - smoothstep(0.0, 0.06, min(gl.x, gl.y));\n      col = mix(col * 0.15, col * 1.3, line);\n    }\n  }\n  // film grain, still from frame to frame so the loop holds\n  vec3 gr = hash33(vec3(floor(p / u_px), 9.0));\n  col += vec3(gr.x * 0.12 * u_g[2].x);\n  return lin2srgb(shoulder(max(col, vec3(0.0))));\n}\n"
   }
  ]
 }

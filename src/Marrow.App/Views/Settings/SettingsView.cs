@@ -867,6 +867,16 @@ internal sealed class GeneralSettingsPage : Decorator
 /// <summary>:417-458 <c>private struct AppearanceSettingsPage: View</c>.</summary>
 internal sealed class AppearanceSettingsPage : Decorator
 {
+    // PORT-ONLY ED-NEW-shader-gradient-1: the Gradient section, every shadergradient option of the Gradient wallpaper, live
+    private static Control Gradient(AppSettings settings)
+    {
+        var sections = new Marrow.App.Port.Settings.GradientSections(() => settings.ShaderGradient, value => settings.ShaderGradient = value, settings.FlushPendingWrites,
+            () => Marrow.UI.Theme.Wallpapers.WallpaperLibraryStore.Shared.Current.Select(Marrow.UI.Theme.Wallpapers.WallpaperKind.Animated, Marrow.UI.Theme.Wallpapers.ShaderGradientParams.WallpaperId));
+        var host = new Decorator { Child = sections.Section, Name = "GradientSection" };
+        host.Track(() => settings.ShaderGradient, _ => sections.Apply());
+        return host;
+    }
+
     // :420-457 body
     public AppearanceSettingsPage()
     {
@@ -887,7 +897,7 @@ internal sealed class AppearanceSettingsPage : Decorator
             var rows = new StackPanel();
             foreach (var row in new Control[] { new ChromeRow("Transparency", () => new BackdropOpacitySlider(new Binding<double>(() => settings.BackdropOpacity, value => settings.BackdropOpacity = value)), "How much shows through the window"), sidebar, activity, open }) { if (rows.Children.Count > 0) rows.Children.Add(new ChromeRowDivider()); rows.Children.Add(row); }
             // PORT-ONLY WL-2 (OD-0110, ED-NEW-wltwo-1): the built-in wallpaper library follows the picture card ("your picture").
-            host.Child = new ChromeSection("Appearance", () => new StackPanel { Spacing = Chrome.SectionHeaderSpacing, Children = { look, new ChromeCard(() => rows), new WallpaperCard(), new WallpaperLibrarySection(), new AppZoomCard(new Binding<long>(() => settings.AppZoom, value => settings.AppZoom = value)), new Marrow.App.Port.ModelsPalette.PaletteColoursSection(model.CreatePaletteColoursController()) } }); // :452-454
+            host.Child = new ChromeSection("Appearance", () => new StackPanel { Spacing = Chrome.SectionHeaderSpacing, Children = { look, new ChromeCard(() => rows), new WallpaperCard(), new WallpaperLibrarySection(), Gradient(settings), new AppZoomCard(new Binding<long>(() => settings.AppZoom, value => settings.AppZoom = value)), new Marrow.App.Port.ModelsPalette.PaletteColoursSection(model.CreatePaletteColoursController()) } }); // :452-454
         });
     }
 

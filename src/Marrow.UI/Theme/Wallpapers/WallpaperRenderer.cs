@@ -242,6 +242,9 @@ public sealed class WallpaperRenderer : IDisposable
         Composite(canvas, width, height);
     }
 
+    private Marrow.Core.Port.Settings.ShaderGradientSettings? gradientShown;
+    private float[] gradientUniform = [];
+
     private void DrawShader(SKCanvas canvas, int width, int height, float dpr, double time)
     {
         if (wall is null || effect is null || uniforms is null) return;
@@ -278,6 +281,12 @@ public sealed class WallpaperRenderer : IDisposable
             uniforms["u_focus"] = (float)focus; uniforms["u_dither"] = dither;
             // a flat wallpaper pans as a whole by up to 0.012 p units; one with layers reads u_tilt itself
             uniforms["u_pan"] = wall.Premium?.Perspective.Mode == "pan" ? 0.012f : 0f;
+            // ED-NEW-shader-gradient-1: the Gradient's options, made again only when the settings change
+            if (wall.Id == ShaderGradientParams.WallpaperId)
+            {
+                if (!ReferenceEquals(gradientShown, ShaderGradientParams.Current)) { gradientShown = ShaderGradientParams.Current; gradientUniform = ShaderGradientParams.Uniforms(gradientShown); }
+                uniforms["u_g"] = gradientUniform;
+            }
         }
         using var shader = effect!.ToShader(uniforms);
         paint.Color = SKColors.White; paint.BlendMode = SKBlendMode.SrcOver; paint.Shader = shader;

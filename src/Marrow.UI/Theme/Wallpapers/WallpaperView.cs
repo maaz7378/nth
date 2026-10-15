@@ -56,6 +56,8 @@ public sealed class WallpaperView : Control
             || change.Property == EnvironmentValues.AccessibilityReduceMotionProperty) Send();
     }
 
+    private void GradientChanged() => Avalonia.Threading.Dispatcher.UIThread.Post(() => visual?.SendHandlerMessage(WallpaperWake.Instance));
+
     private void Install()
     {
         if (visual is not null || ElementComposition.GetElementVisual(this) is not { } host) return;
@@ -65,6 +67,7 @@ public sealed class WallpaperView : Control
         wakes = new WallpaperWakeSource(environment, () => Avalonia.Threading.Dispatcher.UIThread.Post(() => visual?.SendHandlerMessage(WallpaperWake.Instance)));
         platform = Application.Current?.PlatformSettings;
         if (platform is not null) platform.ColorValuesChanged += AccentChanged;
+        ShaderGradientParams.Changed += GradientChanged; // ED-NEW-shader-gradient-1: a paused Gradient draws a changed option at once
         var availability = AmbientWindowState.Acquire(this);
         ambient = availability is null ? null : new(availability);
         visual = host.Compositor.CreateCustomVisual(new WallpaperVisualHandler(ambient));
@@ -109,6 +112,7 @@ public sealed class WallpaperView : Control
     {
         if (window is not null) { window.PropertyChanged -= WindowChanged; window.PositionChanged -= WindowMoved; }
         if (platform is not null) platform.ColorValuesChanged -= AccentChanged;
+        ShaderGradientParams.Changed -= GradientChanged;
         platform = null; wakes?.Dispose(); wakes = null; environment = null;
         visual?.SendHandlerMessage(WallpaperVisualStop.Instance);
         ambient?.Dispose(); ambient = null;

@@ -124,7 +124,7 @@ public sealed class WallpaperLibraryTests
     public void Live_wallpapers_are_exactly_nths_own()
     {
         var live = WallpaperCatalogue.All.Where(x => x.Tier == "live").Select(x => x.Id).ToArray();
-        Assert.Equal(new[] { "ocean", "gradient-plane", "gradient-water", "gradient-sphere", "plasma" }, live);
+        Assert.Equal(new[] { "ocean", "gradient-plane", "gradient-water", "gradient-sphere", "plasma", "shader-gradient" }, live);
         foreach (var w in WallpaperCatalogue.All.Where(x => x.Tier == "live"))
         {
             Assert.Equal(WallpaperKind.Animated, w.Kind); Assert.NotEmpty(w.Name); Assert.NotEmpty(w.Desc);

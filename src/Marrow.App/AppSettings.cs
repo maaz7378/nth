@@ -316,6 +316,7 @@ public sealed partial class AppSettings : MainActorModel, ProviderSettings, Acco
         public const string VoiceNotes = VoiceNotesSettings.StoreKey;
         public const string WorkingDots = WorkingDotsSettings.StoreKey;
         public const string GlassLook = GlassSettings.StoreKey; // PORT-ONLY, owner-requested (OD-0107, OD-0147, ED-NEW-glasslook-2)
+        public const string ShaderGradient = ShaderGradientSettings.StoreKey; // PORT-ONLY ED-NEW-shader-gradient-1
     }
 
     // :182
@@ -413,6 +414,7 @@ public sealed partial class AppSettings : MainActorModel, ProviderSettings, Acco
     private VoiceNotesSettings voiceNotes = VoiceNotesSettings.Default;
     private WorkingDotsSettings workingDots = WorkingDotsSettings.Default;
     private GlassSettings glass = GlassSettings.Default;
+    private ShaderGradientSettings shaderGradient = ShaderGradientSettings.Default;
     private TextGenerationChoice textGeneration;
     private string commitInstructions = "";
     private double terminalHeight;
@@ -684,6 +686,18 @@ public sealed partial class AppSettings : MainActorModel, ProviderSettings, Acco
         {
             Store(Key.GlassLook, glass.ToJson());
             GlassLooks.Tuning = glass;
+        });
+    }
+
+    /// <summary>PORT-ONLY ED-NEW-shader-gradient-1: <c>shaderGradient</c>, the Gradient wallpaper's options (Appearance's Gradient section), held to
+    /// their ranges and mirrored into its shader; written through the coalescer.</summary>
+    public ShaderGradientSettings ShaderGradient
+    {
+        get => Read(shaderGradient);
+        set => Set(ref shaderGradient, (value ?? ShaderGradientSettings.Default).Held(), _ =>
+        {
+            Store(Key.ShaderGradient, shaderGradient.ToJson());
+            Marrow.UI.Theme.Wallpapers.ShaderGradientParams.Current = shaderGradient;
         });
     }
 
@@ -1355,6 +1369,9 @@ public sealed partial class AppSettings : MainActorModel, ProviderSettings, Acco
         // PORT-ONLY (ED-NEW-glasslook-2): unreadable or missing, every surface's own look; mirrored into the material before any window draws.
         glass = defaults.Data(Key.GlassLook) is { } glassStored ? GlassSettings.FromJson(glassStored) : GlassSettings.Default;
         GlassLooks.Tuning = glass;
+        // PORT-ONLY ED-NEW-shader-gradient-1: the Gradient wallpaper's options, mirrored into its shader before any window draws
+        shaderGradient = defaults.Data(Key.ShaderGradient) is { } gradientStored ? ShaderGradientSettings.FromJson(gradientStored) : ShaderGradientSettings.Default;
+        Marrow.UI.Theme.Wallpapers.ShaderGradientParams.Current = shaderGradient;
     }
 
     // MARK: - Hydra pairs
