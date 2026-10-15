@@ -114,7 +114,7 @@ public sealed class GlassTuningTests(HeadlessSession headless)
         try { body(); }
         finally
         {
-            GlassLooks.Tuning = GlassSettings.Default;
+            GlassLooks.Tuning = ClassicGlass.Default;
             GlassLooks.System = new FixedGlassSystem();
         }
     }
@@ -123,7 +123,7 @@ public sealed class GlassTuningTests(HeadlessSession headless)
 
     [Fact]
     [Trait("Decision", "OD-0147")] // THE ONE PLACE: every surface is the approved canvas's material for its kind, under the user's settings; each kind of piece is told apart; a piece's own look wins
-    public void The_look_table_gives_every_surface_the_canvas_material_for_its_kind() => headless.OnUiThread(() => Tuned(GlassSettings.Default, () =>
+    public void The_look_table_gives_every_surface_the_canvas_material_for_its_kind() => headless.OnUiThread(() => Tuned(ClassicGlass.Default, () =>
     {
         var kinds = new Dictionary<GlassSurface, GlassKind>
         {
@@ -160,7 +160,7 @@ public sealed class GlassTuningTests(HeadlessSession headless)
     [Trait("Decision", "OD-0147")] // the canvas's surface table (its glassSpec and matL), recomputed by hand from its formulas at the canvas's own sizes in the dark appearance
     public void The_material_numbers_are_the_canvas_surface_table()
     {
-        var p = GlassTuning.Of(GlassSettings.Default, new FixedGlassSystem());
+        var p = GlassTuning.Of(ClassicGlass.Default, new FixedGlassSystem());
         GlassCanvasSpec Spec(GlassKind kind, double s) => new GlassCanvas(kind, p).Spec(s, 1, 0, 0, 1);
         // the composer, 52 tall: the bezel 12, a bend of 1.3 x 12, 1.0975x at the rim, the frost 32, the shadow 6 / 18 / 0.20 / 0.14
         var composer = Spec(GlassKind.Composer, 52);
@@ -190,7 +190,7 @@ public sealed class GlassTuningTests(HeadlessSession headless)
         Near([20, 48, 0.38, 0.16], settings.ShadowY, settings.ShadowSigma, settings.ShadowAlpha, settings.ContactAlpha);
         // the frost's sigma is 0.48 of its radius, held to 24 (the canvas's Tinted sidebar asks 29.6)
         Assert.Equal(15.36, new GlassCanvas(GlassKind.Composer, p).Sigma, 9);
-        Assert.Equal(24, new GlassCanvas(GlassKind.Sidebar, GlassTuning.Of(GlassSettings.Default.At(100), new FixedGlassSystem())).Sigma, 9);
+        Assert.Equal(24, new GlassCanvas(GlassKind.Sidebar, GlassTuning.Of(ClassicGlass.Default.At(100), new FixedGlassSystem())).Sigma, 9);
         // the light appearance mirrors the body's greys
         var light = new GlassCanvas(GlassKind.Composer, p).Spec(52, 0, 0, 0, 1);
         Near([0.78, 0.83, 0d], light.Mid, light.Grey, light.Dark);
@@ -200,7 +200,7 @@ public sealed class GlassTuningTests(HeadlessSession headless)
     [Trait("Decision", "OD-0147")] // the canvas's matL: Increase contrast, Reduce transparency, Translucent sidebar off, the tint colour, the press and the motion
     public void The_switches_reach_the_material_as_the_canvas_has_them()
     {
-        var p = GlassTuning.Of(GlassSettings.Default, new FixedGlassSystem());
+        var p = GlassTuning.Of(ClassicGlass.Default, new FixedGlassSystem());
         var plain = new GlassCanvas(GlassKind.Composer, p).Spec(52, 1, 0, 0, 1);
         var contrast = new GlassCanvas(GlassKind.Composer, p with { Contrast = 1 }).Spec(52, 1, 0, 0, 1);
         Near([plain.BandDark + 0.14, plain.Spec + 0.2, plain.Hair + 0.1], contrast.BandDark, contrast.Spec, contrast.Hair);
@@ -212,7 +212,7 @@ public sealed class GlassTuningTests(HeadlessSession headless)
         var pressed = new GlassCanvas(GlassKind.Composer, p).Spec(52, 1, 1, 1, 1);
         Near([plain.Bend * 1.2, 3 + 0.4], pressed.Bend, pressed.Swell);
         Assert.Equal(0, new GlassCanvas(GlassKind.Composer, p with { Motion = 0 }).Spec(52, 1, 1, 1, 1).Swell, 9); // reduced motion: no bulge
-        var blue = GlassTuning.Of(GlassSettings.Default with { TintColour = GlassTintColour.Blue }, new FixedGlassSystem());
+        var blue = GlassTuning.Of(ClassicGlass.Default with { TintColour = GlassTintColour.Blue }, new FixedGlassSystem());
         Near([0d, 0.48, 1d, 0.16], blue.TintR, blue.TintG, blue.TintB, blue.TintAmount);
     }
 
@@ -221,13 +221,13 @@ public sealed class GlassTuningTests(HeadlessSession headless)
     public void The_switches_follow_windows_until_the_user_sets_them()
     {
         var windowsOn = new FixedGlassSystem(ReduceMotion: true, IncreaseContrast: true, ReduceTransparency: true);
-        var follows = GlassTuning.Of(GlassSettings.Default, windowsOn);
+        var follows = GlassTuning.Of(ClassicGlass.Default, windowsOn);
         Assert.Equal((1d, 1d, 0d), (follows.Contrast, follows.Reduce, follows.Motion));
-        var userOff = GlassTuning.Of(GlassSettings.Default with { IncreaseContrast = false, ReduceTransparency = false, ReducedMotion = false }, windowsOn);
+        var userOff = GlassTuning.Of(ClassicGlass.Default with { IncreaseContrast = false, ReduceTransparency = false, ReducedMotion = false }, windowsOn);
         Assert.Equal((0d, 0d, 1d), (userOff.Contrast, userOff.Reduce, userOff.Motion));
-        var userOn = GlassTuning.Of(GlassSettings.Default with { IncreaseContrast = true, ReduceTransparency = true, ReducedMotion = true }, new FixedGlassSystem());
+        var userOn = GlassTuning.Of(ClassicGlass.Default with { IncreaseContrast = true, ReduceTransparency = true, ReducedMotion = true }, new FixedGlassSystem());
         Assert.Equal((1d, 1d, 0d), (userOn.Contrast, userOn.Reduce, userOn.Motion));
-        Assert.Equal(1, GlassTuning.Of(GlassSettings.Default with { TranslucentSidebar = false }, new FixedGlassSystem()).SidebarOff);
+        Assert.Equal(1, GlassTuning.Of(ClassicGlass.Default with { TranslucentSidebar = false }, new FixedGlassSystem()).SidebarOff);
     }
 
     [Fact]
@@ -237,9 +237,9 @@ public sealed class GlassTuningTests(HeadlessSession headless)
         var capsule = GlassEffect.Regular(GlassShape.Capsule(RoundedCornerStyle.Continuous));
         var panel = GlassEffect.Regular(GlassShape.RoundedRectangle(24, RoundedCornerStyle.Continuous));
         foreach (var (_, _, variant, _) in GlassSettings.Looks)
-            Tuned(GlassSettings.Default.At(variant) with { IncreaseContrast = true }, () =>
+            Tuned(ClassicGlass.Default.At(variant) with { IncreaseContrast = true }, () =>
             {
-                var expected = GlassTuning.Of(GlassSettings.Default.At(variant) with { IncreaseContrast = true }, new FixedGlassSystem());
+                var expected = GlassTuning.Of(ClassicGlass.Default.At(variant) with { IncreaseContrast = true }, new FixedGlassSystem());
                 Assert.Equal(expected, GlassLooks.Shown);
                 Assert.Equal(new GlassCanvas(GlassKind.Capsule, expected), CanvasOf(capsule));
                 Assert.Equal(new GlassCanvas(GlassKind.Popover, expected), CanvasOf(panel));
@@ -248,12 +248,12 @@ public sealed class GlassTuningTests(HeadlessSession headless)
                 // a piece's own look still wins
                 Assert.Equal(GlassLook.Liquid, GlassLooks.Of(panel.WithLook(GlassLook.Liquid)));
             });
-        Tuned(GlassSettings.Default, () => Assert.Equal(1.40, GlassLooks.For(GlassSurface.Composer, GlassVariant.Clear).Canvas!.Tuning.Refraction, 9));
+        Tuned(ClassicGlass.Default, () => Assert.Equal(1.40, GlassLooks.For(GlassSurface.Composer, GlassVariant.Clear).Canvas!.Tuning.Refraction, 9));
     });
 
     [Fact]
     [Trait("Decision", "ED-NEW-glasslook-2")] // a change glides: every surface passes from its glass under the old settings to the new, frame by frame, with no pop and no new program, and lands on a fresh window's glass
-    public void A_change_glides_every_surface_with_no_pop_and_no_new_program() => headless.OnUiThread(() => Tuned(GlassSettings.Default, () =>
+    public void A_change_glides_every_surface_with_no_pop_and_no_new_program() => headless.OnUiThread(() => Tuned(ClassicGlass.Default, () =>
     {
         GlassMaterial.WarmupPrograms();
         var window = Show(Pill());
@@ -262,16 +262,16 @@ public sealed class GlassTuningTests(HeadlessSession headless)
         {
             var regular = Capture(window);
             var programs = GlassMaterial.ProgramsBuiltForTests;
-            var target = GlassSettings.Default.At(GlassVariant.Tinted) with { IncreaseContrast = true, TintColour = GlassTintColour.Blue };
-            GlassLooks.Blend(GlassSettings.Default, 0);
+            var target = ClassicGlass.Default.At(GlassVariant.Tinted) with { IncreaseContrast = true, TintColour = GlassTintColour.Blue };
+            GlassLooks.Blend(ClassicGlass.Default, 0);
             GlassLooks.Tuning = target;
-            Assert.Equal(new GlassCanvas(GlassKind.Capsule, GlassTuning.Of(GlassSettings.Default, new FixedGlassSystem())), CanvasOf(effect));
+            Assert.Equal(new GlassCanvas(GlassKind.Capsule, GlassTuning.Of(ClassicGlass.Default, new FixedGlassSystem())), CanvasOf(effect));
             Assert.Equal(regular, Capture(window));
             var frames = new List<byte[]> { regular };
             for (var step = 1; step <= 10; step++)
             {
-                GlassLooks.Blend(GlassSettings.Default, step / 10.0);
-                Assert.Equal(new GlassCanvas(GlassKind.Capsule, step < 10 ? GlassTuning.Of(GlassSettings.Default, new FixedGlassSystem()).Toward(GlassTuning.Of(target, new FixedGlassSystem()), step / 10.0)
+                GlassLooks.Blend(ClassicGlass.Default, step / 10.0);
+                Assert.Equal(new GlassCanvas(GlassKind.Capsule, step < 10 ? GlassTuning.Of(ClassicGlass.Default, new FixedGlassSystem()).Toward(GlassTuning.Of(target, new FixedGlassSystem()), step / 10.0)
                     : GlassTuning.Of(target, new FixedGlassSystem())), CanvasOf(effect));
                 frames.Add(Capture(window));
             }
@@ -288,7 +288,7 @@ public sealed class GlassTuningTests(HeadlessSession headless)
         }
         finally
         {
-            GlassLooks.Blend(GlassSettings.Default, 1);
+            GlassLooks.Blend(ClassicGlass.Default, 1);
             window.Close();
         }
     }));
@@ -336,11 +336,11 @@ public sealed class GlassTuningTests(HeadlessSession headless)
     {
         var moved = id switch
         {
-            "tintColour" => GlassSettings.Default with { TintColour = (GlassTintColour)(int)value },
-            "increaseContrast" => GlassSettings.Default with { IncreaseContrast = value > 0 },
-            "reduceTransparency" => GlassSettings.Default with { ReduceTransparency = value > 0 },
-            "translucentSidebar" => GlassSettings.Default with { TranslucentSidebar = value > 0 },
-            _ => GlassSettings.Default.With(id, value),
+            "tintColour" => ClassicGlass.Default with { TintColour = (GlassTintColour)(int)value },
+            "increaseContrast" => ClassicGlass.Default with { IncreaseContrast = value > 0 },
+            "reduceTransparency" => ClassicGlass.Default with { ReduceTransparency = value > 0 },
+            "translucentSidebar" => ClassicGlass.Default with { TranslucentSidebar = value > 0 },
+            _ => ClassicGlass.Default.With(id, value),
         };
         // the translucent sidebar reaches the sidebar alone; the shadow shows best under a lifted piece
         var effect = id == "translucentSidebar" ? GlassEffect.Regular(GlassShape.Capsule(RoundedCornerStyle.Continuous)).OnSurface(GlassSurface.Sidebar)
@@ -348,7 +348,7 @@ public sealed class GlassTuningTests(HeadlessSession headless)
         foreach (var light in new[] { false, true })
         {
             byte[] before = [], after = [];
-            Tuned(GlassSettings.Default, () => before = Fresh(effect, light));
+            Tuned(ClassicGlass.Default, () => before = Fresh(effect, light));
             Tuned(moved, () => after = Fresh(effect, light));
             var (most, parted) = Parting(before, after);
             Assert.True(most >= 8 && parted >= 40, $"{id} at {value}, light {light}: the glass changes by {most} levels at most, {parted} pixels by more than 2");
@@ -357,7 +357,7 @@ public sealed class GlassTuningTests(HeadlessSession headless)
 
     [Fact]
     [Trait("Decision", "ED-NEW-glasslook-2")] // live and smooth: a slider's drag redraws every window's glass with new uniforms (no new program), and each frame is what a fresh window draws
-    public void A_drag_redraws_every_window_live_with_no_new_program() => headless.OnUiThread(() => Tuned(GlassSettings.Default, () =>
+    public void A_drag_redraws_every_window_live_with_no_new_program() => headless.OnUiThread(() => Tuned(ClassicGlass.Default, () =>
     {
         GlassMaterial.WarmupPrograms(); // every program the draws can take is built before the drag
         var first = Show(Pill());
@@ -370,7 +370,7 @@ public sealed class GlassTuningTests(HeadlessSession headless)
             var startSecond = Capture(second);
             var programs = GlassMaterial.ProgramsBuiltForTests;
             byte[] lastFirst = startFirst, lastSecond = startSecond;
-            var tuning = GlassSettings.Default;
+            var tuning = ClassicGlass.Default;
             // a drag of the refraction and then the tint, in 24 steps, a frame drawn after each
             for (var step = 1; step <= 24; step++)
             {
@@ -399,7 +399,7 @@ public sealed class GlassTuningTests(HeadlessSession headless)
 
     [Fact]
     [Trait("Decision", "OD-0147")] // Reset to defaults: back from any Look, any value and any switch, every surface draws the shipped glass again, pixel for pixel
-    public void Reset_brings_back_the_shipped_glass_exactly() => headless.OnUiThread(() => Tuned(GlassSettings.Default, () =>
+    public void Reset_brings_back_the_shipped_glass_exactly() => headless.OnUiThread(() => Tuned(ClassicGlass.Default, () =>
     {
         var window = Show(Pill());
         try
@@ -407,14 +407,14 @@ public sealed class GlassTuningTests(HeadlessSession headless)
             var shipped = Capture(window);
             foreach (var tuning in new[]
             {
-                GlassSettings.Default.At(GlassVariant.Clear), GlassSettings.Default.At(GlassVariant.Tinted), GlassSettings.Default.With("refraction", 2.4).With("bezel", 20),
-                GlassSettings.Default.At(30).With("tint", 0.4).With("rim", 1) with { IncreaseContrast = true, TintColour = GlassTintColour.Purple },
-                GlassSettings.Default with { ReduceTransparency = true },
+                ClassicGlass.Default.At(GlassVariant.Clear), ClassicGlass.Default.At(GlassVariant.Tinted), ClassicGlass.Default.With("refraction", 2.4).With("bezel", 20),
+                ClassicGlass.Default.At(30).With("tint", 0.4).With("rim", 1) with { IncreaseContrast = true, TintColour = GlassTintColour.Purple },
+                ClassicGlass.Default with { ReduceTransparency = true },
             })
             {
                 GlassLooks.Tuning = tuning;
                 Assert.True(Parting(shipped, Capture(window)).Parted >= 40, tuning + " changes the glass");
-                GlassLooks.Tuning = GlassSettings.Default;
+                GlassLooks.Tuning = ClassicGlass.Default;
                 Assert.Equal(shipped, Capture(window));
             }
         }
@@ -430,12 +430,12 @@ public sealed class GlassTuningTests(HeadlessSession headless)
             Assert.Equal((100d, 2.4, 20d, 0.5, 1d, 0.1), (GlassLooks.Tuning.Transparency, GlassLooks.Tuning.Refraction, GlassLooks.Tuning.Frost, GlassLooks.Tuning.Tint, GlassLooks.Tuning.Fringe, GlassLooks.Tuning.Rim));
             Assert.Equal(0.5, GlassLooks.Shown.Tint);
         });
-        Assert.Equal(GlassSettings.Default, GlassLooks.Tuning);
+        Assert.Equal(ClassicGlass.Default, GlassLooks.Tuning);
     });
 
     [Fact]
     [Trait("Decision", "OD-0147")] // a surface set beside the effect (the floating sidebar's) draws that surface's glass, pixel for pixel, and leaves the effect the source's own
-    public void A_surface_set_beside_the_effect_draws_that_surfaces_glass() => headless.OnUiThread(() => Tuned(GlassSettings.Default with { TranslucentSidebar = false }, () =>
+    public void A_surface_set_beside_the_effect_draws_that_surfaces_glass() => headless.OnUiThread(() => Tuned(ClassicGlass.Default with { TranslucentSidebar = false }, () =>
     {
         var shape = GlassShape.RoundedRectangle(24, RoundedCornerStyle.Continuous);
         var beside = Pill(GlassEffect.Regular(shape));
@@ -452,7 +452,7 @@ public sealed class GlassTuningTests(HeadlessSession headless)
 
     [Fact]
     [Trait("Decision", "OD-0147")] // a piece that casts the design's own shadow draws none of the material's past its edge, and the same glass inside it
-    public void A_piece_that_casts_its_own_shadow_draws_none_of_the_materials() => headless.OnUiThread(() => Tuned(GlassSettings.Default, () =>
+    public void A_piece_that_casts_its_own_shadow_draws_none_of_the_materials() => headless.OnUiThread(() => Tuned(ClassicGlass.Default, () =>
     {
         var effect = GlassEffect.Regular(GlassShape.RoundedRectangle(24, RoundedCornerStyle.Continuous));
         byte[] Drawn(GlassEffect? glass, bool own)
@@ -487,7 +487,7 @@ public sealed class GlassTuningTests(HeadlessSession headless)
 
     [Fact]
     [Trait("Decision", "OD-0147")] // no glass on glass: a glass control inside another glass draws no glass of its own (no bezel, rim or shadow): nothing at rest, a flat white capsule under the pointer (the canvas's fill: 0.075 on hover)
-    public void A_control_on_glass_is_flat_with_a_quiet_fill_under_the_pointer() => headless.OnUiThread(() => Tuned(GlassSettings.Default, () =>
+    public void A_control_on_glass_is_flat_with_a_quiet_fill_under_the_pointer() => headless.OnUiThread(() => Tuned(ClassicGlass.Default, () =>
     {
         Window Scene(bool withChip)
         {
@@ -528,7 +528,7 @@ public sealed class GlassTuningTests(HeadlessSession headless)
 
     [Fact]
     [Trait("Decision", "OD-0147")] // the canvas's line of light is angled: the edge facing the light (the top) carries the rim, the edge facing away a faint counter-light; no glossy top half
-    public void The_rim_light_is_angled_from_the_upper_left() => headless.OnUiThread(() => Tuned(GlassSettings.Default, () =>
+    public void The_rim_light_is_angled_from_the_upper_left() => headless.OnUiThread(() => Tuned(ClassicGlass.Default, () =>
     {
         // over an even grey, so what the edges show is the material's light alone
         var window = new Window
@@ -550,7 +550,7 @@ public sealed class GlassTuningTests(HeadlessSession headless)
 
     [Fact]
     [Trait("Decision", "OD-0147")] // a piece that names the release's look still draws the release's material (kept for what names it), and it is not the canvas's
-    public void A_piece_naming_the_release_look_draws_the_release_material() => headless.OnUiThread(() => Tuned(GlassSettings.Default, () =>
+    public void A_piece_naming_the_release_look_draws_the_release_material() => headless.OnUiThread(() => Tuned(ClassicGlass.Default, () =>
     {
         var effect = GlassEffect.Regular(GlassShape.Capsule(RoundedCornerStyle.Continuous));
         Assert.Null(GlassLooks.Of(effect.WithLook(GlassLook.Release)).Canvas);
@@ -561,7 +561,7 @@ public sealed class GlassTuningTests(HeadlessSession headless)
     [Trait("Decision", "OD-0147")] // over a window's transparent pixels (the Acrylic window) the canvas glass is a translucent film of its own grey, never opaque and never black
     [InlineData(false)]
     [InlineData(true)]
-    public void Over_a_transparent_backdrop_the_canvas_glass_is_a_translucent_film_of_its_grey(bool light) => headless.OnUiThread(() => Tuned(GlassSettings.Default, () =>
+    public void Over_a_transparent_backdrop_the_canvas_glass_is_a_translucent_film_of_its_grey(bool light) => headless.OnUiThread(() => Tuned(ClassicGlass.Default, () =>
     {
         const int width = 420, height = 320, pieceLeft = 130, pieceTop = 100;
         var piece = new Border
@@ -646,15 +646,15 @@ public sealed class GlassTuningTests(HeadlessSession headless)
     [
         .. GlassSettings.Looks.SelectMany(l => new[]
         {
-            GlassSettings.Default.At(l.Value),
-            All(GlassSettings.Default.At(l.Value), most: false),
-            All(GlassSettings.Default.At(l.Value), most: true),
-            All(GlassSettings.Default.At(l.Value), most: true).With("frost", 20).With("tint", 0),
-            All(GlassSettings.Default.At(l.Value), most: true).With("saturation", 0.8).With("shadow", 0),
+            ClassicGlass.Default.At(l.Value),
+            All(ClassicGlass.Default.At(l.Value), most: false),
+            All(ClassicGlass.Default.At(l.Value), most: true),
+            All(ClassicGlass.Default.At(l.Value), most: true).With("frost", 20).With("tint", 0),
+            All(ClassicGlass.Default.At(l.Value), most: true).With("saturation", 0.8).With("shadow", 0),
         }),
-        GlassSettings.Default with { IncreaseContrast = true },
-        GlassSettings.Default with { ReduceTransparency = true },
-        .. GlassSettings.TintColours.Skip(1).Select(c => GlassSettings.Default with { TintColour = c.Value }),
+        ClassicGlass.Default with { IncreaseContrast = true },
+        ClassicGlass.Default with { ReduceTransparency = true },
+        .. GlassSettings.TintColours.Skip(1).Select(c => ClassicGlass.Default with { TintColour = c.Value }),
     ];
 
     [Theory]

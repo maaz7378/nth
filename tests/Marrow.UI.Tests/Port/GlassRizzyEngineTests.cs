@@ -32,8 +32,9 @@ public sealed class GlassRizzyEngineTests(HeadlessSession headless)
 
     private static Func<int, int, Color> RenderOnUi(GlassSettings settings, bool light, Color? backdrop)
     {
-        var (tuning, system) = (GlassLooks.Tuning, GlassLooks.System);
+        var (tuning, system, finish) = (GlassLooks.Tuning, GlassLooks.System, GlassCanvas.Finish);
         GlassLooks.System = new FixedGlassSystem();
+        GlassCanvas.Finish = false; // ED-NEW-glass-alive-8: the repository's model alone, without nth's readability veil and rim light
         GlassLooks.Tuning = settings;
         var piece = new Border
         {
@@ -72,6 +73,7 @@ public sealed class GlassRizzyEngineTests(HeadlessSession headless)
         {
             window.Close();
             (GlassLooks.Tuning, GlassLooks.System) = (tuning, system);
+            GlassCanvas.Finish = finish;
         }
     }
 
@@ -115,7 +117,7 @@ public sealed class GlassRizzyEngineTests(HeadlessSession headless)
         var soft = Rim(GlassSettings.Default with { Engine = GlassEngine.Rizzy, Rizzy = RizzyGlass.Repo.With("scale", -60) });
         var hard = Rim(GlassSettings.Default with { Engine = GlassEngine.Rizzy, Rizzy = RizzyGlass.Repo.With("scale", -240) });
         Assert.True(hard > soft + 15, $"scale -240 {hard} vs -60 {soft}");
-        var canvas = Rim(GlassSettings.Default);
+        var canvas = Rim(ClassicGlass.Default);
         Assert.True(hard > canvas + 15, $"liquid-glass {hard} vs canvas {canvas}");
     }
 

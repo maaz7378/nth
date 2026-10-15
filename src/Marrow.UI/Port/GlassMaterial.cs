@@ -20,6 +20,7 @@ using Avalonia.Skia;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Marrow.Core.Port;
+using Marrow.Core.Port.Settings;
 using SkiaSharp;
 
 namespace Marrow.UI.Port;
@@ -852,7 +853,9 @@ internal static partial class GlassMaterial
         source.Append(n == 1 ? "float d = -raw;\n" : "float d = -sceneDistance(xy);\n");
         // OD-0147: a piece in the approved material draws it, and nothing below.
         // ED-NEW-glass-alive-5: a piece drawn by liquid-glass (cvA.x 3).
-        source.Append("if (cvA.x > 2.5) return rzGlass(xy, d, at, extent, flags.x, flags.w, tint, ptr.w < 0.5 || raw > 0.0, cvA, cvB, cvC, cvD);\n");
+        source.Append("if (cvA.x > 4.5) return hqGlass(xy, d, at, extent, flags.x, flags.w, tint, ptr.w < 0.5 || raw > 0.0, cvA, cvB, cvC, cvD, cvE, cvF, cvG);\n");
+        source.Append("if (cvA.x > 3.5) return dsGlass(xy, d, at, extent, flags.x, flags.w, tint, ptr.w < 0.5 || raw > 0.0, cvA, cvB, cvC, cvD, cvF, cvG);\n");
+        source.Append("if (cvA.x > 2.5) return rzGlass(xy, d, at, extent, flags.x, flags.w, tint, ptr.w < 0.5 || raw > 0.0, cvA, cvB, cvC, cvD, cvF, cvG);\n");
         source.Append("if (cvA.x > 0.5) return cvGlass(xy, d, at, extent, ptr.xy, flags.w, tint, ptr.w < 0.5 || raw > 0.0, cvA, cvB, cvC, cvD, cvE, cvF, cvG, cvH, cvI);\n");
         source.Append("""
             // ED-NEW-glasslook-3: the look's depth (aura.y; 0 in the release look): a soft, wide, faint shadow under the glass, the shape blurred over
@@ -1181,10 +1184,39 @@ internal static partial class GlassMaterial
         // rC: alpha, frost, saturation, displaceBlur on; rD: darkness, one device pixel (pt), the piece's scale into the drawing.
         half4 rzRead(float2 p, float blurred) {
             float2 q = clamp(p, window.xy, window.zw);
-            return blurred > 0.5 ? backdrop.eval(q) : sharp.eval(q);
+            if (blurred >= 0.999) return backdrop.eval(q);
+            if (blurred <= 0.001) return sharp.eval(q);
+            return mix(sharp.eval(q), backdrop.eval(q), half(blurred));
+        }
+        // ED-NEW-glass-alive-8: the outward normal of a piece's shape at `at` (the field's gradient), for the engines that bend along it.
+        float2 lqNormal(float2 at, float2 extent, float corner, float kind) {
+            float e = 0.5;
+            float4 c = float4(corner);
+            float gx = shapeDistance(at + float2(e, 0.0), extent, c, kind, 0.0) - shapeDistance(at - float2(e, 0.0), extent, c, kind, 0.0);
+            float gy = shapeDistance(at + float2(0.0, e), extent, c, kind, 0.0) - shapeDistance(at - float2(0.0, e), extent, c, kind, 0.0);
+            float2 g = float2(gx, gy);
+            float l = length(g);
+            return l > 0.00001 ? g / l : float2(0.0, -1.0);
+        }
+        // ED-NEW-glass-alive-8: what every liquid engine adds after its own: a nested piece's magnification is its own (the shift toward its centre,
+        // lA.z); the readability veil (lA.x, the kind's, more where the window behind is clear so text never sits on the bare desktop; lA.w dark);
+        // and the rim light, the one-pixel line on the lit side (the Glass settings' Rim light, lA.y; the light from the upper left).
+        float4 lqFinish(float4 P, float readAlpha, float sd, float2 n, float4 lA, float4 lB) {
+            float dark = lA.w;
+            float veil = clamp(lA.x + lB.z * (1.0 - readAlpha), 0.0, 0.92);
+            if (veil > 0.0) P = cvOver(P, float3(mix(0.97, 0.075, dark)), veil);
+            if (lA.y > 0.0) {
+                float px = lB.x;
+                float line = clamp(1.0 - abs(sd + 0.75 * px) / (1.1 * px), 0.0, 1.0);
+                float lit = clamp(dot(n, float2(-0.6, -0.8)), 0.0, 1.0);
+                float counter = clamp(dot(n, float2(0.6, 0.8)), 0.0, 1.0) * 0.35;
+                float glow = exp(sd / (3.0 * px)) * 0.18;
+                P = cvOver(P, float3(1.0), clamp(lA.y * (line * (0.25 + 0.75 * lit + counter) + glow * lit), 0.0, 1.0));
+            }
+            return P;
         }
         half4 rzGlass(float2 xy, float d, float2 at, float2 extent, float kind, float op, float4 tint, bool tinted,
-                      float4 rA, float4 rB, float4 rC, float4 rD) {
+                      float4 rA, float4 rB, float4 rC, float4 rD, float4 lA, float4 lB) {
             float aa = 0.7 * rD.y;
             float mask = smoothstep(-aa, aa, d);
             float a = mask * op;
@@ -1198,9 +1230,12 @@ internal static partial class GlassMaterial
             float k = rC.x * cover;
             float2 map = float2(rB.w) * k + m * (1.0 - k) - 0.5;
             float2 off = map * rD.z;
-            half4 r = rzRead(xy + off * rB.x, rC.w);
-            half4 g = rzRead(xy + off * rB.y, rC.w);
-            half4 bl = rzRead(xy + off * rB.z, rC.w);
+            float2 mag = (extent * 0.5 - at) * lA.z * rD.z;
+            // the body's frost (rD.w, the kind's, ED-NEW-glass-alive-8): the centre reads the blurred backdrop, the bending rim stays sharp
+            float w = max(rC.w, rD.w * k / max(rC.x, 0.001));
+            half4 r = rzRead(xy + mag + off * rB.x, w);
+            half4 g = rzRead(xy + mag + off * rB.y, w);
+            half4 bl = rzRead(xy + mag + off * rB.z, w);
             float ar = float(r.a), ag = float(g.a), ab = float(bl.a);
             float alpha = 1.0 - (1.0 - ar) * (1.0 - ag) * (1.0 - ab);
             float3 c = float3(cvColour(r).r, cvColour(g).g, cvColour(bl).b);
@@ -1212,6 +1247,153 @@ internal static partial class GlassMaterial
             float4 P = float4(c * alpha, alpha);
             if (rC.y > 0.0) P = cvOver(P, float3(1.0 - rD.x), rC.y);
             if (tinted) P = cvOver(P, float3(tint.rgb), tint.a);
+            float own = shapeDistance(at, extent, float4(rA.y), kind, 0.0);
+            P = lqFinish(P, alpha, own, lqNormal(at, extent, rA.y, kind), lA, lB);
+            return half4(P * a);
+        }
+        // ED-NEW-glass-alive-6: dashersw/liquid-glass-js (MIT; THIRD_PARTY_NOTICES "liquid-glass-js"), container.js's fragment shader: the
+        // refraction is the shape's normal (a capsule's own for a pill, else from the centre) times the base, edge and rim bands of the distance
+        // from the edge, plus the corner boost and the ripple across the normal, all as a share of the page (the window here); then its Gaussian
+        // (the backdrop blurred by (blurRadius / 2)^2 px, its kernel's reach), the white-to-grey tint and the tint sampled across the page at
+        // three heights, both by tintOpacity. dA: 4, the corner (pt), warp, blurred; dB: edge, rim, base intensity, corner boost; dC: edge, rim,
+        // base distance, ripple; dD: tint opacity, the page's width and height (drawing px), the piece's scale into the drawing.
+        half4 dsGlass(float2 xy, float d, float2 at, float2 extent, float kind, float op, float4 tint, bool tinted,
+                      float4 dA, float4 dB, float4 dC, float4 dD, float4 lA, float4 lB) {
+            float px = lB.x;
+            float aa = 0.7 * px;
+            float mask = smoothstep(-aa, aa, d);
+            float a = mask * op;
+            if (stage < 0.5) return half4(0.0, 0.0, 0.0, half(a));
+            if (mask <= 0.0) return half4(0.0);
+            float sd = shapeDistance(at, extent, float4(dA.y), kind, 0.0);
+            float dist = max(-sd, 0.0);
+            float2 coord = at / max(extent, float2(1.0));
+            float r = min(dA.y, min(extent.x, extent.y) * 0.5);
+            float2 n;
+            bool pill = abs(r - extent.y * 0.5) < 2.0 && extent.x > extent.y + 4.0;
+            if (pill) {
+                float2 cs = float2(r, extent.y * 0.5), ce = float2(extent.x - r, extent.y * 0.5);
+                float2 axis = ce - cs;
+                float t = clamp(dot(at - cs, axis) / max(dot(axis, axis), 0.0001), 0.0, 1.0);
+                float2 nd = at - (cs + t * axis);
+                n = length(nd) > 0.0 ? normalize(nd) : float2(0.0, 1.0);
+            } else {
+                float2 nd = coord - 0.5;
+                n = length(nd) > 0.0 ? normalize(nd) : float2(0.0, 1.0);
+            }
+            float minDim = min(extent.x, extent.y);
+            float baseI = 1.0 - exp(-dist * dC.z);
+            float edgeI = exp(-dist * dC.x);
+            float rimI = exp(-dist * dC.y);
+            float total = (dA.z > 0.5 ? baseI * dB.z : 0.0) + edgeI * dB.x + rimI * dB.y;
+            float cornerDistance = max(min(coord.x, 1.0 - coord.x), min(coord.y, 1.0 - coord.y)) * minDim;
+            float2 refraction = n * total + n * exp(-cornerDistance * 0.3) * dB.w
+                + float2(-n.y, n.x) * sin(dist / max(minDim, 1.0) * 25.0) * dC.w * rimI;
+            float2 off = refraction * dD.yz + (extent * 0.5 - at) * lA.z * dD.w;
+            half4 s0 = rzRead(xy + off, dA.w);
+            float alpha = float(s0.a);
+            float3 c = cvColour(s0);
+            float g = coord.y;
+            c = mix(c, mix(float3(1.0), float3(0.7), g), dD.x);
+            float3 top = float3(0.0), mid = float3(0.0), bot = float3(0.0);
+            float2 centre = xy + (extent * 0.5 - at) * dD.w;
+            float hy = extent.y * 0.4 * dD.w;
+            for (int i = 0; i < 4; i++) {
+                float x = mix(window.x, window.z, (float(i) + 0.5) / 4.0);
+                top += cvColour(rzRead(float2(x, centre.y - hy), 1.0));
+                mid += cvColour(rzRead(float2(x, centre.y), 1.0));
+                bot += cvColour(rzRead(float2(x, centre.y + hy), 1.0));
+            }
+            top *= 0.25; mid *= 0.25; bot *= 0.25;
+            float tp = clamp((g - 0.1) / 0.8, 0.0, 1.0);
+            float3 sampled = g < 0.1 ? top : g > 0.9 ? bot : tp < 0.5 ? mix(top, mid, tp * 2.0) : mix(mid, bot, (tp - 0.5) * 2.0);
+            c = mix(c, sampled, dD.x * 0.3);
+            float4 P = float4(c * alpha, alpha);
+            if (tinted) P = cvOver(P, float3(tint.rgb), tint.a);
+            P = lqFinish(P, alpha, sd, lqNormal(at, extent, dA.y, kind), lA, lB);
+            return half4(P * a);
+        }
+        // ED-NEW-glass-alive-7: Glass-HQ/liquid-glass (MIT; THIRD_PARTY_NOTICES "Glass-HQ liquid-glass"): gpu/maps.wgsl's field and overlay planes
+        // and dom/material-graph.ts's material as one pass. The field: depth = the distance in times 0.05 (a 20 px bezel), edge = 1 - the circle
+        // sqrt((2 - depth) depth), displaced by refraction times -n edge / 2 (feDisplacementMap: inward, so the rim magnifies). Regular: the frost
+        // (the backdrop blurred 7.33 px) and the fill (blurred about 22 px, here five frost reads 16 pt apart) blended darken (dark) or lighten
+        // (light) and mixed at the fill opacity, then the calibrated tone a + b v + q v^2 weighed 0.9 (dark) or 0.8 and the chroma; Clear: the
+        // shadow lift and the highlight roll-off and the broad tint. The overlay: the directional specular on the top and bottom, the diffuse
+        // within 4.5 px, the side rim shade, light over a black rim. A tint (a colour) takes the luminance. hA: 5, corner, refraction (pt),
+        // clear; hB: fill opacity, tone a, b, q; hC: chroma, tone weight, shadow lift, roll-off; hD: tint rgb, tint on (0 or its amount);
+        // hE: the pointer's light (hover, interactive), the press's (motion), the pointer x, y.
+        half4 hqGlass(float2 xy, float d, float2 at, float2 extent, float kind, float op, float4 tint, bool tinted,
+                      float4 hA, float4 hB, float4 hC, float4 hD, float4 hE, float4 lA, float4 lB) {
+            float px = lB.x;
+            float aa = max(px, 0.0001);
+            float sd = shapeDistance(at, extent, float4(hA.y), kind, 0.0);
+            float coverage = clamp(0.5 - sd / aa, 0.0, 1.0);
+            float a = coverage * op;
+            if (stage < 0.5) return half4(0.0, 0.0, 0.0, half(a));
+            if (coverage <= 0.0) return half4(0.0);
+            float2 n = lqNormal(at, extent, hA.y, kind);
+            float depth = clamp(-sd * 0.05, 0.0, 1.0);
+            float edge = 1.0 - clamp(sqrt((2.0 - depth) * depth), 0.0, 1.0);
+            float2 off = (-n * edge * 0.5 * hA.z + (extent * 0.5 - at) * lA.z) * lB.y;
+            float2 q = xy + off;
+            float dark = lA.w;
+            float3 v;
+            float alpha;
+            if (hA.w > 0.5) {
+                half4 s0 = rzRead(q, 0.0);
+                alpha = float(s0.a);
+                float3 c = cvColour(s0);
+                float3 tone = c + hC.z * pow(1.0 - c, float3(3.0)) - hC.w * pow(c, float3(3.0));
+                float3 broad = dark > 0.5 ? 0.38 * c + 0.20 : 0.78 * c + 0.26;
+                float tw = dark > 0.5 ? 0.14 : 0.06;
+                v = clamp((1.0 - tw) * tone + tw * broad, 0.0, 1.0);
+            } else {
+                half4 f0 = rzRead(q, 1.0);
+                alpha = float(f0.a);
+                float3 frost = cvColour(f0);
+                float sp = 16.0 * lB.y;
+                float3 fill = (frost + cvColour(rzRead(q + float2(sp, 0.0), 1.0)) + cvColour(rzRead(q - float2(sp, 0.0), 1.0))
+                    + cvColour(rzRead(q + float2(0.0, sp), 1.0)) + cvColour(rzRead(q - float2(0.0, sp), 1.0))) / 5.0;
+                float3 blend = dark > 0.5 ? min(frost, fill) : max(frost, fill);
+                float3 mixed = hB.x * blend + (1.0 - hB.x) * frost;
+                float3 toned = hB.y + hB.z * mixed + hB.w * mixed * mixed;
+                float3 c = clamp(hC.y * toned + (1.0 - hC.y) * mixed, 0.0, 1.0);
+                float s = hC.x;
+                v = clamp(float3(
+                    (0.213 + 0.787 * s) * c.r + (0.715 - 0.715 * s) * c.g + (0.072 - 0.072 * s) * c.b,
+                    (0.213 - 0.213 * s) * c.r + (0.715 + 0.285 * s) * c.g + (0.072 - 0.072 * s) * c.b,
+                    (0.213 - 0.213 * s) * c.r + (0.715 - 0.715 * s) * c.g + (0.072 + 0.928 * s) * c.b), 0.0, 1.0);
+            }
+            if (hD.w > 0.0) {
+                float lum = dot(v, float3(0.2126, 0.7152, 0.0722));
+                v = mix(v, hD.rgb * (0.35 + 0.65 * lum), hD.w);
+            }
+            float4 P = float4(v * alpha, alpha);
+            if (tinted) P = cvOver(P, float3(tint.rgb), tint.a);
+            // the overlay plane
+            float spread = 1.08;
+            float directional = pow(clamp((abs(n.y) - cos(spread)) / (1.0 - cos(spread)), 0.0, 1.0), 1.25);
+            float diffuseDir = pow(clamp((abs(n.y) - cos(spread * 0.65)) / (1.0 - cos(spread * 0.65)), 0.0, 1.0), 1.25);
+            float stroke = clamp((sd + 0.9) / aa + 0.5, 0.0, 1.0) * clamp(0.5 - sd / aa, 0.0, 1.0);
+            float specular = directional * stroke;
+            specular = specular / (1.0 + 0.5 * (1.0 - specular));
+            float diffuse = diffuseDir * 0.18 * pow(1.0 - clamp(-sd / 4.5, 0.0, 1.0), 2.0) * coverage;
+            float highlight = clamp(specular * mix(1.0, 0.82, dark) + diffuse * mix(1.0, 0.40, dark), 0.0, 1.0);
+            float adjusted = sd - 0.5;
+            float falloff = 1.0 - clamp(-adjusted / 0.5, 0.0, 1.0);
+            float ramp = mix(falloff > 0.0 ? 1.0 : 0.0, falloff, 0.75);
+            float outline = ramp * clamp((adjusted + 0.5) / aa + 0.5, 0.0, 1.0) * clamp(-adjusted / aa + 0.5, 0.0, 1.0);
+            float sideSpread = 0.98;
+            float2 w = clamp((float2(n.x, -n.x) - cos(sideSpread)) / (1.0 - cos(sideSpread)), float2(0.0), float2(1.0)) * outline;
+            float shade = dot(w / (float2(1.0) + 0.4 * (float2(1.0) - w)), float2(1.0)) * mix(0.48, 0.60, dark);
+            float oa = highlight + shade * (1.0 - highlight);
+            float light = mix(1.0, 0.82, dark) * highlight / max(oa, 0.00001);
+            P = cvOver(P, float3(light), oa);
+            // the interactive light under the pointer, and the press's
+            float2 dp = at - hE.zw;
+            float glow = exp(-dot(dp, dp) / (2.0 * 40.0 * 40.0)) * (0.10 * hE.x + 0.12 * hE.y);
+            if (glow > 0.0) P = cvOver(P, float3(1.0), glow);
+            P = lqFinish(P, alpha, sd, n, float4(lA.x, 0.0, lA.z, lA.w), lB);
             return half4(P * a);
         }
         half4 cvInterior(float2 xy, float2 at, float2 extent, float2 ptr, float op, float4 tint, bool tinted,
@@ -1844,7 +2026,7 @@ internal static partial class GlassMaterial
                 (UniformName.Of("pointer", i), [(float)r.Pointer.X, (float)r.Pointer.Y, r.Pressed ? 0.12f : r.Hovered ? 0.06f : 0f, r.DrawnTint ? 1f : 0f]),
             };
             foreach (var (name, value) in values) uniforms[name] = value;
-            var canvasRows = CanvasUniforms(r, scale);
+            var canvasRows = CanvasUniforms(r, scale, windowLocal.Width, windowLocal.Height);
             for (var k = 0; k < CanvasRows.Length; k++) uniforms[UniformName.Of(CanvasRows[k], i)] = canvasRows[k];
             uniforms[UniformName.Of("plain", i)] = r.NoRefraction ? 1f : 0f;
             uniforms[UniformName.Of("bare", i)] = r.NoContactLine ? 1f : 0f;
@@ -1904,10 +2086,10 @@ internal static partial class GlassMaterial
     private static readonly string[] CanvasRows = ["cvA", "cvB", "cvC", "cvD", "cvE", "cvF", "cvG", "cvH", "cvI"];
     private static readonly float[][] NoCanvas = [.. Enumerable.Range(0, 9).Select(_ => new float[4])];
 
-    private static float[][] CanvasUniforms(Region r, float scale)
+    private static float[][] CanvasUniforms(Region r, float scale, float pageWidth = 0, float pageHeight = 0)
     {
         if (r.Drawn.Canvas is not { } canvas) return NoCanvas;
-        if (canvas.Liquid) return LiquidUniforms(r, canvas, scale);
+        if (canvas.Liquid) return LiquidUniforms(r, canvas, scale, pageWidth, pageHeight);
         var s = canvas.Spec(r.Smaller, r.Darkness, r.HoverAmount, r.PressAmount, 1 / Math.Max(scale, 0.01));
         var flat = canvas.Kind == GlassKind.Flat;
         // a flat control shows its own tint as a flat fill (unless its shape's fill draws it), and white under the pointer
@@ -1928,25 +2110,81 @@ internal static partial class GlassMaterial
         ];
     }
 
-    // ED-NEW-glass-alive-5: a liquid-glass piece's rows (the shader's rzGlass). The neutral inset is border times half the smaller side
+    // ED-NEW-glass-alive-5..8: a liquid piece's rows. Rizzy (rzGlass): the neutral inset is border times half the smaller side
     // (buildDisplacementMap's borderPx); the corner is the piece's own, or the options' borderRadius for a piece with none; the scales are held to
-    // GlassCanvas.LiquidReach.
-    private static float[][] LiquidUniforms(Region r, GlassCanvas canvas, float scale)
+    // GlassCanvas.LiquidReach. Dasher (dsGlass) and Glass HQ (hqGlass) as their shaders' comments say. Every engine's cvF and cvG are the shared
+    // finish (lqFinish): the kind's readability veil, the rim light, a nested piece's magnification and the appearance; one device pixel, the
+    // piece's scale into the drawing, and the veil added where the window behind is clear.
+    private static float[][] LiquidUniforms(Region r, GlassCanvas canvas, float scale, float pageWidth, float pageHeight)
     {
-        var o = canvas.Rizzy.Held();
-        var (sr, sg, sb) = canvas.LiquidScales;
         var own = Math.Max(Math.Max(r.Corners.TopLeft, r.Corners.TopRight), Math.Max(r.Corners.BottomRight, r.Corners.BottomLeft));
-        var corner = r.Shape.Kind != GlassShapeKind.RoundedRectangle ? Math.Min(r.Size.Width, r.Size.Height) / 2 : own > 0 ? own : o.BorderRadius;
-        var inset = Math.Min(r.Size.Width, r.Size.Height) * o.Border * 0.5;
+        double Corner(double fallback) => r.Shape.Kind != GlassShapeKind.RoundedRectangle ? Math.Min(r.Size.Width, r.Size.Height) / 2 : own > 0 ? own : fallback;
         var toDrawing = (float)Math.Sqrt(Math.Abs(r.Transform.M11 * r.Transform.M22 - r.Transform.M12 * r.Transform.M21));
-        return
-        [
-            [3f, (float)corner, (float)inset, (float)o.Blur],
-            [(float)sr, (float)sg, (float)sb, (float)(o.Lightness / 100)],
-            [(float)o.Alpha, (float)o.Frost, (float)o.Saturation, o.DisplaceBlur >= 0.05 ? 1f : 0f],
-            [(float)Math.Clamp(r.Darkness, 0, 1), 1 / Math.Max(scale, 0.01f), toDrawing, 0f],
-            new float[4], new float[4], new float[4], new float[4], new float[4],
-        ];
+        var px = 1 / Math.Max(scale, 0.01f);
+        var dark = (float)Math.Clamp(r.Darkness, 0, 1);
+        var (veil, clearVeil) = GlassCanvas.Finish ? canvas.Veil : (0, 0);
+        // ED-NEW-glass-alive-8: no engine reads further than 0.8 of the piece's smaller side, so a small button bends as a drop, not a smear
+        var smaller = Math.Min(r.Size.Width, r.Size.Height);
+        var sizeReach = 0.8 * smaller;
+        float[] lA = [(float)veil, GlassCanvas.Finish ? (float)canvas.RimLight : 0f, (float)canvas.NestedMagnify, dark];
+        float[] lB = [px, toDrawing, (float)clearVeil, 0f];
+        switch (canvas.Engine)
+        {
+            case GlassEngine.Dasher:
+            {
+                var o = canvas.Dasher.Held();
+                // its bend is a share of the page: held together so that it stays inside GlassCanvas.LiquidReach
+                var page = Math.Max(Math.Max(pageWidth, pageHeight), 1f);
+                var most = (o.EdgeIntensity + o.RimIntensity + (o.Warp ? o.BaseIntensity : 0) + o.CornerBoost + o.RippleEffect * 0.5) * canvas.NestedGain * page;
+                var limit = Math.Min(GlassCanvas.LiquidReach, sizeReach);
+                var hold = (float)(most > limit ? limit / most : 1);
+                return
+                [
+                    [4f, (float)Corner(o.BorderRadius), o.Warp ? 1f : 0f, canvas.Sigma > 0.05 ? 1f : 0f],
+                    [(float)(o.EdgeIntensity * canvas.NestedGain), (float)(o.RimIntensity * canvas.NestedGain), (float)(o.BaseIntensity * canvas.NestedGain), (float)o.CornerBoost],
+                    [(float)o.EdgeDistance, (float)o.RimDistance, (float)o.BaseDistance, (float)o.RippleEffect],
+                    [(float)o.TintOpacity, (pageWidth > 0 ? pageWidth : 1000f) * hold, (pageHeight > 0 ? pageHeight : 700f) * hold, toDrawing],
+                    new float[4], lA, lB, new float[4], new float[4],
+                ];
+            }
+            case GlassEngine.GlassHq:
+            {
+                var o = canvas.GlassHq.Held();
+                var darkHq = o.Appearance switch { GlassHqAppearance.Light => 0f, GlassHqAppearance.Dark => 1f, _ => dark };
+                var m = GlassCanvas.HqMaterial(darkHq > 0.5f);
+                var refraction = o.Refraction * (1 + (o.Motion == GlassHqMotion.Full ? 0.2 * r.PressAmount : 0));
+                if (canvas.Kind == GlassKind.Flat && o.Concentric) refraction = Math.Min(refraction, o.Inset);
+                refraction = Math.Min(refraction, 2 * sizeReach);
+                var c = GlassSettings.TintColours.First(t => t.Value == o.Tint);
+                var (tr, tg, tb, tintOn) = o.Tint != GlassTintColour.None ? (c.R, c.G, c.B, 0.22) : (0.0, 0.0, 0.0, 0.0);
+                lA[3] = darkHq;
+                return
+                [
+                    [5f, (float)Corner(o.Radius), (float)refraction, o.Material == GlassHqMaterial.Clear ? 1f : 0f],
+                    [(float)m.FillOpacity, (float)m.ToneA, (float)m.ToneB, (float)m.ToneQ],
+                    [(float)m.Chroma, darkHq > 0.5f ? 0.9f : 0.8f, (float)m.ShadowLift, (float)m.HighlightRolloff],
+                    [(float)tr, (float)tg, (float)tb, (float)tintOn],
+                    [o.Interactive ? (float)r.HoverAmount : 0f, o.Motion == GlassHqMotion.None ? 0f : (float)r.PressAmount, (float)r.Pointer.X, (float)r.Pointer.Y],
+                    lA, lB, new float[4], new float[4],
+                ];
+            }
+            default:
+            {
+                var o = canvas.Rizzy.Held();
+                var (sr, sg, sb) = canvas.LiquidScales;
+                var most = 0.5 * Math.Max(Math.Abs(sr), Math.Max(Math.Abs(sg), Math.Abs(sb)));
+                if (most > sizeReach && most > 0) (sr, sg, sb) = (sr * sizeReach / most, sg * sizeReach / most, sb * sizeReach / most);
+                var inset = Math.Min(r.Size.Width, r.Size.Height) * o.Border * 0.5;
+                return
+                [
+                    [3f, (float)Corner(o.BorderRadius), (float)inset, (float)o.Blur],
+                    [(float)sr, (float)sg, (float)sb, (float)(o.Lightness / 100)],
+                    [(float)o.Alpha, (float)o.Frost, (float)o.Saturation, o.DisplaceBlur >= 0.05 ? 1f : 0f],
+                    [dark, px, toDrawing, GlassCanvas.Finish && canvas.Sigma > 0.05 ? (float)canvas.BodyFrost : 0f],
+                    new float[4], lA, lB, new float[4], new float[4],
+                ];
+            }
+        }
     }
 
     // The approved material's lens: its bend and the red read's part of the fringe past the edge (the blur's reach), and its depth: past the
@@ -1954,11 +2192,7 @@ internal static partial class GlassMaterial
     private static Optics CanvasOptics(GlassCanvas canvas, double smaller)
     {
         // ED-NEW-glass-alive-5: liquid-glass bends the whole piece (its centre too, by 1 - alpha): no inside reads one texel.
-        if (canvas.Liquid)
-        {
-            var (sr, sg, sb) = canvas.LiquidScales;
-            return new Optics(0.5 * Math.Max(Math.Abs(sr), Math.Max(Math.Abs(sg), Math.Abs(sb))), 0, double.MaxValue / 4, 0);
-        }
+        if (canvas.Liquid) return new Optics(canvas.LiquidBend, 0, double.MaxValue / 4, 0);
         var s = canvas.Spec(smaller, 1, 1, 1, 1);
         var deep = Math.Max(Math.Max(GlassCanvas.MagnifyWidth * s.Bezel, GlassCanvas.FullAt), Math.Max(s.Band, 12)) + s.Swell;
         return new Optics(s.Bend + s.Fringe, 0, deep, 0);

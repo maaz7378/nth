@@ -16,6 +16,10 @@ public enum GlassEngine
     Canvas,
     /// <summary>rizzytoday/liquid-glass: a displacement map with three per-channel displacements (chromatic aberration).</summary>
     Rizzy,
+    /// <summary>ED-NEW-glass-alive-6: dashersw/liquid-glass-js: the shape's normal times edge, rim and base bands, a ripple, a blur and a tint.</summary>
+    Dasher,
+    /// <summary>ED-NEW-glass-alive-7: Glass-HQ/liquid-glass: a squircle bezel's displacement, a frost and fill, a calibrated tone, a specular and a rim shade.</summary>
+    GlassHq,
 }
 
 /// <summary>The presets of an engine's options: the repository's own values, and three steps around them.</summary>

@@ -46,7 +46,7 @@ public sealed class WindowChromeAcrylicTests(HeadlessSession headless)
             Assert.Equal([WindowTransparencyLevel.Transparent], WindowChrome.ClearBackdrop);
             Assert.Same(WindowChrome.ClearBackdrop, WindowChrome.BackdropFor(DesktopBackdrop.Clear));
             Assert.Same(WindowChrome.GlassBackdrop, WindowChrome.BackdropFor(DesktopBackdrop.Frosted));
-            Assert.Equal(DesktopBackdrop.Clear, GlassSettings.Default.Desktop);
+            Assert.Equal(DesktopBackdrop.Clear, ClassicGlass.Default.Desktop);
             var window = new Window();
             WindowChrome.Configure(window);
             Assert.Equal([WindowTransparencyLevel.Transparent], window.TransparencyLevelHint);

@@ -43,6 +43,21 @@ internal sealed class GlassSections
     internal CzSegmentRow Engine { get; }
     internal CzSegmentRow RizzyPreset { get; }
     internal IReadOnlyDictionary<string, CzSlider> RizzySliders { get; }
+    internal CzToggleRow LiquidGlass { get; }
+    internal CzSegmentRow DasherPreset { get; }
+    internal IReadOnlyDictionary<string, CzSlider> DasherSliders { get; }
+    internal CzToggleRow DasherWarp { get; }
+    internal CzSegmentRow HqPreset { get; }
+    internal CzSegmentRow HqMaterial { get; }
+    internal CzSegmentRow HqAppearance { get; }
+    internal CzMenuButton HqTint { get; }
+    internal CzToggleRow HqConcentric { get; }
+    internal CzToggleRow HqInteractive { get; }
+    internal CzSegmentRow HqMotion { get; }
+    internal IReadOnlyDictionary<string, CzSlider> HqSliders { get; }
+
+    // ED-NEW-glass-alive-8: each engine's rows, shown only under its engine (the picker's choice), folding in and out.
+    private readonly List<(CzRowSlot Slot, GlassEngine Engine)> engineRows = [];
 
     /// <param name="read">The app's glass setting; read inside a tracked read by the page.</param>
     /// <param name="write">Puts a new glass setting in the app's settings (live: the material follows at once).</param>
@@ -69,34 +84,43 @@ internal sealed class GlassSections
                 commit();
             });
         rows.Add(Engine.Row);
+        // ED-NEW-glass-alive-8: the Liquid glass switch, for the whole UI (off: the classic canvas material whatever the engine)
+        LiquidGlass = new CzToggleRow(GlassText.LiquidGlass, GlassText.LiquidGlassDetail, () => read().Liquid, on => Switch(s => s with { Liquid = on }));
+        rows.Add(LiquidGlass.Row);
+        CzRowSlot For(GlassEngine engine, Avalonia.Controls.Control row, bool caption = false)
+        {
+            var slot = rows.Add(row, caption, open: settings.Drawn == engine);
+            engineRows.Add((slot, engine));
+            return slot;
+        }
 
         Look = new CzSegmentRow(GlassText.Look, GlassText.LookDetail(settings), GlassSettings.Looks.Select(l => (l.Id, l.Name)).ToArray(),
             settings.Look is { } look ? GlassSettings.IdOf(look) : "regular", Pick);
         if (settings.Look is null) Look.Control.ShowNone();
-        rows.Add(Look.Row);
+        For(GlassEngine.Canvas, Look.Row);
 
         var t = GlassSettings.TransparencyKnob;
         Transparency = Slider(t, settings.Transparency, value => write(read().At(value)), GlassText.TransparencyValue);
         Avalonia.Automation.AutomationProperties.SetName(Transparency, GlassText.TransparencyName);
-        rows.Add(new CzRow(t.Name, t.Description, Transparency, dimmed => Transparency.Dimmed = dimmed));
+        For(GlassEngine.Canvas, new CzRow(t.Name, t.Description, Transparency, dimmed => Transparency.Dimmed = dimmed));
 
-        rows.Add(new CzCaptionRow(GlassText.FineTuningCaption));
+        For(GlassEngine.Canvas, new CzCaptionRow(GlassText.FineTuningCaption), caption: true);
         ResetFineTuning = new CzCapsuleButton(GlassText.ResetFineTuning, detail: GlassText.ResetFineTuningDetail);
         ResetFineTuning.Invoked += () => Glide((glide.IsMoving ? glideTo : read()).ResetFineTuning());
         ResetFineTuning.Dimmed = !settings.IsCustom;
         FineTuning = new CzRow(GlassText.FineTuning, GlassText.FineTuningDetail(settings.IsCustom), ResetFineTuning, dimmed => ResetFineTuning.Dimmed = dimmed || !read().IsCustom);
-        rows.Add(FineTuning);
+        For(GlassEngine.Canvas, FineTuning);
         var sliders = new Dictionary<string, CzSlider>();
         foreach (var knob in GlassSettings.Knobs)
         {
             var id = knob.Id;
             var slider = Slider(knob, settings.Get(id), value => write(read().With(id, value)));
             sliders[id] = slider;
-            rows.Add(new CzRow(knob.Name, knob.Description, slider, dimmed => slider.Dimmed = dimmed));
+            For(GlassEngine.Canvas, new CzRow(knob.Name, knob.Description, slider, dimmed => slider.Dimmed = dimmed));
         }
         Sliders = sliders;
 
-        rows.Add(new CzCaptionRow(GlassText.RizzyCaption));
+        For(GlassEngine.Rizzy, new CzCaptionRow(GlassText.RizzyCaption), caption: true);
         RizzyPreset = new CzSegmentRow(GlassText.RizzyPreset, GlassText.RizzyPresetDetail(settings.Rizzy), RizzyGlass.Presets.Select(p => (p.Id, p.Name)).ToArray(),
             PresetId(settings.Rizzy) ?? "balanced", id =>
             {
@@ -105,7 +129,7 @@ internal sealed class GlassSections
                 if (now.Rizzy != RizzyGlass.Of(preset.Value)) Glide(now with { Rizzy = RizzyGlass.Of(preset.Value) });
             });
         if (PresetId(settings.Rizzy) is null) RizzyPreset.Control.ShowNone();
-        rows.Add(RizzyPreset.Row);
+        For(GlassEngine.Rizzy, RizzyPreset.Row);
         var rizzySliders = new Dictionary<string, CzSlider>();
         foreach (var knob in RizzyGlass.Knobs)
         {
@@ -113,9 +137,89 @@ internal sealed class GlassSections
             var slider = Slider(knob, settings.Rizzy.Get(id), value => write(read() with { Rizzy = read().Rizzy.With(id, value) }));
             Avalonia.Automation.AutomationProperties.SetName(slider, GlassText.RizzyCaption + ", " + knob.Name);
             rizzySliders[id] = slider;
-            rows.Add(new CzRow(knob.Name, knob.Description, slider, dimmed => slider.Dimmed = dimmed));
+            For(GlassEngine.Rizzy, new CzRow(knob.Name, knob.Description, slider, dimmed => slider.Dimmed = dimmed));
         }
         RizzySliders = rizzySliders;
+
+        // ED-NEW-glass-alive-6: dashersw/liquid-glass-js's own options
+        For(GlassEngine.Dasher, new CzCaptionRow(GlassText.DasherCaption), caption: true);
+        DasherPreset = new CzSegmentRow(GlassText.RizzyPreset, GlassText.EnginePresetDetail(settings.Dasher.Preset is null), DasherGlass.Presets.Select(p => (p.Id, p.Name)).ToArray(),
+            DasherPresetId(settings.Dasher) ?? "balanced", id =>
+            {
+                if (DasherGlass.Presets.FirstOrDefault(p => p.Id == id) is not { Id: not null } preset) return;
+                var now = glide.IsMoving ? glideTo : read();
+                if (now.Dasher != DasherGlass.Of(preset.Value)) Glide(now with { Dasher = DasherGlass.Of(preset.Value) });
+            });
+        if (DasherPresetId(settings.Dasher) is null) DasherPreset.Control.ShowNone();
+        For(GlassEngine.Dasher, DasherPreset.Row);
+        var dasherSliders = new Dictionary<string, CzSlider>();
+        foreach (var knob in DasherGlass.Knobs)
+        {
+            var id = knob.Id;
+            var slider = Slider(knob, settings.Dasher.Get(id), value => write(read() with { Dasher = read().Dasher.With(id, value) }));
+            Avalonia.Automation.AutomationProperties.SetName(slider, GlassText.DasherCaption + ", " + knob.Name);
+            dasherSliders[id] = slider;
+            For(GlassEngine.Dasher, new CzRow(knob.Name, knob.Description, slider, dimmed => slider.Dimmed = dimmed));
+        }
+        DasherSliders = dasherSliders;
+        DasherWarp = new CzToggleRow(GlassText.Warp, GlassText.WarpDetail, () => read().Dasher.Warp, on => Switch(s => s with { Dasher = s.Dasher with { Warp = on } }));
+        For(GlassEngine.Dasher, DasherWarp.Row);
+
+        // ED-NEW-glass-alive-7: Glass-HQ/liquid-glass's own options
+        For(GlassEngine.GlassHq, new CzCaptionRow(GlassText.HqCaption), caption: true);
+        HqPreset = new CzSegmentRow(GlassText.RizzyPreset, GlassText.EnginePresetDetail(settings.GlassHq.Preset is null), GlassHqGlass.Presets.Select(p => (p.Id, p.Name)).ToArray(),
+            settings.GlassHq.Preset ?? "regular", id =>
+            {
+                if (GlassHqGlass.Presets.FirstOrDefault(p => p.Id == id) is not { Id: not null } preset) return;
+                var now = glide.IsMoving ? glideTo : read();
+                if (now.GlassHq != preset.Value) Glide(now with { GlassHq = preset.Value });
+            });
+        if (settings.GlassHq.Preset is null) HqPreset.Control.ShowNone();
+        For(GlassEngine.GlassHq, HqPreset.Row);
+        HqMaterial = new CzSegmentRow(GlassText.HqMaterial, GlassText.HqMaterialDetail, GlassHqGlass.Materials.Select(m => (m.Id, m.Name)).ToArray(),
+            GlassHqGlass.Materials.First(m => m.Value == settings.GlassHq.Material).Id, id =>
+            {
+                if (GlassHqGlass.Materials.FirstOrDefault(m => m.Id == id) is not { Id: not null } m) return;
+                Switch(s => s with { GlassHq = s.GlassHq with { Material = m.Value } });
+            });
+        For(GlassEngine.GlassHq, HqMaterial.Row);
+        HqAppearance = new CzSegmentRow(GlassText.HqAppearance, GlassText.HqAppearanceDetail, GlassHqGlass.Appearances.Select(m => (m.Id, m.Name)).ToArray(),
+            GlassHqGlass.Appearances.First(m => m.Value == settings.GlassHq.Appearance).Id, id =>
+            {
+                if (GlassHqGlass.Appearances.FirstOrDefault(m => m.Id == id) is not { Id: not null } m) return;
+                Switch(s => s with { GlassHq = s.GlassHq with { Appearance = m.Value } });
+            });
+        For(GlassEngine.GlassHq, HqAppearance.Row);
+        var hqSliders = new Dictionary<string, CzSlider>();
+        foreach (var knob in GlassHqGlass.Knobs)
+        {
+            var id = knob.Id;
+            var slider = Slider(knob, settings.GlassHq.Get(id), value => write(read() with { GlassHq = read().GlassHq.With(id, value) }));
+            Avalonia.Automation.AutomationProperties.SetName(slider, GlassText.HqCaption + ", " + knob.Name);
+            hqSliders[id] = slider;
+            For(GlassEngine.GlassHq, new CzRow(knob.Name, knob.Description, slider, dimmed => slider.Dimmed = dimmed));
+        }
+        HqSliders = hqSliders;
+        HqTint = new CzMenuButton(GlassText.HqTint, GlassSettings.TintColours.Select(c => (c.Id, c.Name)).ToArray(), IdOf(settings.GlassHq.Tint), GlassText.HqTintDetail);
+        HqTint.SelectionChanged += id =>
+        {
+            if (showing || GlassSettings.TintColours.FirstOrDefault(c => c.Id == id) is not { Id: not null } colour) return;
+            Switch(s => s with { GlassHq = s.GlassHq with { Tint = colour.Value } });
+        };
+        For(GlassEngine.GlassHq, new CzRow(GlassText.HqTint, GlassText.HqTintDetail, HqTint, dimmed => HqTint.Dimmed = dimmed));
+        HqConcentric = new CzToggleRow(GlassText.HqConcentric, GlassText.HqConcentricDetail, () => read().GlassHq.Concentric,
+            on => Switch(s => s with { GlassHq = s.GlassHq with { Concentric = on } }));
+        For(GlassEngine.GlassHq, HqConcentric.Row);
+        HqInteractive = new CzToggleRow(GlassText.HqInteractive, GlassText.HqInteractiveDetail, () => read().GlassHq.Interactive,
+            on => Switch(s => s with { GlassHq = s.GlassHq with { Interactive = on } }));
+        For(GlassEngine.GlassHq, HqInteractive.Row);
+        HqMotion = new CzSegmentRow(GlassText.HqMotion, GlassText.HqMotionDetail, GlassHqGlass.Motions.Select(m => (m.Id, m.Name)).ToArray(),
+            GlassHqGlass.Motions.First(m => m.Value == settings.GlassHq.Motion).Id, id =>
+            {
+                if (GlassHqGlass.Motions.FirstOrDefault(m => m.Id == id) is not { Id: not null } m) return;
+                Switch(s => s with { GlassHq = s.GlassHq with { Motion = m.Value } });
+            });
+        For(GlassEngine.GlassHq, HqMotion.Row);
 
         rows.Add(new CzCaptionRow(GlassText.BehaviourCaption));
         TintColour = new CzMenuButton(GlassText.TintColour, GlassSettings.TintColours.Select(c => (c.Id, c.Name)).ToArray(), IdOf(settings.TintColour), GlassText.TintColourDetail);
@@ -228,6 +332,23 @@ internal sealed class GlassSections
             }
             var desktop = DesktopId(settings);
             if (Desktop.Control.SelectedId != desktop) Desktop.Apply(desktop, GlassText.DesktopDetail);
+            foreach (var (id, slider) in DasherSliders)
+                if (slider.Value != settings.Dasher.Get(id)) slider.Update(settings.Dasher.Get(id), null);
+            if (DasherPresetId(settings.Dasher) is { } dasher) { if (DasherPreset.Control.SelectedId != dasher) DasherPreset.Apply(dasher, GlassText.EnginePresetDetail(false)); }
+            else { DasherPreset.Control.ShowNone(); DasherPreset.Row.SetDetail(GlassText.EnginePresetDetail(true)); }
+            foreach (var (id, slider) in HqSliders)
+                if (slider.Value != settings.GlassHq.Get(id)) slider.Update(settings.GlassHq.Get(id), null);
+            if (settings.GlassHq.Preset is { } hq) { if (HqPreset.Control.SelectedId != hq) HqPreset.Apply(hq, GlassText.EnginePresetDetail(false)); }
+            else { HqPreset.Control.ShowNone(); HqPreset.Row.SetDetail(GlassText.EnginePresetDetail(true)); }
+            var material = GlassHqGlass.Materials.First(m => m.Value == settings.GlassHq.Material).Id;
+            if (HqMaterial.Control.SelectedId != material) HqMaterial.Apply(material, GlassText.HqMaterialDetail);
+            var appearance = GlassHqGlass.Appearances.First(m => m.Value == settings.GlassHq.Appearance).Id;
+            if (HqAppearance.Control.SelectedId != appearance) HqAppearance.Apply(appearance, GlassText.HqAppearanceDetail);
+            var hqMotion = GlassHqGlass.Motions.First(m => m.Value == settings.GlassHq.Motion).Id;
+            if (HqMotion.Control.SelectedId != hqMotion) HqMotion.Apply(hqMotion, GlassText.HqMotionDetail);
+            var hqTint = IdOf(settings.GlassHq.Tint);
+            if (HqTint.SelectedId != hqTint) HqTint.Show(hqTint);
+            foreach (var (slot, rowEngine) in engineRows) slot.Open = settings.Drawn == rowEngine;
         }
         finally { showing = false; }
         var custom = read().IsCustom;
@@ -235,6 +356,8 @@ internal sealed class GlassSections
         FineTuning.SetDetail(GlassText.FineTuningDetail(custom));
         Reset.Dimmed = read().Held() == GlassSettings.Default;
     }
+
+    private static string? DasherPresetId(DasherGlass dasher) => dasher.Preset is { } preset ? DasherGlass.Presets.First(p => p.Value == preset).Id : null;
 
     private static string? PresetId(RizzyGlass rizzy) => rizzy.Preset is { } preset ? RizzyGlass.Presets.First(p => p.Value == preset).Id : null;
 
@@ -307,8 +430,27 @@ internal static class GlassText
     internal const string DesktopClear = "Clear";
     internal const string DesktopFrosted = "Frosted";
     internal const string Engine = "Engine";
-    internal const string EngineDetail = "Canvas is the approved material; liquid-glass is rizzytoday's lens, set with its own options.";
-    internal const string RizzyCaption = "liquid-glass";
+    internal const string EngineDetail = "The liquid glass every surface is drawn with: Rizzy, Dasher or Glass HQ, each with its own options; Canvas is the classic material.";
+    internal const string RizzyCaption = "Rizzy (rizzytoday/liquid-glass)";
+    internal const string LiquidGlass = "Liquid glass";
+    internal const string LiquidGlassDetail = "The liquid lens on every glass surface. Off, the glass is the classic canvas material.";
+    internal const string DasherCaption = "Dasher (dashersw/liquid-glass-js)";
+    internal const string HqCaption = "Glass HQ (Glass-HQ/liquid-glass)";
+    internal static string EnginePresetDetail(bool custom) => custom ? "Custom" : "The repository's options, and steps around them.";
+    internal const string Warp = "Warp";
+    internal const string WarpDetail = "The centre bends too, not only the rim.";
+    internal const string HqMaterial = "Material";
+    internal const string HqMaterialDetail = "Regular frosts and fills for text; Clear is the most see-through.";
+    internal const string HqAppearance = "Appearance";
+    internal const string HqAppearanceDetail = "The glass's light or dark tone; Theme follows nth's.";
+    internal const string HqTint = "Tint";
+    internal const string HqTintDetail = "A glass colour; text and icons stay as they are.";
+    internal const string HqConcentric = "Concentric";
+    internal const string HqConcentricDetail = "A piece on glass follows its container, and its bend stays within its inset.";
+    internal const string HqInteractive = "Interactive";
+    internal const string HqInteractiveDetail = "Press and pointer feedback: the light follows the pointer.";
+    internal const string HqMotion = "Motion";
+    internal const string HqMotionDetail = "Full swells the press; Reduced only fades; None is still. Reduce Motion always applies.";
     internal const string RizzyPreset = "Preset";
     internal static string RizzyPresetDetail(RizzyGlass rizzy) => rizzy.Preset is null ? "Custom" : "rizzytoday/liquid-glass's options, stepped around its own.";
     internal const string Defaults = "Defaults";

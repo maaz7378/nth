@@ -106,7 +106,7 @@ public sealed class GlassLookRender(HeadlessSession headless)
             if (g is { } at)
             {
                 GlassLooks.System = new FixedGlassSystem();
-                GlassLooks.Tuning = Marrow.Core.Port.Settings.GlassSettings.Default.At(at) with { IncreaseContrast = false, ReduceTransparency = false };
+                GlassLooks.Tuning = ClassicGlass.Default.At(at) with { IncreaseContrast = false, ReduceTransparency = false };
                 named = $"g{at:0}";
             }
             foreach (var backdrop in backdrops)

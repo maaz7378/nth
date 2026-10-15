@@ -108,12 +108,25 @@ public sealed record GlassSettings
     /// <summary>ED-NEW-glass-alive-2: the desktop behind the window, clear (the default) or frosted by Windows.</summary>
     public DesktopBackdrop Desktop { get; init; } = DesktopBackdrop.Clear;
 
-    /// <summary>ED-NEW-glass-alive-5: the engine every glass surface draws with: the approved canvas material by default (OD-0147), or
-    /// rizzytoday/liquid-glass with its own options.</summary>
-    public GlassEngine Engine { get; init; } = GlassEngine.Canvas;
+    /// <summary>ED-NEW-glass-alive-5, ED-NEW-glass-alive-8: the engine every glass surface draws with: rizzytoday/liquid-glass by default (Maaz,
+    /// 2026-10-15: the liquid glass shows at the first launch), dashersw/liquid-glass-js, Glass-HQ/liquid-glass, or the approved canvas material
+    /// (OD-0147) as the classic choice.</summary>
+    public GlassEngine Engine { get; init; } = GlassEngine.Rizzy;
+
+    /// <summary>ED-NEW-glass-alive-8: the Liquid glass switch: off, every surface draws the classic canvas material whatever the engine.</summary>
+    public bool Liquid { get; init; } = true;
+
+    /// <summary>ED-NEW-glass-alive-8: the engine that draws now: <see cref="Engine"/>, or the canvas with the Liquid glass switch off.</summary>
+    public GlassEngine Drawn => Liquid ? Engine : GlassEngine.Canvas;
 
     /// <summary>ED-NEW-glass-alive-5: rizzytoday/liquid-glass's own options (its Balanced preset by default), kept while another engine draws.</summary>
     public RizzyGlass Rizzy { get; init; } = RizzyGlass.Of(GlassEnginePreset.Balanced);
+
+    /// <summary>ED-NEW-glass-alive-6: dashersw/liquid-glass-js's own options (its Balanced preset by default), kept while another engine draws.</summary>
+    public DasherGlass Dasher { get; init; } = DasherGlass.Of(GlassEnginePreset.Balanced);
+
+    /// <summary>ED-NEW-glass-alive-7: Glass-HQ/liquid-glass's own options (the repository's), kept while another engine draws.</summary>
+    public GlassHqGlass GlassHq { get; init; } = GlassHqGlass.Repo;
 
     /// <summary>The shipped glass: Regular, every value the canvas's default, the switches following Windows.</summary>
     public static GlassSettings Default { get; } = new();
@@ -156,7 +169,8 @@ public sealed record GlassSettings
 
     /// <summary>ED-NEW-glass-alive-5: the engines in the page's order, with their ids (the store's) and names.</summary>
     public static IReadOnlyList<(string Id, string Name, GlassEngine Value)> Engines { get; } =
-        [("canvas", "Canvas", GlassEngine.Canvas), ("rizzy", "liquid-glass", GlassEngine.Rizzy)];
+        [("rizzy", "Rizzy", GlassEngine.Rizzy), ("dasher", "Dasher", GlassEngine.Dasher), ("glasshq", "Glass HQ", GlassEngine.GlassHq),
+            ("canvas", "Canvas", GlassEngine.Canvas)];
 
     /// <summary>An engine's id.</summary>
     public static string IdOf(GlassEngine engine) => Engines.First(e => e.Value == engine).Id;
@@ -251,6 +265,8 @@ public sealed record GlassSettings
             Desktop = Enum.IsDefined(Desktop) ? Desktop : DesktopBackdrop.Clear,
             Engine = Enum.IsDefined(Engine) ? Engine : Default.Engine,
             Rizzy = (Rizzy ?? Default.Rizzy).Held(),
+            Dasher = (Dasher ?? Default.Dasher).Held(),
+            GlassHq = (GlassHq ?? Default.GlassHq).Held(),
         };
         foreach (var knob in Knobs) held = held.With(knob.Id, held.Get(knob.Id));
         return held;
@@ -269,6 +285,8 @@ public sealed record GlassSettings
             Transparency = M(Transparency, to.Transparency), Refraction = M(Refraction, to.Refraction), Bezel = M(Bezel, to.Bezel), Frost = M(Frost, to.Frost),
             Fringe = M(Fringe, to.Fringe), Rim = M(Rim, to.Rim), Tint = M(Tint, to.Tint), Saturation = M(Saturation, to.Saturation), Shadow = M(Shadow, to.Shadow),
             Rizzy = (Rizzy ?? Default.Rizzy).Toward(to.Rizzy ?? Default.Rizzy, t),
+            Dasher = (Dasher ?? Default.Dasher).Toward(to.Dasher ?? Default.Dasher, t),
+            GlassHq = (GlassHq ?? Default.GlassHq).Toward(to.GlassHq ?? Default.GlassHq, t),
         };
     }
 
@@ -299,6 +317,19 @@ public sealed record GlassSettings
             {
                 w.WriteStartObject("rizzy");
                 held.Rizzy.Write(w, Default.Rizzy);
+                w.WriteEndObject();
+            }
+            if (!held.Liquid) w.WriteBoolean("liquid", false);
+            if (held.Dasher != Default.Dasher)
+            {
+                w.WriteStartObject("dasher");
+                held.Dasher.Write(w, Default.Dasher);
+                w.WriteEndObject();
+            }
+            if (held.GlassHq != Default.GlassHq)
+            {
+                w.WriteStartObject("glassHq");
+                held.GlassHq.Write(w, Default.GlassHq);
                 w.WriteEndObject();
             }
             w.WriteEndObject();
@@ -335,6 +366,9 @@ public sealed record GlassSettings
                 Engine = root.TryGetProperty("engine", out var engine) && engine.ValueKind == JsonValueKind.String && Engines.FirstOrDefault(e => e.Id == engine.GetString()) is { Id: not null } named
                     ? named.Value : Default.Engine,
                 Rizzy = root.TryGetProperty("rizzy", out var rizzy) ? RizzyGlass.Read(rizzy, Default.Rizzy) : Default.Rizzy,
+                Liquid = Flag(root, "liquid") ?? true,
+                Dasher = root.TryGetProperty("dasher", out var dasher) ? DasherGlass.Read(dasher, Default.Dasher) : Default.Dasher,
+                GlassHq = root.TryGetProperty("glassHq", out var hq) ? GlassHqGlass.Read(hq, Default.GlassHq) : Default.GlassHq,
             };
         }
         catch (Exception e) when (e is JsonException or InvalidOperationException or ArgumentException)
@@ -362,6 +396,8 @@ public enum GlassUnit
     Pixels2,
     /// <summary>A whole number: 50.</summary>
     Whole,
+    /// <summary>Three places: 0.010.</summary>
+    Plain3,
 }
 
 /// <summary>One value of <see cref="GlassSettings"/>: its id, the canvas's name and description, its range and step, and its unit.</summary>
@@ -380,6 +416,7 @@ public sealed record GlassKnob(string Id, string Name, string Description, doubl
         GlassUnit.Pixels1 => value.ToString("F1", CultureInfo.InvariantCulture) + " px",
         GlassUnit.Pixels2 => value.ToString("F2", CultureInfo.InvariantCulture) + " px",
         GlassUnit.Whole => Math.Round(value).ToString(CultureInfo.InvariantCulture),
+        GlassUnit.Plain3 => value.ToString("F3", CultureInfo.InvariantCulture),
         _ => value.ToString("F2", CultureInfo.InvariantCulture),
     };
 }

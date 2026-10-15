@@ -49,7 +49,7 @@ public sealed class RizzyGlassTests
         var balanced = RizzyGlass.Of(GlassEnginePreset.Balanced);
         Assert.Equal((-200.0, 0.09, 0.9, 0.24, 1.15), (balanced.Scale, balanced.Border, balanced.Alpha, balanced.Frost, balanced.Saturation));
         Assert.Equal(-300, RizzyGlass.Of(GlassEnginePreset.Strong).Scale);
-        Assert.Equal(GlassEngine.Canvas, GlassSettings.Default.Engine);
+        Assert.Equal(GlassEngine.Rizzy, GlassSettings.Default.Engine); // ED-NEW-glass-alive-8: liquid glass at the first launch
         Assert.Equal(balanced, GlassSettings.Default.Rizzy);
         Assert.Equal(GlassEnginePreset.Balanced, GlassSettings.Default.Rizzy.Preset);
         Assert.Null(balanced.With("scale", -210).Preset);
@@ -60,9 +60,9 @@ public sealed class RizzyGlassTests
     public void Engine_and_options_round_trip_and_the_default_writes_nothing()
     {
         Assert.Equal("{}", Json(GlassSettings.Default));
-        var liquid = GlassSettings.Default with { Engine = GlassEngine.Rizzy };
-        Assert.Equal("{\"engine\":\"rizzy\"}", Json(liquid));
-        Assert.Equal(liquid, Read(Json(liquid)));
+        var classic = GlassSettings.Default with { Engine = GlassEngine.Canvas };
+        Assert.Equal("{\"engine\":\"canvas\"}", Json(classic));
+        Assert.Equal(classic, Read(Json(classic)));
         var custom = GlassSettings.Default with { Rizzy = GlassSettings.Default.Rizzy.With("scale", -260).With("displaceBlur", 1.5) };
         Assert.Equal("{\"rizzy\":{\"scale\":-260,\"displaceBlur\":1.5}}", Json(custom));
         Assert.Equal(custom, Read(Json(custom)));

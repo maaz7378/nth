@@ -96,7 +96,7 @@ public sealed record GlassLook(double Clarity = 0, double Bend = 1, double Band 
         {
             Quiet = Quiet && to.Quiet,
             Canvas = Canvas is { } a && to.Canvas is { } b && a.Kind == b.Kind
-                ? a with { Tuning = a.Tuning.Toward(b.Tuning, t), Rizzy = a.Rizzy.Toward(b.Rizzy, t), Engine = t < 0.5 ? a.Engine : b.Engine } : t < 0.5 ? Canvas : to.Canvas,
+                ? a with { Tuning = a.Tuning.Toward(b.Tuning, t), Rizzy = a.Rizzy.Toward(b.Rizzy, t), Dasher = a.Dasher.Toward(b.Dasher, t), GlassHq = a.GlassHq.Toward(b.GlassHq, t), Engine = t < 0.5 ? a.Engine : b.Engine } : t < 0.5 ? Canvas : to.Canvas,
         };
     }
 
@@ -272,19 +272,24 @@ public static class GlassLooks
     };
 
     /// <summary>The look of <paramref name="surface"/> under the user's settings now.</summary>
-    public static GlassLook For(GlassSurface surface) => Engined(GlassLook.Of(KindOf(surface), Shown), tuning.Engine, ShownRizzy);
+    public static GlassLook For(GlassSurface surface) => Engined(GlassLook.Of(KindOf(surface), Shown), ShownSettings);
 
     /// <summary>The look of <paramref name="surface"/> at <paramref name="variant"/>'s stop (every fine-tuning value the stop's own), the user's
     /// switches kept.</summary>
     public static GlassLook For(GlassSurface surface, GlassVariant variant) =>
-        Engined(GlassLook.Of(KindOf(surface), GlassTuning.Of(tuning.At(variant), system)), tuning.Engine, tuning.Rizzy);
+        Engined(GlassLook.Of(KindOf(surface), GlassTuning.Of(tuning.At(variant), system)), tuning);
 
-    // ED-NEW-glass-alive-5: the canvas material's look drawn by the user's engine with its own options.
-    private static GlassLook Engined(GlassLook look, GlassEngine engine, RizzyGlass rizzy) =>
-        engine != GlassEngine.Canvas && look.Canvas is { } canvas ? look with { Canvas = canvas with { Engine = engine, Rizzy = rizzy } } : look;
+    // ED-NEW-glass-alive-5, -8: the canvas material's look drawn by the user's engine with its own options (the canvas with Liquid glass off).
+    private static GlassLook Engined(GlassLook look, GlassSettings settings) =>
+        settings.Drawn != GlassEngine.Canvas && look.Canvas is { } canvas
+            ? look with { Canvas = canvas with { Engine = settings.Drawn, Rizzy = settings.Rizzy, Dasher = settings.Dasher, GlassHq = settings.GlassHq } } : look;
+
+    /// <summary>ED-NEW-glass-alive-5, -8: the engine's options every surface is drawn with now (a glide's in between; the engine and the switch are
+    /// the tuning's).</summary>
+    public static GlassSettings ShownSettings => blendFrom is { } from ? from.Toward(tuning, blendProgress) with { Engine = tuning.Engine, Liquid = tuning.Liquid } : tuning;
 
     /// <summary>ED-NEW-glass-alive-5: liquid-glass's options every surface is drawn with now (a glide's in between).</summary>
-    public static RizzyGlass ShownRizzy => blendFrom is { } from ? from.Rizzy.Toward(tuning.Rizzy, blendProgress) : tuning.Rizzy;
+    public static RizzyGlass ShownRizzy => ShownSettings.Rizzy;
 
     // A glide (Blend): from which settings, and how far toward the tuning's.
     private static GlassSettings? blendFrom;
@@ -405,25 +410,85 @@ public sealed record GlassCanvas(GlassKind Kind, GlassTuning Tuning)
     /// <summary>ED-NEW-glass-alive-5: rizzytoday/liquid-glass's options, when <see cref="Engine"/> is <see cref="GlassEngine.Rizzy"/>.</summary>
     public RizzyGlass Rizzy { get; init; } = RizzyGlass.Repo;
 
-    /// <summary>ED-NEW-glass-alive-5: the piece is drawn by liquid-glass (a flat control on glass stays flat: no glass on glass).</summary>
-    internal bool Liquid => Engine == GlassEngine.Rizzy && Kind != GlassKind.Flat && Tuning.Reduce < 0.5;
+    /// <summary>ED-NEW-glass-alive-6: dashersw/liquid-glass-js's options, when <see cref="Engine"/> is <see cref="GlassEngine.Dasher"/>.</summary>
+    public DasherGlass Dasher { get; init; } = DasherGlass.Repo;
 
-    /// <summary>ED-NEW-glass-alive-5: the farthest liquid-glass reads past a point (pt). Its displacement is scale times half the map's swing; it is
-    /// held so that it stays inside what the material reads around itself (GlassMaterial's sampled margin, with no frost blur to share it).</summary>
+    /// <summary>ED-NEW-glass-alive-7: Glass-HQ/liquid-glass's options, when <see cref="Engine"/> is <see cref="GlassEngine.GlassHq"/>.</summary>
+    public GlassHqGlass GlassHq { get; init; } = GlassHqGlass.Repo;
+
+    /// <summary>ED-NEW-glass-alive-5, -8: the piece is drawn by a liquid engine. ED-NEW-glass-alive-8: a piece on glass is liquid too (Maaz,
+    /// 2026-10-15: a drop of liquid on the panel, double lensing): it reads the glass under it and bends it again.</summary>
+    internal bool Liquid => Engine != GlassEngine.Canvas && Tuning.Reduce < 0.5;
+
+    /// <summary>ED-NEW-glass-alive-8: a piece on glass is a second lens (the compound lens: its bend times 1.3, its centre magnified 4.5 %).</summary>
+    internal bool Nested => Kind == GlassKind.Flat;
+
+    /// <summary>ED-NEW-glass-alive-8: the nested lens's gain on the bend.</summary>
+    internal double NestedGain => Nested ? 1.3 : 1;
+
+    /// <summary>ED-NEW-glass-alive-8: the nested lens's magnification of its centre (the shift toward its centre per pt from it).</summary>
+    internal double NestedMagnify => Nested ? 0.045 : 0;
+
+    /// <summary>ED-NEW-glass-alive-8: whether the liquid engines draw the shared finish (the readability veil and the rim light) over their own
+    /// model. Always on in the app; an engine's own pixel tests turn it off to measure the repository's model alone.</summary>
+    internal static bool Finish { get; set; } = true;
+
+    /// <summary>ED-NEW-glass-alive-8: the rim light every liquid engine draws (the Glass settings' Rim light; more with Increase contrast).</summary>
+    internal double RimLight => Math.Clamp(Tuning.Rim + 0.2 * Tuning.Contrast, 0, 1.2);
+
+    /// <summary>ED-NEW-glass-alive-8: the readability veil of the kind (over the bend, under the text), and what it adds where the window behind
+    /// it is clear (the bare desktop: its icons must never fight the text). The sidebar is all but solid with Translucent sidebar off.</summary>
+    internal (double Veil, double Clear) Veil
+    {
+        get
+        {
+            var (veil, clear) = Kind switch
+            {
+                GlassKind.Sidebar => (0.42, 0.5), GlassKind.Settings => (0.36, 0.5), GlassKind.Popover => (0.34, 0.5),
+                GlassKind.Composer => (0.18, 0.45), GlassKind.Capsule => (0.12, 0.4), _ => (0.0, 0.25),
+            };
+            if (Kind == GlassKind.Sidebar) veil += (0.88 - veil) * Tuning.SidebarOff;
+            return (Math.Min(0.9, veil + 0.25 * Tuning.Tint + 0.1 * Tuning.Contrast), clear);
+        }
+    }
+
+    /// <summary>ED-NEW-glass-alive-8: how much of liquid-glass's centre reads the frosted backdrop (the rim stays sharp), by kind: the panels that
+    /// carry text frost their body so it reads; the composer, the buttons and a drop on glass stay clear.</summary>
+    internal double BodyFrost => Kind switch { GlassKind.Sidebar => 1, GlassKind.Settings => 0.85, GlassKind.Popover => 0.7, GlassKind.Composer => 0.35, _ => 0 };
+
+    /// <summary>ED-NEW-glass-alive-8: the frost's sigma (pt) of liquid-glass's body, by kind.</summary>
+    internal double BodySigma => Kind switch { GlassKind.Sidebar => 10, GlassKind.Settings => 9, GlassKind.Popover => 7, GlassKind.Composer => 4, _ => 0 };
+
+    /// <summary>ED-NEW-glass-alive-5: the farthest a liquid engine reads past a point (pt). It is held so that it stays inside what the material
+    /// reads around itself (GlassMaterial's sampled margin).</summary>
     internal const double LiquidReach = 104;
 
-    /// <summary>ED-NEW-glass-alive-5: liquid-glass's red, green and blue scales (scale plus each aberration), held together to <see cref="LiquidReach"/>.</summary>
+    /// <summary>ED-NEW-glass-alive-5: liquid-glass's red, green and blue scales (scale plus each aberration; a nested lens's times 1.3), held
+    /// together to <see cref="LiquidReach"/>.</summary>
     internal (double R, double G, double B) LiquidScales
     {
         get
         {
             var r = Rizzy.Held();
-            var (sr, sg, sb) = (r.Scale + r.AberrationR, r.Scale + r.AberrationG, r.Scale + r.AberrationB);
+            var g = NestedGain;
+            var (sr, sg, sb) = ((r.Scale + r.AberrationR) * g, (r.Scale + r.AberrationG) * g, (r.Scale + r.AberrationB) * g);
             var most = 0.5 * Math.Max(Math.Abs(sr), Math.Max(Math.Abs(sg), Math.Abs(sb)));
             var k = most > LiquidReach ? LiquidReach / most : 1;
             return (sr * k, sg * k, sb * k);
         }
     }
+
+    /// <summary>ED-NEW-glass-alive-8: how far the engine's bend reads (pt), for the material's reach.</summary>
+    internal double LiquidBend => Engine switch
+    {
+        GlassEngine.GlassHq => GlassHq.Held().Refraction * 1.2 * 0.5 + 16,
+        GlassEngine.Dasher => LiquidReach,
+        _ => 0.5 * Math.Max(Math.Abs(LiquidScales.R), Math.Max(Math.Abs(LiquidScales.G), Math.Abs(LiquidScales.B))),
+    };
+
+    /// <summary>ED-NEW-glass-alive-7: Glass-HQ's material numbers (core/materials.ts; dark or light), as the shader takes them.</summary>
+    internal static (double FillOpacity, double ToneA, double ToneB, double ToneQ, double Chroma, double ShadowLift, double HighlightRolloff, double Blur) HqMaterial(bool dark) =>
+        dark ? (0.65, 0.105, 0.83, -0.2091, 1.0648, 0.15, 0.20, 7.33) : (0.34, 0.36, 0.67, -0.1113, 1.1031, 0.18, 0, 7.33);
 
     // The canvas's BODY: the compression target and the neutral grey (dark), the white lift, the local weight of the neutral tint, the rim blur's
     // outer band and where the full frost begins.
@@ -445,7 +510,13 @@ public sealed record GlassCanvas(GlassKind Kind, GlassTuning Tuning)
     }
 
     /// <summary>The frost's sigma (pt), held to <see cref="MaxSigma"/> (ED-NEW-glasslook-4: the canvas's Tinted sidebar and sheet ask up to 30).</summary>
-    internal double Sigma => Kind == GlassKind.Flat ? 0 : Liquid ? Math.Min(MaxSigma, Rizzy.Held().DisplaceBlur) : Math.Min(MaxSigma, SigmaPerRadius * BlurRadius);
+    internal double Sigma => Liquid ? Engine switch
+        {
+            GlassEngine.Dasher => Math.Min(MaxSigma, Math.Pow(Dasher.Held().BlurRadius / 2, 2)),
+            GlassEngine.GlassHq => GlassHq.Held().Material == GlassHqMaterial.Clear ? 0 : HqMaterial(true).Blur,
+            _ => Math.Min(MaxSigma, Math.Max(Rizzy.Held().DisplaceBlur, Finish ? BodySigma : 0)),
+        }
+        : Kind == GlassKind.Flat ? 0 : Math.Min(MaxSigma, SigmaPerRadius * BlurRadius);
 
     /// <summary>The material's numbers for a piece whose smaller side is <paramref name="s"/> pt, in an appearance <paramref name="darkness"/> dark
     /// (0 light, 1 dark), <paramref name="hover"/> and <paramref name="press"/> of the way under the pointer; <paramref name="pixel"/> pt is one device pixel.</summary>
