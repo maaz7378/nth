@@ -19,6 +19,7 @@ using Marrow.UI.Common;
 using Marrow.UI.Sound;
 using Marrow.UI.Chrome;
 using Marrow.UI.Port;
+using Marrow.UI.Port.Settings;
 using Marrow.UI.Theme;
 using Marrow.Core.Support;
 using Marrow.UI.Markdown;
@@ -206,6 +207,7 @@ public sealed class SettingsView : Decorator
     private readonly ViewState state = new();
     private readonly ChromeScrollModel scrollChrome = new();
     private readonly SettingsScrollTracker scrollTracker = new();
+    private JellyNav navJelly = null!;
     private readonly StackPanel rows = new() { Spacing = 1, Margin = new Thickness(Chrome.ListInset, 12, Chrome.ListInset, 8) }; // :147,179-181
     private readonly Dictionary<SettingsPage, SidebarRow> pageRows = new(); // :148 the row each listed page keeps under its ForEach id
     private Control? noResults; // :166-177 the "No results" block while it shows
@@ -248,7 +250,10 @@ public sealed class SettingsView : Decorator
         Width = 780; Height = 580; // :122
         search = new SidebarSearchField(new Binding<string>(() => state.Search, value => state.Search = value), onSubmit: () => { if (VisiblePages.Count > 0) { clickedPage = null; state.Page = VisiblePages[0]; QueueSelectedRowReveal(); } }); // :141-143
         search.Margin = new Thickness(Chrome.ListInset, 14, Chrome.ListInset, 0); // :144-145
-        var scroll = new ScrollViewer { Content = rows, VerticalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Hidden, HorizontalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Disabled }; // :146,190
+        // ED-NEW-jelly-pill-2: the selected page is a draggable liquid glass drop over the list
+        navJelly = new JellyNav(rows, () => rows.Children.OfType<SidebarRow>().ToList(), () => pageRows.TryGetValue(state.Page, out var on) && rows.Children.Contains(on) ? on : null,
+            row => ((SidebarRow)row).Invoke(), corner: Chrome.RowCornerRadius + 2) { Name = "SettingsNavJelly" };
+        var scroll = new ScrollViewer { Content = navJelly, VerticalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Hidden, HorizontalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Disabled }; // :146,190
         sidebarScroll = scroll;
         WireScroll(scroll, page: false);
         var column = new Grid { RowDefinitions = new RowDefinitions("Auto,Auto,*,Auto") }; // :137 + OD-0099 lower-left progress
@@ -372,6 +377,7 @@ public sealed class SettingsView : Decorator
     private void SelectRows()
     {
         foreach (var (page, row) in pageRows) row.IsSelected = state.Page == page;
+        navJelly?.Sync();
     }
 
     private SidebarRow RowFor(SettingsPage page)
@@ -401,6 +407,7 @@ public sealed class SettingsView : Decorator
             return icon;
         }, _ => none, isSelected: state.Page == page, pressLook: true, // the plain button's pressed look (press.row-tile-dim, ED-280)
             rowHeight: Chrome.SettingsNavRowHeight, titleSize: Chrome.SettingsNavTitleSize); // ED-NEW-textsize-2: Claude's Settings navigation
+        row.SelectionDrawnElsewhere = true; // ED-NEW-jelly-pill-2: the drop is the selected fill
         pageRows[page] = row;
         return row;
     }

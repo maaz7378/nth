@@ -17,3 +17,4 @@ Requirement tracker for the overnight brief of 2026-10-15 (cousin/glass-alive). 
 | 3.1 | Composer under the heading, no overlap; bigger rounded rectangle | ComposerCentre.cs, NewThreadPrompt.cs, ComposerView.cs (ComposerSurface.Idle) | IMPLEMENTED | ComposerCentreTests (App.Tests; not compiled here) | not seen | pending | | (this commit) |
 | 3.3 | Morph centre to bottom pill on one spring | ComposerCentre.cs | IMPLEMENTED | ComposerCentreTests.The_centred_rectangle_morphs... | not seen | pending | glass thickness not separately animated | (this commit) |
 | 3.4 | Bottom bar too high | ComposerArea.BottomGap 10 | IMPLEMENTED | none | not seen | pending | value chosen without a measured screenshot | (this commit) |
+| 4.1-4.2 | Settings nav jelly pill: drag, stretch, land, open; click; keys; Reduce Motion | src/Marrow.UI/Port/Settings/CzControls/JellyNav.cs, SettingsView.cs, Chrome.SidebarRow | TESTED | JellyNavTests (5) | headless only | pending | | (this commit) |

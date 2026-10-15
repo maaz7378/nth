@@ -1472,12 +1472,14 @@ namespace Marrow.UI.Chrome
 
             var button = new SelectableButton(() => selected) { Template = PlainButtonTemplate, Content = shape, Padding = default }; // :709, :730
             button.Click += (_, _) => action();
+            invoke = action;
             // The pressed look (PORT-ONLY, ED-280; SOURCE FACT: the reference runtime, CATALOGUE press.row-tile-dim):
             // a plain button dims its content to 0.8 and its wash to x0.7 while the pointer holds it down. The catalogue's own
             // ramp, 0.05 s in and 0.1 s out, ease-out (transition-audit sidebar-panels-015). Only the rows that ask for it draw it.
             var pressed = false;
             var dim = new AnimatedScalar(button, 0, value => row.Opacity = 1 - 0.2 * value);
-            void Restyle(Animation? animation) => fill.Set(FillFor(selected, state.IsHovering).Opacity(pressed ? 0.7 : 1), animation);
+            void Restyle(Animation? animation) => fill.Set(FillFor(selected && !selectionDrawnElsewhere, state.IsHovering).Opacity(pressed ? 0.7 : 1), animation);
+            restyle = () => Restyle(Chrome.Hover);
             if (pressLook)
             {
                 button.PropertyChanged += (_, change) =>
@@ -1542,7 +1544,26 @@ namespace Marrow.UI.Chrome
 
         private readonly Action refreshAccessory;
         private readonly Action applySelection;
+        private readonly Action restyle = static () => { };
         private bool selected;
+        private bool selectionDrawnElsewhere;
+
+        /// <summary>ED-NEW-jelly-pill-2: the selected fill is drawn by a moving pill over the list (the Settings navigation's liquid glass drop),
+        /// so the row draws only its hover; its title still takes the selected weight.</summary>
+        public bool SelectionDrawnElsewhere
+        {
+            get => selectionDrawnElsewhere;
+            set
+            {
+                if (selectionDrawnElsewhere == value) return;
+                selectionDrawnElsewhere = value;
+                restyle();
+            }
+        }
+
+        /// <summary>ED-NEW-jelly-pill-2: picks this row as a click would.</summary>
+        public void Invoke() => invoke();
+        private readonly Action invoke = static () => { };
 
         /// <summary>:683 <c>let isSelected: Bool</c>, handed in anew when the view that owns the row renders it again under
         /// the same identity (SettingsView.swift:148-149, a ForEach over the pages, so a page keeps its row): the fill eases
