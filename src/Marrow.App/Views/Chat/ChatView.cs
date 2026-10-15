@@ -183,11 +183,15 @@ public sealed class ChatView : Decorator
         pane.SizeChanged += (_, _) => NotePaneSize(SettledPaneSize()); // :241-249
         composerHost.SizeChanged += (_, _) => NoteComposerAreaHeight(composerHost.Bounds.Height); // :129-138
         // ED-NEW-composer-centre-1: the composer centred on a new page, gliding down when work starts
-        centre = new ComposerCentre(composerHost);
+        // ED-NEW-composer-centre-2: under the heading, the centred rectangle morphing into the bottom pill on the glide's spring
+        centre = new ComposerCentre(composerHost, idle => Marrow.App.Views.Composer.ComposerSurface.SetIdle(composerHost, idle));
+        double PromptHeight() => Avalonia.VisualTree.VisualExtensions.GetVisualDescendants(timelineHost).OfType<NewThreadPrompt>().FirstOrDefault()?.ContentHeight ?? 0;
         void PlaceComposer() => centre.Update(conversation.Bounds.Height, composerHost.Bounds.Height,
-            ComposerCentre.IsNewPage(this.runtime.Turns.Count, this.runtime.IsRunning, this.runtime.Draft.IsEmpty));
+            ComposerCentre.IsNewPage(this.runtime.Turns.Count, this.runtime.IsRunning, this.runtime.Draft.IsEmpty), PromptHeight());
         conversation.SizeChanged += (_, _) => PlaceComposer();
         composerHost.SizeChanged += (_, _) => PlaceComposer();
+        var promptSeen = 0.0;
+        timelineHost.LayoutUpdated += (_, _) => { var h = PromptHeight(); if (h != promptSeen) { promptSeen = h; PlaceComposer(); } };
         this.Track(() => (this.runtime.Turns.Count, this.runtime.IsRunning, this.runtime.Draft.IsEmpty), _ => PlaceComposer());
         SizeChanged += (_, _) =>
         {

@@ -14,3 +14,6 @@ Requirement tracker for the overnight brief of 2026-10-15 (cousin/glass-alive). 
 | 2.5a | Glass intensity slider | GlassSettings.Intensity, GlassSections.Intensity | TESTED | Glass_intensity_scales..., Intensity_is_stored_held_and_glides | headless frames only | pending | | (this commit) |
 | 2.5b | See-through slider | GlassSections.SeeThrough, GlassSeeThrough | IMPLEMENTED | no App test run here | not seen | pending | same setting as Transparency | (this commit) |
 | 4.3 | Settings not dark | Chrome.WindowBackdrop.SheetScrim | IMPLEMENTED | no rendered Settings test yet | not seen | pending | | (this commit) |
+| 3.1 | Composer under the heading, no overlap; bigger rounded rectangle | ComposerCentre.cs, NewThreadPrompt.cs, ComposerView.cs (ComposerSurface.Idle) | IMPLEMENTED | ComposerCentreTests (App.Tests; not compiled here) | not seen | pending | | (this commit) |
+| 3.3 | Morph centre to bottom pill on one spring | ComposerCentre.cs | IMPLEMENTED | ComposerCentreTests.The_centred_rectangle_morphs... | not seen | pending | glass thickness not separately animated | (this commit) |
+| 3.4 | Bottom bar too high | ComposerArea.BottomGap 10 | IMPLEMENTED | none | not seen | pending | value chosen without a measured screenshot | (this commit) |

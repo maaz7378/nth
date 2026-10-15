@@ -52,6 +52,9 @@ public sealed class NewThreadPrompt : Decorator
         else line.Swap(MakeLine(model), motion); // a name where there was none, or none where there was one: the line's other branch
     }
 
+    /// <summary>ED-NEW-composer-centre-2: the heading's height (the tile and the question line), for the centred composer to stand below it.</summary>
+    internal double ContentHeight => Child is Control content ? content.Bounds.Height - content.Margin.Top - content.Margin.Bottom : 0;
+
     private Control MakeLine(AppModel model)
     {
         // :22-45 the question line
@@ -96,9 +99,11 @@ public sealed class NewThreadPrompt : Decorator
         lineSlot.Swap(MakeLine(model), null);
         column.Children.Add(lineSlot); // :22-46 the question line
 
-        var content = new Border { Padding = new Thickness(40, 0), Child = column };
+        var content = new Border { Padding = new Thickness(40, 0), Child = column, VerticalAlignment = VerticalAlignment.Center };
         HorizontalAlignment = HorizontalAlignment.Stretch;
         VerticalAlignment = VerticalAlignment.Stretch;
+        // ED-NEW-composer-centre-2: the heading and the centred composer under it are one group centred in the pane: the heading rises half the gap
+        RenderTransform = new TranslateTransform(0, -Marrow.App.Views.Chat.ComposerCentre.PromptRise);
 
         // :50-53 fades and scales in from 0.97 over .easeOut(duration: 0.3) on appear. This build runs as the prompt attaches (Track applies on attach), so the
         // appearance is now: a handler a build adds to AttachedToVisualTree is not called for the attach it is running in, which left the prompt invisible.

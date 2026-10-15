@@ -53,6 +53,9 @@ namespace Marrow.App.Views.Composer;
 /// <summary>:4-58 <c>struct ComposerArea: View</c>.</summary>
 public sealed class ComposerArea : Decorator
 {
+    /// <summary>ED-NEW-composer-centre-2: the room under the bottom pill (pt).</summary>
+    internal const double BottomGap = 10;
+
     private readonly ThreadRuntime runtime;
 
     // :18-20 @State private var diffPopover = DiffPopoverCoordinator(): the changes popover presented from the tab.
@@ -146,7 +149,9 @@ public sealed class ComposerArea : Decorator
         var container = new Decorator { Child = new StackPanel { Orientation = Orientation.Vertical, Children = { new AppContextChips(runtime), new Panel { Children = { stack, departures } } } }, MaxWidth = 820 };
         SwiftGlass.SetContainerSpacing(container, 8);
         // :53-55 .padding(.horizontal, 20).padding(.bottom, 14).frame(maxWidth: .infinity)
-        Child = new Border { Child = container, Padding = new Thickness(20, 0, 20, 14) };
+        // ED-NEW-composer-centre-2 (Maaz, 2026-10-15: the bottom bar sits slightly too high): 10 pt under the pill, its gap to the window's edge
+        // matching the window's own 10 pt inset of the sidebar card, where the source's 14 left it floating above the line it should sit on
+        Child = new Border { Child = container, Padding = new Thickness(20, 0, 20, BottomGap) };
 
         // :25 ForEach(runtime.approvals) and :56 .animation(Chrome.panelSlide, value: runtime.approvals.map(\.id))
         this.Track(() => runtime.Approvals, ShowApprovals);
@@ -3115,6 +3120,24 @@ public sealed class FileIndex : MainActorModel
 /// <summary>:1290-1307 <c>private struct ComposerSurface: ViewModifier</c>.</summary>
 internal sealed record ComposerSurface
 {
+    /// <summary>ED-NEW-composer-centre-2: how far the composer is the new page's centred rectangle (1) rather than the bottom pill (0), inherited
+    /// from the composer's row: the plate grows to <see cref="IdleHeight"/> and its corner eases from the pill's 22 to <see cref="IdleCorner"/>.</summary>
+    public static readonly AttachedProperty<double> IdleProperty =
+        AvaloniaProperty.RegisterAttached<ComposerSurface, Control, double>("Idle", 0, inherits: true);
+
+    public static double GetIdle(Control control) => control.GetValue(IdleProperty);
+
+    public static void SetIdle(Control control, double value) => control.SetValue(IdleProperty, value);
+
+    /// <summary>The centred composer's least height (pt): a roomy start box, the bottom pill's 46 grown by 82.</summary>
+    internal const double IdleHeight = 128;
+
+    /// <summary>The centred composer's corner (pt): a softly rounded rectangle, not a capsule.</summary>
+    internal const double IdleCorner = 26;
+
+    /// <summary>The plate's corner at <paramref name="idle"/> of the way to the centred rectangle.</summary>
+    internal static double CornerAt(double idle) => 22 + (IdleCorner - 22) * Math.Clamp(idle, 0, 1);
+
     // :1297-1306 func body(content:)
     public Control Body(Control content)
     {
@@ -3142,13 +3165,19 @@ internal sealed record ComposerSurface
                 // :1304 content.glassEffect(.regular, in: shape), sampling app-owned content (OD-0005).
                 shape.Background = null;
                 shape.ClipToBounds = false;
-                SwiftGlass.SetEffect(shape, GlassEffect.Regular(GlassShape.RoundedRectangle(22, RoundedCornerStyle.Continuous, circularInBand: true)));
+                var idle = GetIdle(shape);
+                var corner = CornerAt(idle);
+                shape.RoundedRectangle(corner, RoundedCornerStyle.Continuous);
+                shape.CircularInBand(idle <= 0);
+                // the pill keeps its measured circular corner; the centred rectangle takes Apple's continuous corner (ED-NEW-composer-centre-2)
+                SwiftGlass.SetEffect(shape, GlassEffect.Regular(GlassShape.RoundedRectangle(corner, RoundedCornerStyle.Continuous, circularInBand: idle <= 0)));
             }
+            shape.MinHeight = GetIdle(shape) * IdleHeight;
         }
 
         shape.PropertyChanged += (_, e) =>
         {
-            if (e.Property == RenderBudget.IsOnGlassPanelProperty) Draw();
+            if (e.Property == RenderBudget.IsOnGlassPanelProperty || e.Property == IdleProperty) Draw();
         };
         Draw();
         return shape;
