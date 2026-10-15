@@ -244,6 +244,9 @@ public sealed class WallpaperRenderer : IDisposable
 
     private Marrow.Core.Port.Settings.ShaderGradientSettings? gradientShown;
     private float[] gradientUniform = [];
+    private Marrow.Core.Port.Settings.ShaderEffectSettings? effectSettingsShown;
+    private float[] effectUniform = [];
+    private string? effectIdShown;
 
     private void DrawShader(SKCanvas canvas, int width, int height, float dpr, double time)
     {
@@ -286,6 +289,16 @@ public sealed class WallpaperRenderer : IDisposable
             {
                 if (!ReferenceEquals(gradientShown, ShaderGradientParams.Current)) { gradientShown = ShaderGradientParams.Current; gradientUniform = ShaderGradientParams.Uniforms(gradientShown); }
                 uniforms["u_g"] = gradientUniform;
+            }
+            // ED-NEW-shader-effects-1: a Shaders effect's options, made again only when the settings change
+            if (wall.Tier == ShaderEffects.Tier && ShaderEffects.Find(wall.Id) is { } effectShown)
+            {
+                if (!ReferenceEquals(effectSettingsShown, ShaderEffects.Current) || effectIdShown != wall.Id)
+                {
+                    (effectSettingsShown, effectIdShown) = (ShaderEffects.Current, wall.Id);
+                    effectUniform = ShaderEffects.Uniforms(effectShown, effectSettingsShown);
+                }
+                uniforms["u_e"] = effectUniform;
             }
         }
         using var shader = effect!.ToShader(uniforms);

@@ -68,6 +68,7 @@ public sealed class WallpaperView : Control
         platform = Application.Current?.PlatformSettings;
         if (platform is not null) platform.ColorValuesChanged += AccentChanged;
         ShaderGradientParams.Changed += GradientChanged; // ED-NEW-shader-gradient-1: a paused Gradient draws a changed option at once
+        ShaderEffects.Changed += GradientChanged; // ED-NEW-shader-effects-1: so does a Shaders effect
         var availability = AmbientWindowState.Acquire(this);
         ambient = availability is null ? null : new(availability);
         visual = host.Compositor.CreateCustomVisual(new WallpaperVisualHandler(ambient));
@@ -113,6 +114,7 @@ public sealed class WallpaperView : Control
         if (window is not null) { window.PropertyChanged -= WindowChanged; window.PositionChanged -= WindowMoved; }
         if (platform is not null) platform.ColorValuesChanged -= AccentChanged;
         ShaderGradientParams.Changed -= GradientChanged;
+        ShaderEffects.Changed -= GradientChanged;
         platform = null; wakes?.Dispose(); wakes = null; environment = null;
         visual?.SendHandlerMessage(WallpaperVisualStop.Instance);
         ambient?.Dispose(); ambient = null;

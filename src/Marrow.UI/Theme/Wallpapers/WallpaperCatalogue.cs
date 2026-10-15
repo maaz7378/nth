@@ -118,7 +118,9 @@ public static class WallpaperCatalogue
             : "uniform float2 u_res; uniform float u_t; uniform float3 u_pal[6]; uniform float u_dark; uniform float2 u_opt; uniform float u_px;\n"
                 + "uniform float2 u_tilt; uniform float2 u_sun; uniform float u_focus; uniform float u_pan; uniform float u_dither;\n"
                 // ED-NEW-shader-gradient-1: the Gradient wallpaper's options
-                + (wall.Id == ShaderGradientParams.WallpaperId ? $"uniform float4 u_g[{ShaderGradientParams.Rows}];\n" : "");
+                + (wall.Id == ShaderGradientParams.WallpaperId ? $"uniform float4 u_g[{ShaderGradientParams.Rows}];\n" : "")
+                // ED-NEW-shader-effects-1: a Shaders effect's own options
+                + (wall.Tier == ShaderEffects.Tier ? $"uniform float4 u_e[{ShaderEffects.Rows}];\n" : "");
         return header + WallpaperShaderArithmetic.Helpers + WallpaperBranchArithmetic.Helpers(wall.Id) + source;
     }
 

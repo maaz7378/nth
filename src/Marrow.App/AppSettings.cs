@@ -317,6 +317,7 @@ public sealed partial class AppSettings : MainActorModel, ProviderSettings, Acco
         public const string WorkingDots = WorkingDotsSettings.StoreKey;
         public const string GlassLook = GlassSettings.StoreKey; // PORT-ONLY, owner-requested (OD-0107, OD-0147, ED-NEW-glasslook-2)
         public const string ShaderGradient = ShaderGradientSettings.StoreKey; // PORT-ONLY ED-NEW-shader-gradient-1
+        public const string ShaderEffects = ShaderEffectSettings.StoreKey; // PORT-ONLY ED-NEW-shader-effects-1
     }
 
     // :182
@@ -415,6 +416,7 @@ public sealed partial class AppSettings : MainActorModel, ProviderSettings, Acco
     private WorkingDotsSettings workingDots = WorkingDotsSettings.Default;
     private GlassSettings glass = GlassSettings.Default;
     private ShaderGradientSettings shaderGradient = ShaderGradientSettings.Default;
+    private ShaderEffectSettings shaderEffects = ShaderEffectSettings.Default;
     private TextGenerationChoice textGeneration;
     private string commitInstructions = "";
     private double terminalHeight;
@@ -698,6 +700,18 @@ public sealed partial class AppSettings : MainActorModel, ProviderSettings, Acco
         {
             Store(Key.ShaderGradient, shaderGradient.ToJson());
             Marrow.UI.Theme.Wallpapers.ShaderGradientParams.Current = shaderGradient;
+        });
+    }
+
+    /// <summary>PORT-ONLY ED-NEW-shader-effects-1: <c>shaderEffects</c>, the Shaders section's options for each shader-effects-inc effect,
+    /// mirrored into their shaders; written through the coalescer.</summary>
+    public ShaderEffectSettings ShaderEffects
+    {
+        get => Read(shaderEffects);
+        set => Set(ref shaderEffects, value ?? ShaderEffectSettings.Default, _ =>
+        {
+            Store(Key.ShaderEffects, shaderEffects.ToJson());
+            Marrow.UI.Theme.Wallpapers.ShaderEffects.Current = shaderEffects;
         });
     }
 
@@ -1372,6 +1386,8 @@ public sealed partial class AppSettings : MainActorModel, ProviderSettings, Acco
         // PORT-ONLY ED-NEW-shader-gradient-1: the Gradient wallpaper's options, mirrored into its shader before any window draws
         shaderGradient = defaults.Data(Key.ShaderGradient) is { } gradientStored ? ShaderGradientSettings.FromJson(gradientStored) : ShaderGradientSettings.Default;
         Marrow.UI.Theme.Wallpapers.ShaderGradientParams.Current = shaderGradient;
+        shaderEffects = defaults.Data(Key.ShaderEffects) is { } effectsStored ? ShaderEffectSettings.FromJson(effectsStored) : ShaderEffectSettings.Default;
+        Marrow.UI.Theme.Wallpapers.ShaderEffects.Current = shaderEffects;
     }
 
     // MARK: - Hydra pairs

@@ -96,8 +96,8 @@ public sealed class WallpaperLibraryTests
     [Trait("Rule", "R-TEST-1")]
     public void Catalogue_has_162_wallpapers_810_dual_palettes_and_source_labels()
     {
-        // The design's own library: nth's live wallpapers (tier "live") are counted on their own, in Live_wallpapers_are_exactly_nths_own.
-        var design = WallpaperCatalogue.All.Where(x => x.Tier != "live").ToArray();
+        // The design's own library (its three tiers): nth's live wallpapers and the Shaders effects are counted on their own.
+        var design = WallpaperCatalogue.All.Where(x => x.Tier is "vibrant" or "balanced" or "minimal").ToArray();
         Assert.Equal(90, design.Count(x => x.Kind == WallpaperKind.Static));
         Assert.Equal(72, design.Count(x => x.Kind == WallpaperKind.Animated));
         Assert.Equal(810, design.Sum(x => x.Packs.Length));
