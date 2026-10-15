@@ -20,3 +20,4 @@ Requirement tracker for the overnight brief of 2026-10-15 (cousin/glass-alive). 
 | 4.1-4.2 | Settings nav jelly pill: drag, stretch, land, open; click; keys; Reduce Motion | src/Marrow.UI/Port/Settings/CzControls/JellyNav.cs, SettingsView.cs, Chrome.SidebarRow | TESTED | JellyNavTests (5) | headless only | pending | | (this commit) |
 | 5.1 | Shared liquid glass slider thumb | GlassThumb.cs, CzSliderRail.cs | TESTED (CzSlider) | GlassThumbTests | headless only | pending | BackdropOpacitySlider, EffortSlider, NthUi sliders not migrated | (this commit) |
 | 5.2 | Switch glass thumb, Nocta kept | SettingsView.cs SmallSwitch.Thumb | IMPLEMENTED | none run here (App.Tests) | not seen | pending | | (this commit) |
+| 6 | Sidebar in the main screen's shade | GlassLooks.cs (Veil, KindFrost), GlassMaterial.cs | TESTED | GlassSidebarShadeTests, The_sidebar_reads_over_a_busy_wallpaper | headless frames | pending | dark 15 luma under main (readability bound) | (this commit) |

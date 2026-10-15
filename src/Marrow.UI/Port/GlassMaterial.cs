@@ -2183,7 +2183,7 @@ internal static partial class GlassMaterial
                 [
                     [3f, (float)Corner(o.BorderRadius), (float)inset, (float)o.Blur],
                     [(float)sr, (float)sg, (float)sb, (float)(o.Lightness / 100)],
-                    [(float)o.Alpha, (float)o.Frost, (float)o.Saturation, o.DisplaceBlur >= 0.05 ? 1f : 0f],
+                    [(float)o.Alpha, (float)(o.Frost * canvas.KindFrost), (float)o.Saturation, o.DisplaceBlur >= 0.05 ? 1f : 0f],
                     [dark, px, toDrawing, GlassCanvas.Finish && canvas.Sigma > 0.05 ? (float)canvas.BodyFrost : 0f],
                     new float[4], lA, lB, new float[4], new float[4],
                 ];

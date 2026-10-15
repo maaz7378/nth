@@ -457,13 +457,17 @@ public sealed record GlassCanvas(GlassKind Kind, GlassTuning Tuning)
         {
             var (veil, clear) = Kind switch
             {
-                GlassKind.Sidebar => (0.42, 0.5), GlassKind.Settings => (0.36, 0.5), GlassKind.Popover => (0.34, 0.5),
+                GlassKind.Sidebar => (0.04, 0.5), GlassKind.Settings => (0.36, 0.5), GlassKind.Popover => (0.34, 0.5),
                 GlassKind.Composer => (0.18, 0.45), GlassKind.Capsule => (0.12, 0.4), _ => (0.0, 0.25),
             };
             if (Kind == GlassKind.Sidebar) veil += (0.88 - veil) * Tuning.SidebarOff;
             return (Math.Min(0.9, veil + 0.25 * Tuning.Tint + 0.1 * Tuning.Contrast), clear);
         }
     }
+
+    /// <summary>ED-NEW-sidebar-shade-1: the share of liquid-glass's frost colour a kind takes: the sidebar half (with its slim veil it sits in the main
+    /// screen's shade; its body frost still calms what is behind its words).</summary>
+    internal double KindFrost => Kind == GlassKind.Sidebar ? 0.5 : 1;
 
     /// <summary>ED-NEW-glass-alive-8: how much of liquid-glass's centre reads the frosted backdrop (the rim stays sharp), by kind: the panels that
     /// carry text frost their body so it reads; the composer, the buttons and a drop on glass stay clear.</summary>
