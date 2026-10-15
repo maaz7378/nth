@@ -47,7 +47,7 @@ public sealed class ShaderEffectsTests
             "sei-fractal-noise", "sei-gabor-noise", "sei-godrays", "sei-grid", "sei-hex-grid", "sei-isometric-cubes", "sei-lens-flare", "sei-line",
             "sei-linear-gradient", "sei-multi-point-gradient", "sei-perlin-noise", "sei-prism", "sei-radial-gradient", "sei-ripples", "sei-scratches",
             "sei-simplex-noise", "sei-sine-wave", "sei-spiral", "sei-stripes", "sei-triangular-grid", "sei-truchet", "sei-weave", "sei-wavelet-noise",
-            "sei-worley-noise",
+            "sei-worley-noise", "sei-mesh-gradient", "sei-satin", "sei-strands", "sei-studio-background", "sei-waveform",
         }, ShaderEffects.All.Select(e => e.Id));
         Assert.Equal(ShaderEffects.All.Select(e => e.Id), WallpaperCatalogue.All.Where(w => w.Tier == ShaderEffects.Tier).Select(w => w.Id));
         foreach (var e in ShaderEffects.All)

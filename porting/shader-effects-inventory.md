@@ -3,7 +3,7 @@
 The Shaders section (ED-NEW-shader-effects-1). Source: shader-effects-inc/shaders (MIT, THIRD_PARTY_NOTICES "shader-effects-inc shaders"), packages/core/src/shaders, one folder per effect, each effect's role, category and props read from its index.ts; the port follows each effect's emitted WGSL (the package's shader snapshots).
 
 Total effects: 200. Roles: filter 65, generator 51, shapeEffect 23, simulation 19, warp 18, shape 15, media 5, structural 2, overlay 2.
-Status: ported 45, wallpaper-capable generators still to port 5, not standalone 149 (each with its reason), not a live wallpaper 1 (SolidColor: a flat colour never moves).
+Status: ported 50, wallpaper-capable generators still to port 0, not standalone 149 (each with its reason), not a live wallpaper 1 (SolidColor: a flat colour never moves).
 
 | Effect | Role | Category | Props | Status | Why not (yet) a wallpaper |
 |---|---|---|---|---|---|
@@ -116,7 +116,7 @@ Status: ported 45, wallpaper-capable generators still to port 5, not standalone 
 | Liquify | warp | Interactive | 4 | NOT STANDALONE | distorts an input picture: composition over the current wallpaper, not standalone; reads the pointer |
 | MagneticFilings | simulation | Interactive | 11 | NOT STANDALONE | keeps state between frames (ping-pong buffers): needs a multi-pass state pipeline the one-pass wallpaper renderer does not have; reads the pointer |
 | Marble | generator | Textures | 8 | PORTED (sei-marble) |  |
-| MeshGradient | generator | Textures | 11 | PENDING (wallpaper-capable) | standalone generator: wallpaper-capable, port pending |
+| MeshGradient | generator | Textures | 11 | PORTED (sei-mesh-gradient) | the package's default five-stop palette is offered as five colours (its Colour A/B fallback is colours 1 and 5); the anchors it computes on the CPU are computed in the shader from the same formula; no output dither |
 | Mirror | warp | Distortions | 1 | NOT STANDALONE | distorts an input picture: composition over the current wallpaper, not standalone |
 | MultiPointGradient | generator | Textures | 12 | PORTED (sei-multi-point-gradient) |  |
 | Nebula | shapeEffect | Shape Effects | 22 | NOT STANDALONE | acts on a shape layer: composition, not standalone |
@@ -153,7 +153,7 @@ Status: ported 45, wallpaper-capable generators still to port 5, not standalone 
 | RippleWipe | filter | Transitions | 5 | NOT STANDALONE | needs an input picture: offered later as an effect over the current wallpaper (composition), not a standalone wallpaper |
 | Ripples | generator | Textures | 9 | PORTED (sei-ripples) |  |
 | RoundedRect | shape | ? | 0 | NOT STANDALONE | a single shape (circle, star, ...): a building block for composition, not a wallpaper on its own |
-| Satin | generator | Textures | 18 | PENDING (wallpaper-capable) | standalone generator: wallpaper-capable, port pending |
+| Satin | generator | Textures | 18 | PORTED (sei-satin) | Folds is live here (a loop to 12), compile-time in the package; thread grain uses the library's gradient noise |
 | Saturation | filter | Adjustments | 1 | NOT STANDALONE | needs an input picture: offered later as an effect over the current wallpaper (composition), not a standalone wallpaper |
 | Scratches | generator | Textures | 6 | PORTED (sei-scratches) |  |
 | Sharpness | filter | Adjustments | 1 | NOT STANDALONE | needs an input picture: offered later as an effect over the current wallpaper (composition), not a standalone wallpaper |
@@ -171,10 +171,10 @@ Status: ported 45, wallpaper-capable generators still to port 5, not standalone 
 | Spiral | generator | Textures | 10 | PORTED (sei-spiral) |  |
 | Star | shape | ? | 0 | NOT STANDALONE | a single shape (circle, star, ...): a building block for composition, not a wallpaper on its own |
 | Stone | filter | Stylize | 0 | NOT STANDALONE | needs an input picture: offered later as an effect over the current wallpaper (composition), not a standalone wallpaper |
-| Strands | generator | Textures | 14 | PENDING (wallpaper-capable) | standalone generator: wallpaper-capable, port pending |
+| Strands | generator | Textures | 14 | PORTED (sei-strands) | the package's default four-stop gradient is offered as four colours |
 | Stretch | warp | Distortions | 3 | NOT STANDALONE | distorts an input picture: composition over the current wallpaper, not standalone |
 | Stripes | generator | Textures | 9 | PORTED (sei-stripes) |  |
-| StudioBackground | generator | Textures | 19 | PENDING (wallpaper-capable) | standalone generator: wallpaper-capable, port pending |
+| StudioBackground | generator | Textures | 19 | PORTED (sei-studio-background) | the four ambient glows the package orbits on the CPU orbit in the shader (same seeded constants, closed-form time) |
 | SunBurst | generator | Textures | 8 | PORTED (sei-sunburst) |  |
 | Surface3D | shapeEffect | Distortions | 0 | NOT STANDALONE | acts on a shape layer: composition, not standalone |
 | Swirl | generator | Textures | 6 | PORTED (sei-swirl) |  |
@@ -200,7 +200,7 @@ Status: ported 45, wallpaper-capable generators still to port 5, not standalone 
 | Water | shapeEffect | Shape Effects | 23 | NOT STANDALONE | acts on a shape layer: composition, not standalone |
 | Watercolor | filter | Stylize | 5 | NOT STANDALONE | needs an input picture: offered later as an effect over the current wallpaper (composition), not a standalone wallpaper |
 | WaveDistortion | warp | Distortions | 5 | NOT STANDALONE | distorts an input picture: composition over the current wallpaper, not standalone |
-| Waveform | generator | Textures | 18 | PENDING (wallpaper-capable) | standalone generator: wallpaper-capable, port pending |
+| Waveform | generator | Textures | 18 | PORTED (sei-waveform) | the package's optional multi-stop colour list is not offered (its two colours are) |
 | WaveletNoise | generator | Textures | 9 | PORTED (sei-wavelet-noise) | the package's optional multi-stop colour list is not offered (its two colours are) |
 | Weave | generator | Textures | 5 | PORTED (sei-weave) |  |
 | WebcamTexture | media | Textures | 1 | NOT STANDALONE | needs an image, a video, a webcam or text as input: not a wallpaper |

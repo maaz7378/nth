@@ -29059,6 +29059,3410 @@
      "detail": "How fast the points drift"
     }
    ]
+  },
+  {
+   "id": "sei-mesh-gradient",
+   "name": "Mesh Gradient",
+   "tier": "shaders",
+   "period": 55,
+   "desc": "Soft colour swaths drifting and swirling, seams wrapping through the palette.",
+   "defaults": {
+    "pack": "halo",
+    "speed": 1.0,
+    "motion": 0.5,
+    "second": 0.55,
+    "dynamic": false,
+    "perspective": true,
+    "focus": 0.0
+   },
+   "options": [
+    {
+     "id": "motion",
+     "label": "Motion",
+     "lo": "Slow",
+     "hi": "Fast",
+     "default": 0.5
+    },
+    {
+     "id": "glow",
+     "label": "Glow",
+     "lo": "Dim",
+     "hi": "Bright",
+     "default": 0.5
+    }
+   ],
+   "roles": [
+    [
+     0.24,
+     0.08,
+     0.9,
+     0.04
+    ],
+    [
+     0.32,
+     0.11,
+     0.84,
+     0.07
+    ],
+    [
+     0.42,
+     0.13,
+     0.78,
+     0.09
+    ],
+    [
+     0.54,
+     0.13,
+     0.72,
+     0.1
+    ],
+    [
+     0.66,
+     0.12,
+     0.66,
+     0.11
+    ],
+    [
+     0.92,
+     0.05,
+     0.98,
+     0.03
+    ]
+   ],
+   "packs": [
+    {
+     "id": "halo",
+     "name": "Halo",
+     "dark": [
+      "#ff5005",
+      "#dbba95",
+      "#d0bce1",
+      "#1a0f24",
+      "#fff3e6",
+      "#ffffff"
+     ],
+     "light": [
+      "#ff7a3d",
+      "#f3dcc2",
+      "#e6dbf2",
+      "#d9cbe4",
+      "#ffffff",
+      "#ffffff"
+     ]
+    },
+    {
+     "id": "pensive",
+     "name": "Pensive",
+     "dark": [
+      "#606080",
+      "#8d7dca",
+      "#212121",
+      "#0b0b12",
+      "#e8e4ff",
+      "#ffffff"
+     ],
+     "light": [
+      "#8a8ab0",
+      "#b7a9f0",
+      "#dcdcec",
+      "#cfcfe0",
+      "#ffffff",
+      "#ffffff"
+     ]
+    },
+    {
+     "id": "mint",
+     "name": "Mint",
+     "dark": [
+      "#94ffd1",
+      "#6bf5ff",
+      "#ffffff",
+      "#0a1f1c",
+      "#ffffff",
+      "#ffffff"
+     ],
+     "light": [
+      "#94ffd1",
+      "#6bf5ff",
+      "#ffffff",
+      "#dff7f2",
+      "#ffffff",
+      "#ffffff"
+     ]
+    },
+    {
+     "id": "dusk",
+     "name": "Dusk",
+     "dark": [
+      "#ff0561",
+      "#db959f",
+      "#bcc1e1",
+      "#0f1224",
+      "#ffe6ea",
+      "#ffffff"
+     ],
+     "light": [
+      "#ff3d81",
+      "#f3c2c9",
+      "#dbdff2",
+      "#cbcee4",
+      "#ffffff",
+      "#ffffff"
+     ]
+    },
+    {
+     "id": "lagoon",
+     "name": "Lagoon",
+     "dark": [
+      "#1effd2",
+      "#9cd9db",
+      "#e0e1c0",
+      "#242411",
+      "#e8ffff",
+      "#ffffff"
+     ],
+     "light": [
+      "#50ffdf",
+      "#c7f2f3",
+      "#f2f2dd",
+      "#e3e4cd",
+      "#ffffff",
+      "#ffffff"
+     ]
+    }
+   ],
+   "dynamic": {
+    "light": {
+     "dawn": {
+      "dL": [
+       -0.015,
+       -0.015,
+       -0.015,
+       -0.015,
+       -0.015,
+       -0.015
+      ],
+      "kC": [
+       1.1,
+       1.1,
+       1.1,
+       1.1,
+       1.1,
+       1.1
+      ],
+      "dh": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "tint": [
+       355.0,
+       0.24
+      ]
+     },
+     "day": {
+      "dL": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "kC": [
+       1.0,
+       1.0,
+       1.0,
+       1.0,
+       1.0,
+       1.0
+      ],
+      "dh": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "tint": [
+       0.0,
+       0.0
+      ]
+     },
+     "dusk": {
+      "dL": [
+       -0.035,
+       -0.035,
+       -0.035,
+       -0.035,
+       -0.035,
+       -0.035
+      ],
+      "kC": [
+       1.16,
+       1.16,
+       1.16,
+       1.16,
+       1.16,
+       1.16
+      ],
+      "dh": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "tint": [
+       335.0,
+       0.3
+      ]
+     },
+     "night": {
+      "dL": [
+       -0.105,
+       -0.105,
+       -0.105,
+       -0.105,
+       -0.105,
+       -0.105
+      ],
+      "kC": [
+       0.9,
+       0.9,
+       0.9,
+       0.9,
+       0.9,
+       0.9
+      ],
+      "dh": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "tint": [
+       262.0,
+       0.46
+      ]
+     }
+    },
+    "dark": {
+     "dawn": {
+      "dL": [
+       0.03,
+       0.03,
+       0.03,
+       0.03,
+       0.03,
+       0.03
+      ],
+      "kC": [
+       1.12,
+       1.12,
+       1.12,
+       1.12,
+       1.12,
+       1.12
+      ],
+      "dh": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "tint": [
+       355.0,
+       0.24
+      ]
+     },
+     "day": {
+      "dL": [
+       0.085,
+       0.085,
+       0.085,
+       0.085,
+       0.085,
+       0.085
+      ],
+      "kC": [
+       0.92,
+       0.92,
+       0.92,
+       0.92,
+       0.92,
+       0.92
+      ],
+      "dh": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "tint": [
+       232.0,
+       0.18
+      ]
+     },
+     "dusk": {
+      "dL": [
+       0.03,
+       0.03,
+       0.03,
+       0.03,
+       0.03,
+       0.03
+      ],
+      "kC": [
+       1.18,
+       1.18,
+       1.18,
+       1.18,
+       1.18,
+       1.18
+      ],
+      "dh": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "tint": [
+       335.0,
+       0.32
+      ]
+     },
+     "night": {
+      "dL": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "kC": [
+       1.0,
+       1.0,
+       1.0,
+       1.0,
+       1.0,
+       1.0
+      ],
+      "dh": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "tint": [
+       0.0,
+       0.0
+      ]
+     }
+    },
+    "sun": {
+     "dawn": [
+      0.0,
+      0.0
+     ],
+     "day": [
+      0.0,
+      0.0
+     ],
+     "dusk": [
+      0.0,
+      0.0
+     ],
+     "night": [
+      0.0,
+      0.0
+     ]
+    }
+   },
+   "perspective": {
+    "mode": "layers",
+    "default": true
+   },
+   "focus": {
+    "default": 0.0
+   },
+   "match": {
+    "off": [
+     22.5,
+     12.5,
+     0.0,
+     -15.0,
+     -30.0,
+     -1.5
+    ],
+    "hero": 2,
+    "ck": 1.0,
+    "lk": 1.0,
+    "dark_warm": {
+     "band": [
+      -10,
+      15,
+      100,
+      120
+     ],
+     "ground_hue": 330,
+     "mid_hue": 355,
+     "ground_below": 0.32,
+     "mid_below": 0.62,
+     "mid_amount": 1.0,
+     "kc": 1.3,
+     "dl": 0.03,
+     "bright_dl": 0.06,
+     "bright_kc": 1.15
+    },
+    "dl": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "dc": [
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "cm": [
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "glsl": "// shader-effects-inc/shaders (MIT, THIRD_PARTY_NOTICES \"shader-effects-inc shaders\"), ported by nth from each effect's emitted WGSL (the\n// package's own shader snapshots) into the wallpaper library's GLSL subset. Shared by every effect of the Shaders section:\n// - its options are the effect's own props, in u_e (the host fills them from the Shaders settings: colours as linear rgba, numbers as given);\n// - the package's integer (bit-op) Perlin hash cannot run on the subset (no bit operations), so its Perlin noise is the library's gradient noise;\n// - its time runs on, so the loop is closed by crossfading the effect at t with itself at t - T across the loop (frame T is frame 0 exactly); T is 55 s (ED-NEW-shader-effects-2).\nconst float T = 55.0;\nvec2 sUV(vec2 p) { float a = u_res.x / max(u_res.y, 1.0); return vec2((p.x / a + 1.0) * 0.5, (p.y + 1.0) * 0.5); }\nfloat sAspect() { return u_res.x / max(u_res.y, 1.0); }\nvec3 sMix(vec3 a, vec3 b, float t, float space) { return space < 0.5 ? mix(a, b, t) : lab2lin(mix(lin2lab(a), lin2lab(b), t)); }\nfloat pn2(vec2 p) { return gnoise(vec3(p, 0.37)) * 0.66; }\nfloat pn3(vec3 p) { return gnoise(p) * 0.66; }\n\n// u_e: color1@0, color2@4, color3@8, color4@12, color5@16, colorSpace@20, count@21, smoothness@22, variation@23, swirl@24, drift@25, wrapping@26, speed@27, seed@28\nvec3 p_color1() { return u_e[0].rgb; }\nvec3 p_color2() { return u_e[1].rgb; }\nvec3 p_color3() { return u_e[2].rgb; }\nvec3 p_color4() { return u_e[3].rgb; }\nvec3 p_color5() { return u_e[4].rgb; }\nfloat p_colorSpace() { return u_e[5].x; }\nfloat p_count() { return u_e[5].y; }\nfloat p_smoothness() { return u_e[5].z; }\nfloat p_variation() { return u_e[5].w; }\nfloat p_swirl() { return u_e[6].x; }\nfloat p_drift() { return u_e[6].y; }\nfloat p_wrapping() { return u_e[6].z; }\nfloat p_speed() { return u_e[6].w; }\nfloat p_seed() { return u_e[7].x; }\n// MeshGradient: up to 8 colour anchors scattered on a golden-angle spiral, drifting, blended by inverse-distance weights over a\n// swirled, twice domain-warped canvas, the blend wrapped back through a five-stop palette. The package computes the anchors on the\n// CPU each frame (scatterAnchors.ts, a mirror of its in-shader spiralScatter); here they are computed in the shader from count, seed,\n// drift, aspect and time with the same formula (its bit-cast hashes are sine hashes: same construction, other random values).\nfloat effSpeed() { return p_speed(); }\nfloat mgH11(float p) { return fract(sin(p * 12.9898 + 4.1414) * 43758.5453); }\nvec2 mgH22(vec2 p) { float h = sin(dot(p, vec2(127.1, 311.7))) * 43758.5453; return vec2(fract(h), fract(h * 1.618033988749895 + 0.3183)); }\nvec2 mgAnchor(float fi, float count, float seed, float drift, float aspect, float t) {\n  float theta = fi * 2.399963229728653 + mgH11(seed * 0.7311 + 1.618) * 6.283185307179586;\n  float r = sqrt((fi + 0.5) / count);\n  vec2 j = (mgH22(vec2(fi * 3.77 + 0.917, seed * 1.093 + 2.236)) - 0.5) * 0.26;\n  vec2 ph = mgH22(vec2(fi * 7.13 + 1.618, seed * 0.531 + 3.71)) * 6.283185307179586;\n  float w1 = 0.5 + mgH11(fi * 5.417 + seed * 0.291 + 0.917) * 0.7;\n  float tw = t * 0.11 * w1;\n  vec2 d = vec2(sin(tw + ph.x), cos(tw * 1.37 + ph.y));\n  vec2 nv = vec2(cos(theta), sin(theta)) * r * 0.62 + j + d * drift * 0.16;\n  return vec2((0.5 + nv.x) * aspect, 0.5 + nv.y);\n}\nvec3 mgWarp(vec3 pos, float t) {\n  float qx = pn3(pos + vec3(t * 0.3, t * -0.2, 0.0));\n  float qy = pn3(pos + vec3(5.2, 1.3, t * 0.25));\n  vec3 w1 = pos + vec3(qx, qy, 0.0) * 0.48;\n  float rx = pn3(w1 + vec3(1.7, 9.2, t * 0.15));\n  float ry = pn3(w1 + vec3(8.3, 2.8, t * 0.13));\n  return pos + vec3(rx, ry, 0.0) * 0.48;\n}\nvec3 mgStop(float k) {\n  float s = p_colorSpace();\n  if (k < 0.26) return sMix(p_color1(), p_color2(), k / 0.26, s);\n  if (k < 0.52) return sMix(p_color2(), p_color3(), (k - 0.26) / 0.26, s);\n  if (k < 0.76) return sMix(p_color3(), p_color4(), (k - 0.52) / 0.24, s);\n  return sMix(p_color4(), p_color5(), (k - 0.76) / 0.24, s);\n}\nvec3 eff(vec2 uv, float t) {\n  float aspect = sAspect();\n  float seed = p_seed();\n  vec2 c = vec2(uv.x * aspect - aspect * 0.5, uv.y - 0.5);\n  float sa = -3.0 * p_swirl() * smoothstep(0.0, 1.0, length(c));\n  vec2 rc = vec2(c.x * cos(sa) - c.y * sin(sa), c.x * sin(sa) + c.y * cos(sa));\n  vec2 us = vec2(rc.x + aspect * 0.5, rc.y + 0.5);\n  vec3 w = mgWarp(vec3(us * 1.6, seed * 7.31), t * 0.125);\n  vec2 q = w.xy / 1.6;\n  float power = clamp(8.0 / (p_smoothness() + 0.5) * exp(pn3(vec3(q * 1.9, seed * 3.17 + t * 0.045)) * p_variation() * 1.4), 0.6, 16.0);\n  float count = floor(p_count() + 0.5);\n  float shuffle = mgH11(seed * 0.531 + 0.77);\n  float num = 0.0; float den = 0.0;\n  for (int i = 0; i < 8; i++) {\n    float fi = float(i);\n    float on = fi < count - 0.5 ? 1.0 : 0.0;\n    float dist = max(length(q - mgAnchor(fi, count, seed, p_drift(), aspect, t)), 0.01);\n    float wt = on / pow(dist, power);\n    num += wt * fract(fi * 0.6180339887 + shuffle);\n    den += wt;\n  }\n  float f = num / max(den, 1e-6);\n  float m = fract(f * (1.0 + p_wrapping() * 9.0) * 0.5) * 2.0;\n  return mgStop(clamp(1.0 - abs(m - 1.0), 0.0, 1.0));\n}\n\nvec3 wall(vec2 p, float t) {\n  float sp = effSpeed() * mix(0.5, 1.5, u_opt.x);\n  vec2 uv = sUV(p + tiltD(0.4));\n  // ED-NEW-shader-effects-2: a still picture (an effect with no speed, or its speed at 0) drifts once round a small circle over the loop,\n  // its size Motion's (fract, so frame T is frame 0 to the bit), so every wallpaper moves (R-TEST-1) and the loop closes; a moving effect does not drift\n  float a = 6.283185307179586 * fract(t / T);\n  uv += (sp == 0.0 ? 0.06 * u_opt.x : 0.0) * vec2(cos(a) - 1.0, sin(a));\n  vec3 c = mix(eff(uv, t * sp), eff(uv, (t - T) * sp), t / T);\n  return lin2srgb(shoulder(max(c * mix(0.7, 1.3, u_opt.y), vec3(0.0))));\n}\n",
+   "props": [
+    {
+     "id": "color1",
+     "label": "Colour 1",
+     "kind": "color",
+     "default": "#1a0533",
+     "detail": "First stop"
+    },
+    {
+     "id": "color2",
+     "label": "Colour 2",
+     "kind": "color",
+     "default": "#6d2fd1",
+     "detail": "Second stop"
+    },
+    {
+     "id": "color3",
+     "label": "Colour 3",
+     "kind": "color",
+     "default": "#e04b9e",
+     "detail": "Third stop"
+    },
+    {
+     "id": "color4",
+     "label": "Colour 4",
+     "kind": "color",
+     "default": "#ff8c42",
+     "detail": "Fourth stop"
+    },
+    {
+     "id": "color5",
+     "label": "Colour 5",
+     "kind": "color",
+     "default": "#ffdf8e",
+     "detail": "Last stop"
+    },
+    {
+     "id": "colorSpace",
+     "label": "Colour space",
+     "kind": "select",
+     "options": [
+      "Linear",
+      "OKLab"
+     ],
+     "default": 1,
+     "detail": "The space the colours mix in"
+    },
+    {
+     "id": "count",
+     "label": "Points",
+     "kind": "number",
+     "min": 2,
+     "max": 8,
+     "step": 1,
+     "default": 5,
+     "detail": "How many colour points"
+    },
+    {
+     "id": "smoothness",
+     "label": "Smoothness",
+     "kind": "number",
+     "min": 0,
+     "max": 5,
+     "step": 0.01,
+     "default": 2,
+     "detail": "How smoothly they blend"
+    },
+    {
+     "id": "variation",
+     "label": "Variation",
+     "kind": "number",
+     "min": 0,
+     "max": 1,
+     "step": 0.01,
+     "default": 0.35,
+     "detail": "How much the edge softness varies"
+    },
+    {
+     "id": "swirl",
+     "label": "Swirl",
+     "kind": "number",
+     "min": -1,
+     "max": 1,
+     "step": 0.01,
+     "default": 0.3,
+     "detail": "How much the field spirals"
+    },
+    {
+     "id": "drift",
+     "label": "Drift",
+     "kind": "number",
+     "min": 0,
+     "max": 1,
+     "step": 0.01,
+     "default": 0.5,
+     "detail": "How far the points wander"
+    },
+    {
+     "id": "wrapping",
+     "label": "Wrapping",
+     "kind": "number",
+     "min": 0,
+     "max": 1,
+     "step": 0.01,
+     "default": 0,
+     "detail": "How often the palette wraps at the seams"
+    },
+    {
+     "id": "speed",
+     "label": "Speed",
+     "kind": "number",
+     "min": 0,
+     "max": 10,
+     "step": 0.1,
+     "default": 1,
+     "detail": "How fast it moves"
+    },
+    {
+     "id": "seed",
+     "label": "Seed",
+     "kind": "number",
+     "min": 0,
+     "max": 100,
+     "step": 1,
+     "default": 0,
+     "detail": "Which layout"
+    }
+   ]
+  },
+  {
+   "id": "sei-satin",
+   "name": "Satin",
+   "tier": "shaders",
+   "period": 55,
+   "desc": "Draped satin swaying in a breeze, a long sheen along its threads.",
+   "defaults": {
+    "pack": "halo",
+    "speed": 1.0,
+    "motion": 0.5,
+    "second": 0.55,
+    "dynamic": false,
+    "perspective": true,
+    "focus": 0.0
+   },
+   "options": [
+    {
+     "id": "motion",
+     "label": "Motion",
+     "lo": "Slow",
+     "hi": "Fast",
+     "default": 0.5
+    },
+    {
+     "id": "glow",
+     "label": "Glow",
+     "lo": "Dim",
+     "hi": "Bright",
+     "default": 0.5
+    }
+   ],
+   "roles": [
+    [
+     0.24,
+     0.08,
+     0.9,
+     0.04
+    ],
+    [
+     0.32,
+     0.11,
+     0.84,
+     0.07
+    ],
+    [
+     0.42,
+     0.13,
+     0.78,
+     0.09
+    ],
+    [
+     0.54,
+     0.13,
+     0.72,
+     0.1
+    ],
+    [
+     0.66,
+     0.12,
+     0.66,
+     0.11
+    ],
+    [
+     0.92,
+     0.05,
+     0.98,
+     0.03
+    ]
+   ],
+   "packs": [
+    {
+     "id": "halo",
+     "name": "Halo",
+     "dark": [
+      "#ff5005",
+      "#dbba95",
+      "#d0bce1",
+      "#1a0f24",
+      "#fff3e6",
+      "#ffffff"
+     ],
+     "light": [
+      "#ff7a3d",
+      "#f3dcc2",
+      "#e6dbf2",
+      "#d9cbe4",
+      "#ffffff",
+      "#ffffff"
+     ]
+    },
+    {
+     "id": "pensive",
+     "name": "Pensive",
+     "dark": [
+      "#606080",
+      "#8d7dca",
+      "#212121",
+      "#0b0b12",
+      "#e8e4ff",
+      "#ffffff"
+     ],
+     "light": [
+      "#8a8ab0",
+      "#b7a9f0",
+      "#dcdcec",
+      "#cfcfe0",
+      "#ffffff",
+      "#ffffff"
+     ]
+    },
+    {
+     "id": "mint",
+     "name": "Mint",
+     "dark": [
+      "#94ffd1",
+      "#6bf5ff",
+      "#ffffff",
+      "#0a1f1c",
+      "#ffffff",
+      "#ffffff"
+     ],
+     "light": [
+      "#94ffd1",
+      "#6bf5ff",
+      "#ffffff",
+      "#dff7f2",
+      "#ffffff",
+      "#ffffff"
+     ]
+    },
+    {
+     "id": "dusk",
+     "name": "Dusk",
+     "dark": [
+      "#ff0561",
+      "#db959f",
+      "#bcc1e1",
+      "#0f1224",
+      "#ffe6ea",
+      "#ffffff"
+     ],
+     "light": [
+      "#ff3d81",
+      "#f3c2c9",
+      "#dbdff2",
+      "#cbcee4",
+      "#ffffff",
+      "#ffffff"
+     ]
+    },
+    {
+     "id": "lagoon",
+     "name": "Lagoon",
+     "dark": [
+      "#1effd2",
+      "#9cd9db",
+      "#e0e1c0",
+      "#242411",
+      "#e8ffff",
+      "#ffffff"
+     ],
+     "light": [
+      "#50ffdf",
+      "#c7f2f3",
+      "#f2f2dd",
+      "#e3e4cd",
+      "#ffffff",
+      "#ffffff"
+     ]
+    }
+   ],
+   "dynamic": {
+    "light": {
+     "dawn": {
+      "dL": [
+       -0.015,
+       -0.015,
+       -0.015,
+       -0.015,
+       -0.015,
+       -0.015
+      ],
+      "kC": [
+       1.1,
+       1.1,
+       1.1,
+       1.1,
+       1.1,
+       1.1
+      ],
+      "dh": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "tint": [
+       355.0,
+       0.24
+      ]
+     },
+     "day": {
+      "dL": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "kC": [
+       1.0,
+       1.0,
+       1.0,
+       1.0,
+       1.0,
+       1.0
+      ],
+      "dh": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "tint": [
+       0.0,
+       0.0
+      ]
+     },
+     "dusk": {
+      "dL": [
+       -0.035,
+       -0.035,
+       -0.035,
+       -0.035,
+       -0.035,
+       -0.035
+      ],
+      "kC": [
+       1.16,
+       1.16,
+       1.16,
+       1.16,
+       1.16,
+       1.16
+      ],
+      "dh": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "tint": [
+       335.0,
+       0.3
+      ]
+     },
+     "night": {
+      "dL": [
+       -0.105,
+       -0.105,
+       -0.105,
+       -0.105,
+       -0.105,
+       -0.105
+      ],
+      "kC": [
+       0.9,
+       0.9,
+       0.9,
+       0.9,
+       0.9,
+       0.9
+      ],
+      "dh": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "tint": [
+       262.0,
+       0.46
+      ]
+     }
+    },
+    "dark": {
+     "dawn": {
+      "dL": [
+       0.03,
+       0.03,
+       0.03,
+       0.03,
+       0.03,
+       0.03
+      ],
+      "kC": [
+       1.12,
+       1.12,
+       1.12,
+       1.12,
+       1.12,
+       1.12
+      ],
+      "dh": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "tint": [
+       355.0,
+       0.24
+      ]
+     },
+     "day": {
+      "dL": [
+       0.085,
+       0.085,
+       0.085,
+       0.085,
+       0.085,
+       0.085
+      ],
+      "kC": [
+       0.92,
+       0.92,
+       0.92,
+       0.92,
+       0.92,
+       0.92
+      ],
+      "dh": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "tint": [
+       232.0,
+       0.18
+      ]
+     },
+     "dusk": {
+      "dL": [
+       0.03,
+       0.03,
+       0.03,
+       0.03,
+       0.03,
+       0.03
+      ],
+      "kC": [
+       1.18,
+       1.18,
+       1.18,
+       1.18,
+       1.18,
+       1.18
+      ],
+      "dh": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "tint": [
+       335.0,
+       0.32
+      ]
+     },
+     "night": {
+      "dL": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "kC": [
+       1.0,
+       1.0,
+       1.0,
+       1.0,
+       1.0,
+       1.0
+      ],
+      "dh": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "tint": [
+       0.0,
+       0.0
+      ]
+     }
+    },
+    "sun": {
+     "dawn": [
+      0.0,
+      0.0
+     ],
+     "day": [
+      0.0,
+      0.0
+     ],
+     "dusk": [
+      0.0,
+      0.0
+     ],
+     "night": [
+      0.0,
+      0.0
+     ]
+    }
+   },
+   "perspective": {
+    "mode": "layers",
+    "default": true
+   },
+   "focus": {
+    "default": 0.0
+   },
+   "match": {
+    "off": [
+     22.5,
+     12.5,
+     0.0,
+     -15.0,
+     -30.0,
+     -1.5
+    ],
+    "hero": 2,
+    "ck": 1.0,
+    "lk": 1.0,
+    "dark_warm": {
+     "band": [
+      -10,
+      15,
+      100,
+      120
+     ],
+     "ground_hue": 330,
+     "mid_hue": 355,
+     "ground_below": 0.32,
+     "mid_below": 0.62,
+     "mid_amount": 1.0,
+     "kc": 1.3,
+     "dl": 0.03,
+     "bright_dl": 0.06,
+     "bright_kc": 1.15
+    },
+    "dl": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "dc": [
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "cm": [
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "glsl": "// shader-effects-inc/shaders (MIT, THIRD_PARTY_NOTICES \"shader-effects-inc shaders\"), ported by nth from each effect's emitted WGSL (the\n// package's own shader snapshots) into the wallpaper library's GLSL subset. Shared by every effect of the Shaders section:\n// - its options are the effect's own props, in u_e (the host fills them from the Shaders settings: colours as linear rgba, numbers as given);\n// - the package's integer (bit-op) Perlin hash cannot run on the subset (no bit operations), so its Perlin noise is the library's gradient noise;\n// - its time runs on, so the loop is closed by crossfading the effect at t with itself at t - T across the loop (frame T is frame 0 exactly); T is 55 s (ED-NEW-shader-effects-2).\nconst float T = 55.0;\nvec2 sUV(vec2 p) { float a = u_res.x / max(u_res.y, 1.0); return vec2((p.x / a + 1.0) * 0.5, (p.y + 1.0) * 0.5); }\nfloat sAspect() { return u_res.x / max(u_res.y, 1.0); }\nvec3 sMix(vec3 a, vec3 b, float t, float space) { return space < 0.5 ? mix(a, b, t) : lab2lin(mix(lin2lab(a), lin2lab(b), t)); }\nfloat pn2(vec2 p) { return gnoise(vec3(p, 0.37)) * 0.66; }\nfloat pn3(vec3 p) { return gnoise(p) * 0.66; }\n\n// u_e: color@0, highlightColor@4, foldCount@8, foldDirection@9, foldDepth@10, foldWidth@11, pinning@12, seed@13, speed@14, breeze@15, gloss@16, anisotropy@17, bloom@18, sheen@19, weave@20, fiberAngle@21, lightAngle@22, fill@23\nvec3 p_color() { return u_e[0].rgb; }\nvec3 p_highlightColor() { return u_e[1].rgb; }\nfloat p_foldCount() { return u_e[2].x; }\nfloat p_foldDirection() { return u_e[2].y; }\nfloat p_foldDepth() { return u_e[2].z; }\nfloat p_foldWidth() { return u_e[2].w; }\nfloat p_pinning() { return u_e[3].x; }\nfloat p_seed() { return u_e[3].y; }\nfloat p_speed() { return u_e[3].z; }\nfloat p_breeze() { return u_e[3].w; }\nfloat p_gloss() { return u_e[4].x; }\nfloat p_anisotropy() { return u_e[4].y; }\nfloat p_bloom() { return u_e[4].z; }\nfloat p_sheen() { return u_e[4].w; }\nfloat p_weave() { return u_e[5].x; }\nfloat p_fiberAngle() { return u_e[5].y; }\nfloat p_lightAngle() { return u_e[5].z; }\nfloat p_fill() { return u_e[5].w; }\n// Satin: draped cloth. Up to 12 folds (seeded height, width, phase and spacing) run along a direction, swaying in a breeze, gathered\n// at the top edge by Pinning; the surface normal comes from finite differences of the fold height, threads add a fine grain, and two\n// anisotropic Ward lobes (a tight streak and a broad bloom) plus a grazing sheen light it, tone-mapped (Khronos neutral). The package\n// unrolls the folds at compile time (Folds is compile-time there); here they are a loop to 12 gated by Folds, so it changes live.\nfloat effSpeed() { return p_speed(); }\nfloat stH(float s, float k) { return fract(sin(s * k) * 43758.5453); }\n// x: height, y: across-displacement of the cloth at q\nvec2 stCloth(vec2 q, float t, float aspect) {\n  vec2 dT = vec2(cos(p_foldDirection() * 0.017453292519943295), sin(p_foldDirection() * 0.017453292519943295));\n  vec2 dP = vec2(-dT.y, dT.x);\n  float along = dot(q, dT);\n  float across = dot(q, dP);\n  float ext = abs(dT.x) * aspect + abs(dT.y);\n  float a = along / ext + 0.5;\n  float spread = (abs(dP.x) * aspect + abs(dP.y)) * 1.1;\n  float n = clamp(floor(p_foldCount() + 0.5), 1.0, 12.0);\n  float hang = clamp(a, 0.0, 1.0);\n  float freeA = mix(1.0, hang, p_pinning());\n  float open = mix(1.0, mix(0.7, 1.2, hang), p_pinning());\n  float br = p_breeze();\n  float h = 0.0; float shift = 0.0; float bulge = 0.0;\n  for (int i = 0; i < 12; i++) {\n    float fi = float(i);\n    if (fi < n) {\n      float s = p_seed() + 0.37 + fi * 31.7;\n      float fh = p_foldDepth() * mix(0.35, 1.0, stH(s, 39.425));\n      float ph = stH(s, 94.673) * 6.283185307179586;\n      float off = spread * (fi - (n - 1.0) * 0.5) / n + (stH(s, 12.9898) - 0.5) * 0.8 * (spread / n);\n      float spine = off + (sin(a * 3.1 + t * 0.35 + ph) * 0.045 + sin(a * 6.7 - t * 0.22 + ph * 2.0) * 0.018 + sin(a * 11.3 + t * 0.5 + ph * 3.0) * 0.007) * mix(0.35, 1.0, br) * freeA\n                 + sin(t * 0.7 + ph) * br * 0.08 * freeA;\n      float fw = p_foldWidth() * mix(0.6, 1.5, stH(s, 78.233));\n      float d = (across - spine) / (fw * open);\n      float d2 = d * d;\n      float prof = exp(-mix(d2, d2 * d2, 0.7) * 2.0);\n      h += fh * (0.7 + sin(a * 2.4 + ph + t * 0.4) * 0.3) * prof;\n      shift += prof * (spine - off);\n      bulge += fh * 0.25 * sign(d) * (1.0 - prof);\n    }\n  }\n  return vec2(h, across - shift + bulge);\n}\nfloat stWard(vec3 n, vec3 tg, vec3 l, vec3 v, float aT, float aB) {\n  vec3 T3 = normalize(tg - n * dot(n, tg));\n  vec3 B3 = cross(n, T3);\n  vec3 H = normalize(l - v);\n  float hT = dot(H, T3); float hB = dot(H, B3);\n  float hN = clamp(abs(dot(H, n)), 1e-4, 1.0);\n  aT = max(aT, 1e-4); aB = max(aB, 1e-4);\n  return exp(-((hT / aT) * (hT / aT) + (hB / aB) * (hB / aB)) / ((hN + 1.0) * 0.5));\n}\nvec3 stTone(vec3 c) {\n  float x = min(c.x, min(c.y, c.z));\n  float o = x < 0.08 ? x - 6.25 * x * x : 0.04;\n  c -= o;\n  float peak = max(c.x, max(c.y, c.z));\n  if (peak < 0.76) return c;\n  float np = 1.0 - 0.0576 / (peak + 0.24 - 0.76);\n  c *= np / peak;\n  float g = 1.0 - 1.0 / (0.15 * (peak - np) + 1.0);\n  return mix(c, vec3(np), g);\n}\nvec3 eff(vec2 uv, float t) {\n  float aspect = sAspect();\n  vec2 q = vec2((uv.x - 0.5) * aspect, uv.y - 0.5);\n  float px = stCloth(q + vec2(0.004, 0.0), t, aspect).x;\n  float mx = stCloth(q - vec2(0.004, 0.0), t, aspect).x;\n  float py = stCloth(q + vec2(0.0, 0.004), t, aspect).x;\n  float my = stCloth(q - vec2(0.0, 0.004), t, aspect).x;\n  vec2 c0 = stCloth(q, t, aspect);\n  vec3 nf = normalize(vec3(-0.3 * (px - mx) / 0.008, -0.3 * (py - my) / 0.008, -1.0));\n  vec2 fT = vec2(cos(p_fiberAngle() * 0.017453292519943295), sin(p_fiberAngle() * 0.017453292519943295));\n  vec2 fP = vec2(-fT.y, fT.x);\n  vec2 dT = vec2(cos(p_foldDirection() * 0.017453292519943295), sin(p_foldDirection() * 0.017453292519943295));\n  vec2 dP = vec2(-dT.y, dT.x);\n  float ext = abs(dT.x) * aspect + abs(dT.y);\n  vec2 onCloth = dT * (dot(q, dT) / ext + 0.5) + dP * c0.y;\n  float fa = dot(onCloth, fT); float fc = dot(onCloth, fP);\n  float threads = pn2(vec2(fa * 14.0, fc * 420.0)) + pn2(vec2(fa * 26.0 + 3.1, fc * 900.0 + 7.7)) * 0.5;\n  vec3 n = normalize(vec3(nf.xy + fP * threads * p_weave() * 0.1, nf.z));\n  vec2 key = vec2(cos(p_lightAngle() * 0.017453292519943295), sin(p_lightAngle() * 0.017453292519943295));\n  vec3 L = normalize(vec3(key, -0.65));\n  vec3 Lf = normalize(vec3(-key, -0.45));\n  float diffuse = 0.18 + clamp((dot(n, L) + 0.35) / 1.35, 0.0, 1.0) * 0.9 + clamp((dot(n, Lf) + 0.6) / 1.6, 0.0, 1.0) * p_fill() * 0.45;\n  float curv = (px + mx + py + my - c0.x * 4.0) / 0.000016;\n  float cavity = clamp(1.0 - curv * 0.0012, 0.6, 1.1);\n  vec3 view = normalize(vec3((uv.x - 0.5) * aspect * 0.6, (uv.y - 0.5) * 0.6, 1.0));\n  float gl = p_gloss(); float an = p_anisotropy();\n  float bA = mix(0.05, 0.45, 1.0 - gl);\n  float bB = mix(0.05, 0.45, 0.85);\n  vec3 tg = vec3(fT, 0.0);\n  float spec = stWard(n, tg, L, view, bA * (1.0 + an * 7.0), max(bA * (1.0 - an * 0.55), 0.02)) * mix(0.25, 0.9, gl)\n             + stWard(n, tg, L, view, bB * (1.0 + an * 0.5 * 7.0), max(bB * (1.0 - an * 0.5 * 0.55), 0.02)) * p_bloom() * 0.35;\n  float grazing = 1.0 - clamp(-dot(n, view), 0.0, 1.0);\n  float sheen = pow(grazing, mix(3.0, 1.0, mix(0.7, 0.3, gl))) * clamp((dot(n, L) + 0.5) / 1.5, 0.0, 1.0) * p_sheen() * 0.6;\n  return max(stTone(p_color() * diffuse * cavity + p_highlightColor() * (spec + sheen) * cavity), vec3(0.0));\n}\n\nvec3 wall(vec2 p, float t) {\n  float sp = effSpeed() * mix(0.5, 1.5, u_opt.x);\n  vec2 uv = sUV(p + tiltD(0.4));\n  // ED-NEW-shader-effects-2: a still picture (an effect with no speed, or its speed at 0) drifts once round a small circle over the loop,\n  // its size Motion's (fract, so frame T is frame 0 to the bit), so every wallpaper moves (R-TEST-1) and the loop closes; a moving effect does not drift\n  float a = 6.283185307179586 * fract(t / T);\n  uv += (sp == 0.0 ? 0.06 * u_opt.x : 0.0) * vec2(cos(a) - 1.0, sin(a));\n  vec3 c = mix(eff(uv, t * sp), eff(uv, (t - T) * sp), t / T);\n  return lin2srgb(shoulder(max(c * mix(0.7, 1.3, u_opt.y), vec3(0.0))));\n}\n",
+   "props": [
+    {
+     "id": "color",
+     "label": "Colour",
+     "kind": "color",
+     "default": "#c92c40",
+     "detail": "The cloth's dye"
+    },
+    {
+     "id": "highlightColor",
+     "label": "Highlight",
+     "kind": "color",
+     "default": "#c4667b",
+     "detail": "The light the weave catches"
+    },
+    {
+     "id": "foldCount",
+     "label": "Folds",
+     "kind": "number",
+     "min": 1,
+     "max": 12,
+     "step": 1,
+     "default": 7,
+     "detail": "How many ridges"
+    },
+    {
+     "id": "foldDirection",
+     "label": "Direction",
+     "kind": "number",
+     "min": 0,
+     "max": 360,
+     "step": 1,
+     "default": 90,
+     "detail": "Which way the folds run"
+    },
+    {
+     "id": "foldDepth",
+     "label": "Depth",
+     "kind": "number",
+     "min": 0,
+     "max": 1,
+     "step": 0.01,
+     "default": 0.5,
+     "detail": "How deep the folds are"
+    },
+    {
+     "id": "foldWidth",
+     "label": "Width",
+     "kind": "number",
+     "min": 0.04,
+     "max": 0.4,
+     "step": 0.01,
+     "default": 0.14,
+     "detail": "How wide each ridge is"
+    },
+    {
+     "id": "pinning",
+     "label": "Pinning",
+     "kind": "number",
+     "min": 0,
+     "max": 1,
+     "step": 0.01,
+     "default": 0.6,
+     "detail": "How gathered it is at the top"
+    },
+    {
+     "id": "seed",
+     "label": "Seed",
+     "kind": "number",
+     "min": 0,
+     "max": 100,
+     "step": 1,
+     "default": 0,
+     "detail": "Which layout of folds"
+    },
+    {
+     "id": "speed",
+     "label": "Speed",
+     "kind": "number",
+     "min": 0,
+     "max": 4,
+     "step": 0.01,
+     "default": 1,
+     "detail": "How fast the cloth moves"
+    },
+    {
+     "id": "breeze",
+     "label": "Breeze",
+     "kind": "number",
+     "min": 0,
+     "max": 1,
+     "step": 0.01,
+     "default": 0.4,
+     "detail": "How far the folds sway"
+    },
+    {
+     "id": "gloss",
+     "label": "Gloss",
+     "kind": "number",
+     "min": 0,
+     "max": 1,
+     "step": 0.01,
+     "default": 0.1,
+     "detail": "Matte satin to glossy silk"
+    },
+    {
+     "id": "anisotropy",
+     "label": "Anisotropy",
+     "kind": "number",
+     "min": 0,
+     "max": 1,
+     "step": 0.01,
+     "default": 0.7,
+     "detail": "How long the streak is"
+    },
+    {
+     "id": "bloom",
+     "label": "Bloom",
+     "kind": "number",
+     "min": 0,
+     "max": 1,
+     "step": 0.01,
+     "default": 0.5,
+     "detail": "The broad glow round the highlight"
+    },
+    {
+     "id": "sheen",
+     "label": "Sheen",
+     "kind": "number",
+     "min": 0,
+     "max": 1,
+     "step": 0.01,
+     "default": 0.5,
+     "detail": "The glow on the folds' flanks",
+     "probe": {
+      "@hi": 1
+     }
+    },
+    {
+     "id": "weave",
+     "label": "Weave",
+     "kind": "number",
+     "min": 0,
+     "max": 1,
+     "step": 0.01,
+     "default": 0.1,
+     "detail": "How visible the threads are",
+     "probe": {
+      "@hi": 1
+     }
+    },
+    {
+     "id": "fiberAngle",
+     "label": "Thread angle",
+     "kind": "number",
+     "min": 0,
+     "max": 360,
+     "step": 1,
+     "default": 90,
+     "detail": "Which way the threads run"
+    },
+    {
+     "id": "lightAngle",
+     "label": "Light angle",
+     "kind": "number",
+     "min": 0,
+     "max": 360,
+     "step": 1,
+     "default": 215,
+     "detail": "Where the key light comes from"
+    },
+    {
+     "id": "fill",
+     "label": "Fill",
+     "kind": "number",
+     "min": 0,
+     "max": 1,
+     "step": 0.01,
+     "default": 0.35,
+     "detail": "The fill light from the other side"
+    }
+   ]
+  },
+  {
+   "id": "sei-strands",
+   "name": "Strands",
+   "tier": "shaders",
+   "period": 55,
+   "desc": "Glowing strands waving between two points, colours flowing along them.",
+   "defaults": {
+    "pack": "halo",
+    "speed": 1.0,
+    "motion": 0.5,
+    "second": 0.55,
+    "dynamic": false,
+    "perspective": true,
+    "focus": 0.0
+   },
+   "options": [
+    {
+     "id": "motion",
+     "label": "Motion",
+     "lo": "Slow",
+     "hi": "Fast",
+     "default": 0.5
+    },
+    {
+     "id": "glow",
+     "label": "Glow",
+     "lo": "Dim",
+     "hi": "Bright",
+     "default": 0.5
+    }
+   ],
+   "roles": [
+    [
+     0.24,
+     0.08,
+     0.9,
+     0.04
+    ],
+    [
+     0.32,
+     0.11,
+     0.84,
+     0.07
+    ],
+    [
+     0.42,
+     0.13,
+     0.78,
+     0.09
+    ],
+    [
+     0.54,
+     0.13,
+     0.72,
+     0.1
+    ],
+    [
+     0.66,
+     0.12,
+     0.66,
+     0.11
+    ],
+    [
+     0.92,
+     0.05,
+     0.98,
+     0.03
+    ]
+   ],
+   "packs": [
+    {
+     "id": "halo",
+     "name": "Halo",
+     "dark": [
+      "#ff5005",
+      "#dbba95",
+      "#d0bce1",
+      "#1a0f24",
+      "#fff3e6",
+      "#ffffff"
+     ],
+     "light": [
+      "#ff7a3d",
+      "#f3dcc2",
+      "#e6dbf2",
+      "#d9cbe4",
+      "#ffffff",
+      "#ffffff"
+     ]
+    },
+    {
+     "id": "pensive",
+     "name": "Pensive",
+     "dark": [
+      "#606080",
+      "#8d7dca",
+      "#212121",
+      "#0b0b12",
+      "#e8e4ff",
+      "#ffffff"
+     ],
+     "light": [
+      "#8a8ab0",
+      "#b7a9f0",
+      "#dcdcec",
+      "#cfcfe0",
+      "#ffffff",
+      "#ffffff"
+     ]
+    },
+    {
+     "id": "mint",
+     "name": "Mint",
+     "dark": [
+      "#94ffd1",
+      "#6bf5ff",
+      "#ffffff",
+      "#0a1f1c",
+      "#ffffff",
+      "#ffffff"
+     ],
+     "light": [
+      "#94ffd1",
+      "#6bf5ff",
+      "#ffffff",
+      "#dff7f2",
+      "#ffffff",
+      "#ffffff"
+     ]
+    },
+    {
+     "id": "dusk",
+     "name": "Dusk",
+     "dark": [
+      "#ff0561",
+      "#db959f",
+      "#bcc1e1",
+      "#0f1224",
+      "#ffe6ea",
+      "#ffffff"
+     ],
+     "light": [
+      "#ff3d81",
+      "#f3c2c9",
+      "#dbdff2",
+      "#cbcee4",
+      "#ffffff",
+      "#ffffff"
+     ]
+    },
+    {
+     "id": "lagoon",
+     "name": "Lagoon",
+     "dark": [
+      "#1effd2",
+      "#9cd9db",
+      "#e0e1c0",
+      "#242411",
+      "#e8ffff",
+      "#ffffff"
+     ],
+     "light": [
+      "#50ffdf",
+      "#c7f2f3",
+      "#f2f2dd",
+      "#e3e4cd",
+      "#ffffff",
+      "#ffffff"
+     ]
+    }
+   ],
+   "dynamic": {
+    "light": {
+     "dawn": {
+      "dL": [
+       -0.015,
+       -0.015,
+       -0.015,
+       -0.015,
+       -0.015,
+       -0.015
+      ],
+      "kC": [
+       1.1,
+       1.1,
+       1.1,
+       1.1,
+       1.1,
+       1.1
+      ],
+      "dh": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "tint": [
+       355.0,
+       0.24
+      ]
+     },
+     "day": {
+      "dL": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "kC": [
+       1.0,
+       1.0,
+       1.0,
+       1.0,
+       1.0,
+       1.0
+      ],
+      "dh": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "tint": [
+       0.0,
+       0.0
+      ]
+     },
+     "dusk": {
+      "dL": [
+       -0.035,
+       -0.035,
+       -0.035,
+       -0.035,
+       -0.035,
+       -0.035
+      ],
+      "kC": [
+       1.16,
+       1.16,
+       1.16,
+       1.16,
+       1.16,
+       1.16
+      ],
+      "dh": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "tint": [
+       335.0,
+       0.3
+      ]
+     },
+     "night": {
+      "dL": [
+       -0.105,
+       -0.105,
+       -0.105,
+       -0.105,
+       -0.105,
+       -0.105
+      ],
+      "kC": [
+       0.9,
+       0.9,
+       0.9,
+       0.9,
+       0.9,
+       0.9
+      ],
+      "dh": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "tint": [
+       262.0,
+       0.46
+      ]
+     }
+    },
+    "dark": {
+     "dawn": {
+      "dL": [
+       0.03,
+       0.03,
+       0.03,
+       0.03,
+       0.03,
+       0.03
+      ],
+      "kC": [
+       1.12,
+       1.12,
+       1.12,
+       1.12,
+       1.12,
+       1.12
+      ],
+      "dh": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "tint": [
+       355.0,
+       0.24
+      ]
+     },
+     "day": {
+      "dL": [
+       0.085,
+       0.085,
+       0.085,
+       0.085,
+       0.085,
+       0.085
+      ],
+      "kC": [
+       0.92,
+       0.92,
+       0.92,
+       0.92,
+       0.92,
+       0.92
+      ],
+      "dh": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "tint": [
+       232.0,
+       0.18
+      ]
+     },
+     "dusk": {
+      "dL": [
+       0.03,
+       0.03,
+       0.03,
+       0.03,
+       0.03,
+       0.03
+      ],
+      "kC": [
+       1.18,
+       1.18,
+       1.18,
+       1.18,
+       1.18,
+       1.18
+      ],
+      "dh": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "tint": [
+       335.0,
+       0.32
+      ]
+     },
+     "night": {
+      "dL": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "kC": [
+       1.0,
+       1.0,
+       1.0,
+       1.0,
+       1.0,
+       1.0
+      ],
+      "dh": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "tint": [
+       0.0,
+       0.0
+      ]
+     }
+    },
+    "sun": {
+     "dawn": [
+      0.0,
+      0.0
+     ],
+     "day": [
+      0.0,
+      0.0
+     ],
+     "dusk": [
+      0.0,
+      0.0
+     ],
+     "night": [
+      0.0,
+      0.0
+     ]
+    }
+   },
+   "perspective": {
+    "mode": "layers",
+    "default": true
+   },
+   "focus": {
+    "default": 0.0
+   },
+   "match": {
+    "off": [
+     22.5,
+     12.5,
+     0.0,
+     -15.0,
+     -30.0,
+     -1.5
+    ],
+    "hero": 2,
+    "ck": 1.0,
+    "lk": 1.0,
+    "dark_warm": {
+     "band": [
+      -10,
+      15,
+      100,
+      120
+     ],
+     "ground_hue": 330,
+     "mid_hue": 355,
+     "ground_below": 0.32,
+     "mid_below": 0.62,
+     "mid_amount": 1.0,
+     "kc": 1.3,
+     "dl": 0.03,
+     "bright_dl": 0.06,
+     "bright_kc": 1.15
+    },
+    "dl": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "dc": [
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "cm": [
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "glsl": "// shader-effects-inc/shaders (MIT, THIRD_PARTY_NOTICES \"shader-effects-inc shaders\"), ported by nth from each effect's emitted WGSL (the\n// package's own shader snapshots) into the wallpaper library's GLSL subset. Shared by every effect of the Shaders section:\n// - its options are the effect's own props, in u_e (the host fills them from the Shaders settings: colours as linear rgba, numbers as given);\n// - the package's integer (bit-op) Perlin hash cannot run on the subset (no bit operations), so its Perlin noise is the library's gradient noise;\n// - its time runs on, so the loop is closed by crossfading the effect at t with itself at t - T across the loop (frame T is frame 0 exactly); T is 55 s (ED-NEW-shader-effects-2).\nconst float T = 55.0;\nvec2 sUV(vec2 p) { float a = u_res.x / max(u_res.y, 1.0); return vec2((p.x / a + 1.0) * 0.5, (p.y + 1.0) * 0.5); }\nfloat sAspect() { return u_res.x / max(u_res.y, 1.0); }\nvec3 sMix(vec3 a, vec3 b, float t, float space) { return space < 0.5 ? mix(a, b, t) : lab2lin(mix(lin2lab(a), lin2lab(b), t)); }\nfloat pn2(vec2 p) { return gnoise(vec3(p, 0.37)) * 0.66; }\nfloat pn3(vec3 p) { return gnoise(p) * 0.66; }\n\n// u_e: speed@0, amplitude@1, frequency@2, lineCount@3, lineWidth@4, softness@5, spread@6, pinEdges@7, color1@8, color2@12, color3@16, color4@20, colorSpace@24, colorScale@25, colorVariance@26, colorSpeed@27, startX@28, startY@29, endX@30, endY@31\nfloat p_speed() { return u_e[0].x; }\nfloat p_amplitude() { return u_e[0].y; }\nfloat p_frequency() { return u_e[0].z; }\nfloat p_lineCount() { return u_e[0].w; }\nfloat p_lineWidth() { return u_e[1].x; }\nfloat p_softness() { return u_e[1].y; }\nfloat p_spread() { return u_e[1].z; }\nfloat p_pinEdges() { return u_e[1].w; }\nvec3 p_color1() { return u_e[2].rgb; }\nvec3 p_color2() { return u_e[3].rgb; }\nvec3 p_color3() { return u_e[4].rgb; }\nvec3 p_color4() { return u_e[5].rgb; }\nfloat p_colorSpace() { return u_e[6].x; }\nfloat p_colorScale() { return u_e[6].y; }\nfloat p_colorVariance() { return u_e[6].z; }\nfloat p_colorSpeed() { return u_e[6].w; }\nfloat p_startX() { return u_e[7].x; }\nfloat p_startY() { return u_e[7].y; }\nfloat p_endX() { return u_e[7].z; }\nfloat p_endY() { return u_e[7].w; }\n// Strands: up to 16 glowing strands waving between a start and an end point, fanned out by Spread, each shimmering and coloured from a\n// four-stop gradient that flows along it. The package runs two clocks (waves on Speed, colours on Colour speed), so this effect takes\n// the clock (effSpeed 1) and scales each itself. Colours accumulate in the chosen space (OKLab by default) and convert back once.\nfloat effSpeed() { return p_speed() != 0.0 || p_colorSpeed() != 0.0 ? 1.0 : 0.0; }\nvec3 sdStop(float k) {\n  k = clamp(k, 0.0, 1.0);\n  if (k < 0.34) return sMix(p_color1(), p_color2(), k / 0.34, p_colorSpace());\n  if (k < 0.67) return sMix(p_color2(), p_color3(), (k - 0.34) / 0.33, p_colorSpace());\n  return sMix(p_color3(), p_color4(), (k - 0.67) / 0.33, p_colorSpace());\n}\nvec3 eff(vec2 uv, float t) {\n  float aspect = sAspect();\n  vec2 sp = vec2(p_startX() * aspect, 1.0 - p_startY());\n  vec2 ep = vec2(p_endX() * aspect, 1.0 - p_endY());\n  vec2 dir = ep - sp;\n  float len = max(length(dir), 1e-6);\n  vec2 nd = dir / len;\n  vec2 pd = vec2(-nd.y, nd.x);\n  vec2 rel = vec2(uv.x * aspect, uv.y) - sp;\n  float prog = dot(rel, nd) / len;\n  float perp = dot(rel, pd);\n  bool pin = p_pinEdges() > 0.5;\n  float pinch = pin ? sin(clamp(prog, 0.0, 1.0) * 3.141592653589793) : 1.0;\n  float edgeFade = pin ? smoothstep(0.0, 0.06, prog) * (1.0 - smoothstep(0.94, 1.0, prog)) : 1.0;\n  float waveT = t * p_speed();\n  float colorT = t * p_colorSpeed();\n  float thick = p_lineWidth() * 0.07;\n  float soft = p_softness() * 0.08 + 8e-4;\n  float n = clamp(floor(p_lineCount() + 0.5), 1.0, 16.0);\n  float denom = max(n - 1.0, 1.0);\n  float waveBase = prog * 6.283185307179586 * p_frequency();\n  float shimmerBase = prog * 8.0 + waveT * 2.0;\n  float colorBase = prog * p_colorScale() + colorT;\n  bool lab = p_colorSpace() > 0.5;\n  vec3 acc = vec3(0.0);\n  float wsum = 0.0;\n  for (int i = 0; i < 16; i++) {\n    float fi = float(i);\n    if (fi < n) {\n      float nm = fi / denom;\n      float st = waveT * (nm * 0.6 + 0.7);\n      float wave = sin(waveBase + st + fi * 0.9) + sin(waveBase * 2.1 - st * 0.7 + fi * 0.9) * 0.5;\n      float centre = ((nm - 0.5) * p_spread() + wave * p_amplitude() * 0.06) * pinch;\n      float line = 1.0 - smoothstep(thick, thick + soft, abs(perp - centre));\n      float shimmer = sin(shimmerBase + fi) * 0.15 + 0.85;\n      float cc = colorBase + nm * p_colorVariance();\n      vec3 c = sdStop(1.0 - abs(fract(cc * 0.5) * 2.0 - 1.0));\n      float w = line * shimmer;\n      acc += (lab ? lin2lab(c) : c) * w;\n      wsum += w;\n    }\n  }\n  vec3 col = acc / max(wsum, 1e-4);\n  col = lab ? lab2lin(col) : col;\n  return max(col, vec3(0.0)) * clamp(wsum * edgeFade, 0.0, 1.0);\n}\n\nvec3 wall(vec2 p, float t) {\n  float sp = effSpeed() * mix(0.5, 1.5, u_opt.x);\n  vec2 uv = sUV(p + tiltD(0.4));\n  // ED-NEW-shader-effects-2: a still picture (an effect with no speed, or its speed at 0) drifts once round a small circle over the loop,\n  // its size Motion's (fract, so frame T is frame 0 to the bit), so every wallpaper moves (R-TEST-1) and the loop closes; a moving effect does not drift\n  float a = 6.283185307179586 * fract(t / T);\n  uv += (sp == 0.0 ? 0.06 * u_opt.x : 0.0) * vec2(cos(a) - 1.0, sin(a));\n  vec3 c = mix(eff(uv, t * sp), eff(uv, (t - T) * sp), t / T);\n  return lin2srgb(shoulder(max(c * mix(0.7, 1.3, u_opt.y), vec3(0.0))));\n}\n",
+   "props": [
+    {
+     "id": "speed",
+     "label": "Speed",
+     "kind": "number",
+     "min": 0,
+     "max": 2,
+     "step": 0.1,
+     "default": 0.5,
+     "detail": "How fast the strands wave"
+    },
+    {
+     "id": "amplitude",
+     "label": "Amplitude",
+     "kind": "number",
+     "min": 0,
+     "max": 5,
+     "step": 0.1,
+     "default": 2,
+     "detail": "How far they wave"
+    },
+    {
+     "id": "frequency",
+     "label": "Frequency",
+     "kind": "number",
+     "min": 0,
+     "max": 5,
+     "step": 0.1,
+     "default": 0.3,
+     "detail": "How many waves along each"
+    },
+    {
+     "id": "lineCount",
+     "label": "Strands",
+     "kind": "number",
+     "min": 1,
+     "max": 16,
+     "step": 1,
+     "default": 8,
+     "detail": "How many strands"
+    },
+    {
+     "id": "lineWidth",
+     "label": "Width",
+     "kind": "number",
+     "min": 0,
+     "max": 1,
+     "step": 0.05,
+     "default": 0.05,
+     "detail": "How thick each core is"
+    },
+    {
+     "id": "softness",
+     "label": "Softness",
+     "kind": "number",
+     "min": 0,
+     "max": 1,
+     "step": 0.05,
+     "default": 0.05,
+     "detail": "How feathered the edges are"
+    },
+    {
+     "id": "spread",
+     "label": "Spread",
+     "kind": "number",
+     "min": 0,
+     "max": 1,
+     "step": 0.05,
+     "default": 0.2,
+     "detail": "How far they fan out"
+    },
+    {
+     "id": "pinEdges",
+     "label": "Pin edges",
+     "kind": "select",
+     "options": [
+      "Off",
+      "On"
+     ],
+     "default": 0,
+     "detail": "Pinch them to the start and end points"
+    },
+    {
+     "id": "color1",
+     "label": "Colour 1",
+     "kind": "color",
+     "default": "#00e5ff",
+     "detail": "First stop"
+    },
+    {
+     "id": "color2",
+     "label": "Colour 2",
+     "kind": "color",
+     "default": "#5b8cff",
+     "detail": "Second stop"
+    },
+    {
+     "id": "color3",
+     "label": "Colour 3",
+     "kind": "color",
+     "default": "#b06bff",
+     "detail": "Third stop"
+    },
+    {
+     "id": "color4",
+     "label": "Colour 4",
+     "kind": "color",
+     "default": "#ff5fa2",
+     "detail": "Last stop"
+    },
+    {
+     "id": "colorSpace",
+     "label": "Colour space",
+     "kind": "select",
+     "options": [
+      "Linear",
+      "OKLab"
+     ],
+     "default": 1,
+     "detail": "The space the colours mix in"
+    },
+    {
+     "id": "colorScale",
+     "label": "Colour scale",
+     "kind": "number",
+     "min": 1,
+     "max": 6,
+     "step": 1,
+     "default": 1,
+     "detail": "How often the gradient repeats"
+    },
+    {
+     "id": "colorVariance",
+     "label": "Colour variance",
+     "kind": "number",
+     "min": 0,
+     "max": 1,
+     "step": 0.05,
+     "default": 1,
+     "detail": "How differently the strands are coloured"
+    },
+    {
+     "id": "colorSpeed",
+     "label": "Colour speed",
+     "kind": "number",
+     "min": 0,
+     "max": 2,
+     "step": 0.05,
+     "default": 1,
+     "detail": "How fast the colours flow"
+    },
+    {
+     "id": "startX",
+     "label": "Start X",
+     "kind": "number",
+     "min": 0,
+     "max": 1,
+     "step": 0.01,
+     "default": 0,
+     "detail": "Where they start, left to right"
+    },
+    {
+     "id": "startY",
+     "label": "Start Y",
+     "kind": "number",
+     "min": 0,
+     "max": 1,
+     "step": 0.01,
+     "default": 0.5,
+     "detail": "Where they start, top to bottom"
+    },
+    {
+     "id": "endX",
+     "label": "End X",
+     "kind": "number",
+     "min": 0,
+     "max": 1,
+     "step": 0.01,
+     "default": 1,
+     "detail": "Where they end, left to right"
+    },
+    {
+     "id": "endY",
+     "label": "End Y",
+     "kind": "number",
+     "min": 0,
+     "max": 1,
+     "step": 0.01,
+     "default": 0.5,
+     "detail": "Where they end, top to bottom"
+    }
+   ]
+  },
+  {
+   "id": "sei-studio-background",
+   "name": "Studio Background",
+   "tier": "shaders",
+   "period": 55,
+   "desc": "A lit photo-studio cove, ambient glows drifting.",
+   "defaults": {
+    "pack": "halo",
+    "speed": 1.0,
+    "motion": 0.5,
+    "second": 0.55,
+    "dynamic": false,
+    "perspective": true,
+    "focus": 0.0
+   },
+   "options": [
+    {
+     "id": "motion",
+     "label": "Motion",
+     "lo": "Slow",
+     "hi": "Fast",
+     "default": 0.5
+    },
+    {
+     "id": "glow",
+     "label": "Glow",
+     "lo": "Dim",
+     "hi": "Bright",
+     "default": 0.5
+    }
+   ],
+   "roles": [
+    [
+     0.24,
+     0.08,
+     0.9,
+     0.04
+    ],
+    [
+     0.32,
+     0.11,
+     0.84,
+     0.07
+    ],
+    [
+     0.42,
+     0.13,
+     0.78,
+     0.09
+    ],
+    [
+     0.54,
+     0.13,
+     0.72,
+     0.1
+    ],
+    [
+     0.66,
+     0.12,
+     0.66,
+     0.11
+    ],
+    [
+     0.92,
+     0.05,
+     0.98,
+     0.03
+    ]
+   ],
+   "packs": [
+    {
+     "id": "halo",
+     "name": "Halo",
+     "dark": [
+      "#ff5005",
+      "#dbba95",
+      "#d0bce1",
+      "#1a0f24",
+      "#fff3e6",
+      "#ffffff"
+     ],
+     "light": [
+      "#ff7a3d",
+      "#f3dcc2",
+      "#e6dbf2",
+      "#d9cbe4",
+      "#ffffff",
+      "#ffffff"
+     ]
+    },
+    {
+     "id": "pensive",
+     "name": "Pensive",
+     "dark": [
+      "#606080",
+      "#8d7dca",
+      "#212121",
+      "#0b0b12",
+      "#e8e4ff",
+      "#ffffff"
+     ],
+     "light": [
+      "#8a8ab0",
+      "#b7a9f0",
+      "#dcdcec",
+      "#cfcfe0",
+      "#ffffff",
+      "#ffffff"
+     ]
+    },
+    {
+     "id": "mint",
+     "name": "Mint",
+     "dark": [
+      "#94ffd1",
+      "#6bf5ff",
+      "#ffffff",
+      "#0a1f1c",
+      "#ffffff",
+      "#ffffff"
+     ],
+     "light": [
+      "#94ffd1",
+      "#6bf5ff",
+      "#ffffff",
+      "#dff7f2",
+      "#ffffff",
+      "#ffffff"
+     ]
+    },
+    {
+     "id": "dusk",
+     "name": "Dusk",
+     "dark": [
+      "#ff0561",
+      "#db959f",
+      "#bcc1e1",
+      "#0f1224",
+      "#ffe6ea",
+      "#ffffff"
+     ],
+     "light": [
+      "#ff3d81",
+      "#f3c2c9",
+      "#dbdff2",
+      "#cbcee4",
+      "#ffffff",
+      "#ffffff"
+     ]
+    },
+    {
+     "id": "lagoon",
+     "name": "Lagoon",
+     "dark": [
+      "#1effd2",
+      "#9cd9db",
+      "#e0e1c0",
+      "#242411",
+      "#e8ffff",
+      "#ffffff"
+     ],
+     "light": [
+      "#50ffdf",
+      "#c7f2f3",
+      "#f2f2dd",
+      "#e3e4cd",
+      "#ffffff",
+      "#ffffff"
+     ]
+    }
+   ],
+   "dynamic": {
+    "light": {
+     "dawn": {
+      "dL": [
+       -0.015,
+       -0.015,
+       -0.015,
+       -0.015,
+       -0.015,
+       -0.015
+      ],
+      "kC": [
+       1.1,
+       1.1,
+       1.1,
+       1.1,
+       1.1,
+       1.1
+      ],
+      "dh": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "tint": [
+       355.0,
+       0.24
+      ]
+     },
+     "day": {
+      "dL": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "kC": [
+       1.0,
+       1.0,
+       1.0,
+       1.0,
+       1.0,
+       1.0
+      ],
+      "dh": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "tint": [
+       0.0,
+       0.0
+      ]
+     },
+     "dusk": {
+      "dL": [
+       -0.035,
+       -0.035,
+       -0.035,
+       -0.035,
+       -0.035,
+       -0.035
+      ],
+      "kC": [
+       1.16,
+       1.16,
+       1.16,
+       1.16,
+       1.16,
+       1.16
+      ],
+      "dh": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "tint": [
+       335.0,
+       0.3
+      ]
+     },
+     "night": {
+      "dL": [
+       -0.105,
+       -0.105,
+       -0.105,
+       -0.105,
+       -0.105,
+       -0.105
+      ],
+      "kC": [
+       0.9,
+       0.9,
+       0.9,
+       0.9,
+       0.9,
+       0.9
+      ],
+      "dh": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "tint": [
+       262.0,
+       0.46
+      ]
+     }
+    },
+    "dark": {
+     "dawn": {
+      "dL": [
+       0.03,
+       0.03,
+       0.03,
+       0.03,
+       0.03,
+       0.03
+      ],
+      "kC": [
+       1.12,
+       1.12,
+       1.12,
+       1.12,
+       1.12,
+       1.12
+      ],
+      "dh": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "tint": [
+       355.0,
+       0.24
+      ]
+     },
+     "day": {
+      "dL": [
+       0.085,
+       0.085,
+       0.085,
+       0.085,
+       0.085,
+       0.085
+      ],
+      "kC": [
+       0.92,
+       0.92,
+       0.92,
+       0.92,
+       0.92,
+       0.92
+      ],
+      "dh": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "tint": [
+       232.0,
+       0.18
+      ]
+     },
+     "dusk": {
+      "dL": [
+       0.03,
+       0.03,
+       0.03,
+       0.03,
+       0.03,
+       0.03
+      ],
+      "kC": [
+       1.18,
+       1.18,
+       1.18,
+       1.18,
+       1.18,
+       1.18
+      ],
+      "dh": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "tint": [
+       335.0,
+       0.32
+      ]
+     },
+     "night": {
+      "dL": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "kC": [
+       1.0,
+       1.0,
+       1.0,
+       1.0,
+       1.0,
+       1.0
+      ],
+      "dh": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "tint": [
+       0.0,
+       0.0
+      ]
+     }
+    },
+    "sun": {
+     "dawn": [
+      0.0,
+      0.0
+     ],
+     "day": [
+      0.0,
+      0.0
+     ],
+     "dusk": [
+      0.0,
+      0.0
+     ],
+     "night": [
+      0.0,
+      0.0
+     ]
+    }
+   },
+   "perspective": {
+    "mode": "layers",
+    "default": true
+   },
+   "focus": {
+    "default": 0.0
+   },
+   "match": {
+    "off": [
+     22.5,
+     12.5,
+     0.0,
+     -15.0,
+     -30.0,
+     -1.5
+    ],
+    "hero": 2,
+    "ck": 1.0,
+    "lk": 1.0,
+    "dark_warm": {
+     "band": [
+      -10,
+      15,
+      100,
+      120
+     ],
+     "ground_hue": 330,
+     "mid_hue": 355,
+     "ground_below": 0.32,
+     "mid_below": 0.62,
+     "mid_amount": 1.0,
+     "kc": 1.3,
+     "dl": 0.03,
+     "bright_dl": 0.06,
+     "bright_kc": 1.15
+    },
+    "dl": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "dc": [
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "cm": [
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "glsl": "// shader-effects-inc/shaders (MIT, THIRD_PARTY_NOTICES \"shader-effects-inc shaders\"), ported by nth from each effect's emitted WGSL (the\n// package's own shader snapshots) into the wallpaper library's GLSL subset. Shared by every effect of the Shaders section:\n// - its options are the effect's own props, in u_e (the host fills them from the Shaders settings: colours as linear rgba, numbers as given);\n// - the package's integer (bit-op) Perlin hash cannot run on the subset (no bit operations), so its Perlin noise is the library's gradient noise;\n// - its time runs on, so the loop is closed by crossfading the effect at t with itself at t - T across the loop (frame T is frame 0 exactly); T is 55 s (ED-NEW-shader-effects-2).\nconst float T = 55.0;\nvec2 sUV(vec2 p) { float a = u_res.x / max(u_res.y, 1.0); return vec2((p.x / a + 1.0) * 0.5, (p.y + 1.0) * 0.5); }\nfloat sAspect() { return u_res.x / max(u_res.y, 1.0); }\nvec3 sMix(vec3 a, vec3 b, float t, float space) { return space < 0.5 ? mix(a, b, t) : lab2lin(mix(lin2lab(a), lin2lab(b), t)); }\nfloat pn2(vec2 p) { return gnoise(vec3(p, 0.37)) * 0.66; }\nfloat pn3(vec3 p) { return gnoise(p) * 0.66; }\n\n// u_e: color@0, keyColor@4, keyIntensity@8, keySoftness@9, fillColor@10, fillIntensity@14, fillSoftness@15, fillAngle@16, backColor@17, backIntensity@21, backSoftness@22, brightness@23, vignette@24, centerX@25, centerY@26, lightTarget@27, wallCurvature@28, ambientIntensity@29, speed@30, seed@31\nvec3 p_color() { return u_e[0].rgb; }\nvec3 p_keyColor() { return u_e[1].rgb; }\nfloat p_keyIntensity() { return u_e[2].x; }\nfloat p_keySoftness() { return u_e[2].y; }\nvec3 p_fillColor() { return vec3(u_e[2].z, u_e[2].w, u_e[3].x); }\nfloat p_fillIntensity() { return u_e[3].z; }\nfloat p_fillSoftness() { return u_e[3].w; }\nfloat p_fillAngle() { return u_e[4].x; }\nvec3 p_backColor() { return vec3(u_e[4].y, u_e[4].z, u_e[4].w); }\nfloat p_backIntensity() { return u_e[5].y; }\nfloat p_backSoftness() { return u_e[5].z; }\nfloat p_brightness() { return u_e[5].w; }\nfloat p_vignette() { return u_e[6].x; }\nfloat p_centerX() { return u_e[6].y; }\nfloat p_centerY() { return u_e[6].z; }\nfloat p_lightTarget() { return u_e[6].w; }\nfloat p_wallCurvature() { return u_e[7].x; }\nfloat p_ambientIntensity() { return u_e[7].y; }\nfloat p_speed() { return u_e[7].z; }\nfloat p_seed() { return u_e[7].w; }\n// StudioBackground: a photo studio's cove (wall curving into floor) lit by an overhead key light, two side fills and a back wash, with\n// four ambient glows orbiting slowly (Speed). The package integrates those orbits on the CPU (deltaTime x speed); here they are the\n// same sines of the effect clock, their sizes, radii, rates and phases from the same seeded hash (seed + i x 73.1), so time is closed form.\nfloat effSpeed() { return p_speed(); }\nfloat sbHash(float x) { return fract(sin(x * 12.9898) * 43758.5453); }\nfloat sbSpot(float du, float dv, float k) { return exp((du * du + dv * dv) * -k); }\nfloat sbGlow(vec2 uv, float aspect, float lx, float ly, float s2) { float dx = (uv.x - lx) * aspect; float dy = uv.y - ly; return exp(-0.5 * (dx * dx + dy * dy) / s2); }\nfloat sbLight(vec2 uv, float aspect, float cx, float wallX, float floorX, float soft, float wallY2, float cone, float wallFall, float notFloor, float wallBias, float isFloor, float floorFall, float floorBias) {\n  float decay = mix(5.0, 0.8, soft * 0.01);\n  float w = (uv.x - mix(wallX, cx, wallY2)) * aspect / cone;\n  float f = (uv.x - mix(cx, floorX, 0.25)) * aspect * 1.4;\n  return exp(-(w * w + wallFall) * decay) * notFloor * wallBias + exp(-(f * f + floorFall) * decay * 1.5) * isFloor * floorBias;\n}\nvec3 eff(vec2 uv, float t) {\n  float aspect = sAspect();\n  float cy = 1.0 - p_centerY();\n  float cx = p_centerX();\n  float wallY = clamp(uv.y / max(cy, 1e-6), 0.0, 1.0);\n  float curv = p_wallCurvature() * 0.01;\n  float tr = mix(0.015, 0.15, curv);\n  float isFloor = smoothstep(cy - tr, cy + tr, uv.y);\n  float br = p_brightness() * 0.02;\n  float g = (uv.y - cy) / (tr + 0.001);\n  float base = mix(mix(0.2, 0.4, wallY), mix(0.38, 0.18, clamp((uv.y - cy) / max(1.0 - cy, 1e-6), 0.0, 1.0)), isFloor) * br + exp(-0.5 * g * g) * curv * br * 0.1;\n  float wallY2 = wallY * wallY;\n  float cone = mix(0.05, 0.45, wallY2);\n  float wallFall = (1.0 - wallY) * 1.2 * (1.0 - wallY) * 1.2;\n  float notFloor = 1.0 - isFloor;\n  float target = p_lightTarget() * 0.01;\n  float wallBias = (1.0 - target) * 1.4 + 0.3;\n  float ff = (uv.y - (cy + (1.0 - cy) * 0.3)) * 4.0;\n  float floorFall = ff * ff;\n  float floorBias = target * 1.4 + 0.3;\n  float key = sbLight(uv, aspect, cx, cx, cx, p_keySoftness(), wallY2, cone, wallFall, notFloor, wallBias, isFloor, floorFall, floorBias);\n  float keyInt = p_keyIntensity() * 0.015;\n  float fa = p_fillAngle() * 0.005;\n  float fillL = sbLight(uv, aspect, cx, cx - fa, cx - fa, p_fillSoftness(), wallY2, cone, wallFall, notFloor, wallBias, isFloor, floorFall, floorBias);\n  float fillR = sbLight(uv, aspect, cx, cx + fa, cx + fa, p_fillSoftness(), wallY2, cone, wallFall, notFloor, wallBias, isFloor, floorFall, floorBias);\n  float fillInt = p_fillIntensity() * 0.015;\n  float coveX = (uv.x - cx) * aspect;\n  float backDecay = mix(5.0, 0.8, p_backSoftness() * 0.01);\n  float back = sbSpot(coveX * 0.5, (uv.y - mix(1.0, cy, 0.15)) * 4.0, backDecay) * isFloor + sbSpot(coveX * 0.6, (cy - uv.y) * 3.0, backDecay * 0.8) * notFloor * wallY2;\n  vec3 light = vec3(base) + p_keyColor() * key * keyInt + p_fillColor() * (fillL + fillR) * fillInt + p_backColor() * back * p_backIntensity() * 0.015;\n  light += vec3(sbSpot(coveX * 0.7, (uv.y - cy + 0.02) * 10.0, 2.5) * keyInt * 0.12 * notFloor);\n  float amb = 0.0;\n  for (int i = 0; i < 4; i++) {\n    float sd = p_seed() + float(i) * 73.1;\n    float sz = sbHash(sd + 311.0) * 0.12 + 0.1;\n    float ox = sin(t * (sbHash(sd + 91.0) * 0.3 + 0.1) + sbHash(sd + 200.0) * 6.283185307179586) * (sbHash(sd) * 0.5 + 0.2);\n    float oy = cos(t * (sbHash(sd + 143.0) * 0.25 + 0.08) + sbHash(sd + 257.0) * 6.283185307179586) * (sbHash(sd + 37.0) * 0.25 + 0.1);\n    amb += sbGlow(uv, aspect, cx + ox, cy - 0.2 + oy, sz * sz);\n  }\n  light += vec3(amb * p_ambientIntensity() * 0.012 * 0.25);\n  float vx = (uv.x - 0.5) * aspect; float vy = uv.y - 0.5;\n  float vig = clamp(1.0 - (vx * vx + vy * vy) * p_vignette() * 0.025, 0.0, 1.0);\n  return clamp(p_color() * clamp(light, vec3(0.0), vec3(3.0)) * vig, vec3(0.0), vec3(1.0));\n}\n\nvec3 wall(vec2 p, float t) {\n  float sp = effSpeed() * mix(0.5, 1.5, u_opt.x);\n  vec2 uv = sUV(p + tiltD(0.4));\n  // ED-NEW-shader-effects-2: a still picture (an effect with no speed, or its speed at 0) drifts once round a small circle over the loop,\n  // its size Motion's (fract, so frame T is frame 0 to the bit), so every wallpaper moves (R-TEST-1) and the loop closes; a moving effect does not drift\n  float a = 6.283185307179586 * fract(t / T);\n  uv += (sp == 0.0 ? 0.06 * u_opt.x : 0.0) * vec2(cos(a) - 1.0, sin(a));\n  vec3 c = mix(eff(uv, t * sp), eff(uv, (t - T) * sp), t / T);\n  return lin2srgb(shoulder(max(c * mix(0.7, 1.3, u_opt.y), vec3(0.0))));\n}\n",
+   "props": [
+    {
+     "id": "color",
+     "label": "Surface",
+     "kind": "color",
+     "default": "#d8dbec",
+     "detail": "The studio's surface"
+    },
+    {
+     "id": "keyColor",
+     "label": "Key colour",
+     "kind": "color",
+     "default": "#d5e4ea",
+     "detail": "The overhead key light"
+    },
+    {
+     "id": "keyIntensity",
+     "label": "Key intensity",
+     "kind": "number",
+     "min": 0,
+     "max": 100,
+     "step": 1,
+     "default": 40,
+     "detail": "How strong the key light is"
+    },
+    {
+     "id": "keySoftness",
+     "label": "Key softness",
+     "kind": "number",
+     "min": 0,
+     "max": 100,
+     "step": 1,
+     "default": 50,
+     "detail": "How diffuse it is"
+    },
+    {
+     "id": "fillColor",
+     "label": "Fill colour",
+     "kind": "color",
+     "default": "#d5e4ea",
+     "detail": "The side fill lights"
+    },
+    {
+     "id": "fillIntensity",
+     "label": "Fill intensity",
+     "kind": "number",
+     "min": 0,
+     "max": 100,
+     "step": 1,
+     "default": 10,
+     "detail": "How strong the fills are"
+    },
+    {
+     "id": "fillSoftness",
+     "label": "Fill softness",
+     "kind": "number",
+     "min": 0,
+     "max": 100,
+     "step": 1,
+     "default": 70,
+     "detail": "How diffuse they are",
+     "probe": {
+      "fillIntensity": 60
+     }
+    },
+    {
+     "id": "fillAngle",
+     "label": "Fill spread",
+     "kind": "number",
+     "min": 0,
+     "max": 100,
+     "step": 1,
+     "default": 70,
+     "detail": "How far apart they are"
+    },
+    {
+     "id": "backColor",
+     "label": "Back colour",
+     "kind": "color",
+     "default": "#c8d4e8",
+     "detail": "The upward back wash"
+    },
+    {
+     "id": "backIntensity",
+     "label": "Back intensity",
+     "kind": "number",
+     "min": 0,
+     "max": 100,
+     "step": 1,
+     "default": 20,
+     "detail": "How strong the back wash is"
+    },
+    {
+     "id": "backSoftness",
+     "label": "Back softness",
+     "kind": "number",
+     "min": 0,
+     "max": 100,
+     "step": 1,
+     "default": 80,
+     "detail": "How diffuse it is"
+    },
+    {
+     "id": "brightness",
+     "label": "Ambient",
+     "kind": "number",
+     "min": 0,
+     "max": 100,
+     "step": 1,
+     "default": 20,
+     "detail": "The overall ambient light"
+    },
+    {
+     "id": "vignette",
+     "label": "Vignette",
+     "kind": "number",
+     "min": 0,
+     "max": 100,
+     "step": 1,
+     "default": 0,
+     "detail": "How dark the edges are"
+    },
+    {
+     "id": "centerX",
+     "label": "Stage X",
+     "kind": "number",
+     "min": 0,
+     "max": 1,
+     "step": 0.01,
+     "default": 0.5,
+     "detail": "Where the light meets the floor, left to right"
+    },
+    {
+     "id": "centerY",
+     "label": "Stage Y",
+     "kind": "number",
+     "min": 0,
+     "max": 1,
+     "step": 0.01,
+     "default": 0.8,
+     "detail": "Where the floor begins, top to bottom"
+    },
+    {
+     "id": "lightTarget",
+     "label": "Light depth",
+     "kind": "number",
+     "min": 0,
+     "max": 100,
+     "step": 1,
+     "default": 100,
+     "detail": "Floor or wall"
+    },
+    {
+     "id": "wallCurvature",
+     "label": "Wall curvature",
+     "kind": "number",
+     "min": 0,
+     "max": 100,
+     "step": 1,
+     "default": 10,
+     "detail": "How rounded the cove is"
+    },
+    {
+     "id": "ambientIntensity",
+     "label": "Ambient detail",
+     "kind": "number",
+     "min": 0,
+     "max": 100,
+     "step": 1,
+     "default": 50,
+     "detail": "How strong the drifting glows are"
+    },
+    {
+     "id": "speed",
+     "label": "Speed",
+     "kind": "number",
+     "min": -5,
+     "max": 5,
+     "step": 0.1,
+     "default": 2,
+     "detail": "How fast they drift"
+    },
+    {
+     "id": "seed",
+     "label": "Seed",
+     "kind": "number",
+     "min": 0,
+     "max": 100,
+     "step": 1,
+     "default": 0,
+     "detail": "Which glows"
+    }
+   ]
+  },
+  {
+   "id": "sei-waveform",
+   "name": "Waveform",
+   "tier": "shaders",
+   "period": 55,
+   "desc": "A simulated audio signal as bars, a wave, a line or dots.",
+   "defaults": {
+    "pack": "halo",
+    "speed": 1.0,
+    "motion": 0.5,
+    "second": 0.55,
+    "dynamic": false,
+    "perspective": true,
+    "focus": 0.0
+   },
+   "options": [
+    {
+     "id": "motion",
+     "label": "Motion",
+     "lo": "Slow",
+     "hi": "Fast",
+     "default": 0.5
+    },
+    {
+     "id": "glow",
+     "label": "Glow",
+     "lo": "Dim",
+     "hi": "Bright",
+     "default": 0.5
+    }
+   ],
+   "roles": [
+    [
+     0.24,
+     0.08,
+     0.9,
+     0.04
+    ],
+    [
+     0.32,
+     0.11,
+     0.84,
+     0.07
+    ],
+    [
+     0.42,
+     0.13,
+     0.78,
+     0.09
+    ],
+    [
+     0.54,
+     0.13,
+     0.72,
+     0.1
+    ],
+    [
+     0.66,
+     0.12,
+     0.66,
+     0.11
+    ],
+    [
+     0.92,
+     0.05,
+     0.98,
+     0.03
+    ]
+   ],
+   "packs": [
+    {
+     "id": "halo",
+     "name": "Halo",
+     "dark": [
+      "#ff5005",
+      "#dbba95",
+      "#d0bce1",
+      "#1a0f24",
+      "#fff3e6",
+      "#ffffff"
+     ],
+     "light": [
+      "#ff7a3d",
+      "#f3dcc2",
+      "#e6dbf2",
+      "#d9cbe4",
+      "#ffffff",
+      "#ffffff"
+     ]
+    },
+    {
+     "id": "pensive",
+     "name": "Pensive",
+     "dark": [
+      "#606080",
+      "#8d7dca",
+      "#212121",
+      "#0b0b12",
+      "#e8e4ff",
+      "#ffffff"
+     ],
+     "light": [
+      "#8a8ab0",
+      "#b7a9f0",
+      "#dcdcec",
+      "#cfcfe0",
+      "#ffffff",
+      "#ffffff"
+     ]
+    },
+    {
+     "id": "mint",
+     "name": "Mint",
+     "dark": [
+      "#94ffd1",
+      "#6bf5ff",
+      "#ffffff",
+      "#0a1f1c",
+      "#ffffff",
+      "#ffffff"
+     ],
+     "light": [
+      "#94ffd1",
+      "#6bf5ff",
+      "#ffffff",
+      "#dff7f2",
+      "#ffffff",
+      "#ffffff"
+     ]
+    },
+    {
+     "id": "dusk",
+     "name": "Dusk",
+     "dark": [
+      "#ff0561",
+      "#db959f",
+      "#bcc1e1",
+      "#0f1224",
+      "#ffe6ea",
+      "#ffffff"
+     ],
+     "light": [
+      "#ff3d81",
+      "#f3c2c9",
+      "#dbdff2",
+      "#cbcee4",
+      "#ffffff",
+      "#ffffff"
+     ]
+    },
+    {
+     "id": "lagoon",
+     "name": "Lagoon",
+     "dark": [
+      "#1effd2",
+      "#9cd9db",
+      "#e0e1c0",
+      "#242411",
+      "#e8ffff",
+      "#ffffff"
+     ],
+     "light": [
+      "#50ffdf",
+      "#c7f2f3",
+      "#f2f2dd",
+      "#e3e4cd",
+      "#ffffff",
+      "#ffffff"
+     ]
+    }
+   ],
+   "dynamic": {
+    "light": {
+     "dawn": {
+      "dL": [
+       -0.015,
+       -0.015,
+       -0.015,
+       -0.015,
+       -0.015,
+       -0.015
+      ],
+      "kC": [
+       1.1,
+       1.1,
+       1.1,
+       1.1,
+       1.1,
+       1.1
+      ],
+      "dh": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "tint": [
+       355.0,
+       0.24
+      ]
+     },
+     "day": {
+      "dL": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "kC": [
+       1.0,
+       1.0,
+       1.0,
+       1.0,
+       1.0,
+       1.0
+      ],
+      "dh": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "tint": [
+       0.0,
+       0.0
+      ]
+     },
+     "dusk": {
+      "dL": [
+       -0.035,
+       -0.035,
+       -0.035,
+       -0.035,
+       -0.035,
+       -0.035
+      ],
+      "kC": [
+       1.16,
+       1.16,
+       1.16,
+       1.16,
+       1.16,
+       1.16
+      ],
+      "dh": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "tint": [
+       335.0,
+       0.3
+      ]
+     },
+     "night": {
+      "dL": [
+       -0.105,
+       -0.105,
+       -0.105,
+       -0.105,
+       -0.105,
+       -0.105
+      ],
+      "kC": [
+       0.9,
+       0.9,
+       0.9,
+       0.9,
+       0.9,
+       0.9
+      ],
+      "dh": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "tint": [
+       262.0,
+       0.46
+      ]
+     }
+    },
+    "dark": {
+     "dawn": {
+      "dL": [
+       0.03,
+       0.03,
+       0.03,
+       0.03,
+       0.03,
+       0.03
+      ],
+      "kC": [
+       1.12,
+       1.12,
+       1.12,
+       1.12,
+       1.12,
+       1.12
+      ],
+      "dh": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "tint": [
+       355.0,
+       0.24
+      ]
+     },
+     "day": {
+      "dL": [
+       0.085,
+       0.085,
+       0.085,
+       0.085,
+       0.085,
+       0.085
+      ],
+      "kC": [
+       0.92,
+       0.92,
+       0.92,
+       0.92,
+       0.92,
+       0.92
+      ],
+      "dh": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "tint": [
+       232.0,
+       0.18
+      ]
+     },
+     "dusk": {
+      "dL": [
+       0.03,
+       0.03,
+       0.03,
+       0.03,
+       0.03,
+       0.03
+      ],
+      "kC": [
+       1.18,
+       1.18,
+       1.18,
+       1.18,
+       1.18,
+       1.18
+      ],
+      "dh": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "tint": [
+       335.0,
+       0.32
+      ]
+     },
+     "night": {
+      "dL": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "kC": [
+       1.0,
+       1.0,
+       1.0,
+       1.0,
+       1.0,
+       1.0
+      ],
+      "dh": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "tint": [
+       0.0,
+       0.0
+      ]
+     }
+    },
+    "sun": {
+     "dawn": [
+      0.0,
+      0.0
+     ],
+     "day": [
+      0.0,
+      0.0
+     ],
+     "dusk": [
+      0.0,
+      0.0
+     ],
+     "night": [
+      0.0,
+      0.0
+     ]
+    }
+   },
+   "perspective": {
+    "mode": "layers",
+    "default": true
+   },
+   "focus": {
+    "default": 0.0
+   },
+   "match": {
+    "off": [
+     22.5,
+     12.5,
+     0.0,
+     -15.0,
+     -30.0,
+     -1.5
+    ],
+    "hero": 2,
+    "ck": 1.0,
+    "lk": 1.0,
+    "dark_warm": {
+     "band": [
+      -10,
+      15,
+      100,
+      120
+     ],
+     "ground_hue": 330,
+     "mid_hue": 355,
+     "ground_below": 0.32,
+     "mid_below": 0.62,
+     "mid_amount": 1.0,
+     "kc": 1.3,
+     "dl": 0.03,
+     "bright_dl": 0.06,
+     "bright_kc": 1.15
+    },
+    "dl": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "dc": [
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "cm": [
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "glsl": "// shader-effects-inc/shaders (MIT, THIRD_PARTY_NOTICES \"shader-effects-inc shaders\"), ported by nth from each effect's emitted WGSL (the\n// package's own shader snapshots) into the wallpaper library's GLSL subset. Shared by every effect of the Shaders section:\n// - its options are the effect's own props, in u_e (the host fills them from the Shaders settings: colours as linear rgba, numbers as given);\n// - the package's integer (bit-op) Perlin hash cannot run on the subset (no bit operations), so its Perlin noise is the library's gradient noise;\n// - its time runs on, so the loop is closed by crossfading the effect at t with itself at t - T across the loop (frame T is frame 0 exactly); T is 55 s (ED-NEW-shader-effects-2).\nconst float T = 55.0;\nvec2 sUV(vec2 p) { float a = u_res.x / max(u_res.y, 1.0); return vec2((p.x / a + 1.0) * 0.5, (p.y + 1.0) * 0.5); }\nfloat sAspect() { return u_res.x / max(u_res.y, 1.0); }\nvec3 sMix(vec3 a, vec3 b, float t, float space) { return space < 0.5 ? mix(a, b, t) : lab2lin(mix(lin2lab(a), lin2lab(b), t)); }\nfloat pn2(vec2 p) { return gnoise(vec3(p, 0.37)) * 0.66; }\nfloat pn3(vec3 p) { return gnoise(p) * 0.66; }\n\n// u_e: style@0, colorA@1, colorB@5, colorSpace@9, fromX@10, fromY@11, toX@12, toY@13, amplitude@14, frequency@15, height@16, align@17, count@18, barWidth@19, rounding@20, dotSize@21, lineWidth@22, softness@23, speed@24, seed@25\nfloat p_style() { return u_e[0].x; }\nvec3 p_colorA() { return vec3(u_e[0].y, u_e[0].z, u_e[0].w); }\nvec3 p_colorB() { return vec3(u_e[1].y, u_e[1].z, u_e[1].w); }\nfloat p_colorSpace() { return u_e[2].y; }\nfloat p_fromX() { return u_e[2].z; }\nfloat p_fromY() { return u_e[2].w; }\nfloat p_toX() { return u_e[3].x; }\nfloat p_toY() { return u_e[3].y; }\nfloat p_amplitude() { return u_e[3].z; }\nfloat p_frequency() { return u_e[3].w; }\nfloat p_height() { return u_e[4].x; }\nfloat p_align() { return u_e[4].y; }\nfloat p_count() { return u_e[4].z; }\nfloat p_barWidth() { return u_e[4].w; }\nfloat p_rounding() { return u_e[5].x; }\nfloat p_dotSize() { return u_e[5].y; }\nfloat p_lineWidth() { return u_e[5].z; }\nfloat p_softness() { return u_e[5].w; }\nfloat p_speed() { return u_e[6].x; }\nfloat p_seed() { return u_e[6].y; }\n// Waveform: a simulated audio signal along a start-to-end baseline, drawn as bars, a filled wave, an oscilloscope line or a dot\n// matrix, mirrored about the baseline or growing on one side; the colour runs from colour A at the start to colour B at the end.\nfloat effSpeed() { return p_speed(); }\nfloat wfRaw(float x, float t) {\n  float f = p_frequency();\n  return sin(x * f * 5.1 + t * 1.3) * 0.28 + sin(x * f * 9.7 - t * 1.9) * sin(x * f * 1.7 + t * 0.6) * 0.24\n       + sin(x * f * 17.3 + t * 2.7) * 0.18 + sin(x * f * 31.9 - t * 3.4) * sin(x * f * 3.3 - t * 0.9) * 0.14\n       + sin(x * f * 67.7 + t * 4.1) * 0.09 + sin(x * f * 131.3 - t * 5.3) * sin(x * f * 7.9 + t * 1.1) * 0.07;\n}\nfloat wfEnv(float x) { return mix(0.4, 1.0, exp(-((x - 0.5) * (x - 0.5)) * 4.0)); }\nfloat wfLevel(float x, float t) { return clamp((0.45 + wfRaw(x, t) * 0.6) * wfEnv(x) * p_amplitude(), 0.0, 1.0); }\nfloat wfSignal(float x, float t) { return clamp(wfRaw(x, t) * wfEnv(x) * p_amplitude(), -1.0, 1.0); }\nfloat wfRect(float dx, float dy, float w, float h, float r) {\n  float qx = abs(dx) - w + r; float qy = abs(dy) - h + r;\n  return length(vec2(max(qx, 0.0), max(qy, 0.0))) + min(max(qx, qy), 0.0) - r;\n}\nfloat wfFill(float d, float px) { return 1.0 - smoothstep(-px * 0.5, px * 0.5, d); }\nvec3 eff(vec2 uv, float t) {\n  float aspect = sAspect();\n  vec2 rel = vec2(uv.x * aspect - p_fromX() * aspect, uv.y - (1.0 - p_fromY()));\n  vec2 toRel = vec2(p_toX() * aspect - p_fromX() * aspect, (1.0 - p_toY()) - (1.0 - p_fromY()));\n  float len = max(length(toRel), 0.0001);\n  vec2 dir = toRel / len;\n  float along = dot(rel, dir);\n  float x = along / len;\n  vec3 col = sMix(p_colorA(), p_colorB(), clamp(x, 0.0, 1.0), p_colorSpace());\n  float px = 1.0 / max(u_res.y, 1.0);\n  float tt = t + p_seed();\n  float across = rel.x * -dir.y + rel.y * dir.x;\n  float align = floor(p_align() + 0.5);\n  bool mirrored = align < 0.5;\n  float dy = align > 0.5 && align < 1.5 ? -across : across;\n  float rise = mirrored ? abs(dy) : dy;\n  float ext = mirrored ? 0.5 : 1.0;\n  float count = max(floor(p_count() + 0.5), 1.0);\n  float cell = len / count;\n  float xc = x * count;\n  float colX = (floor(xc) + 0.5) / count;\n  float dx = (fract(xc) - 0.5) * cell;\n  float style = floor(p_style() + 0.5);\n  float cov;\n  if (style < 0.5) {\n    float halfW = p_barWidth() * cell * 0.5;\n    float e = max(wfLevel(colX, tt) * p_height() * ext, mirrored ? halfW : halfW * 2.0);\n    float halfH = mirrored ? e : e * 0.5;\n    cov = wfFill(wfRect(dx, mirrored ? dy : dy - halfH, halfW, halfH, p_rounding() * halfW), px);\n  } else if (style < 1.5) {\n    float e = wfLevel(x, tt) * p_height() * ext;\n    float d = mirrored ? rise - e : max(rise - e, -rise);\n    float fp = px + p_softness() * 0.2;\n    cov = 1.0 - smoothstep(-fp * 0.5, fp * 0.5, d);\n  } else if (style < 2.5) {\n    float h = 0.002;\n    float c0 = (mirrored ? wfSignal(x, tt) : wfLevel(x, tt)) * p_height() * ext;\n    float c1 = (mirrored ? wfSignal(x + h, tt) : wfLevel(x + h, tt)) * p_height() * ext;\n    float c2 = (mirrored ? wfSignal(x - h, tt) : wfLevel(x - h, tt)) * p_height() * ext;\n    float slope = (c1 - c2) / (2.0 * h * len);\n    cov = wfFill(abs((dy - c0) / sqrt(1.0 + slope * slope)) - p_lineWidth() * 0.5, px);\n  } else {\n    float rows = rise / cell;\n    float rowY = (floor(rows) + 0.5) * cell;\n    float e = wfLevel(colX, tt) * p_height() * ext;\n    float lit = (1.0 - smoothstep(e - cell * 0.5, e + cell * 0.5, rowY)) * (mirrored ? 1.0 : step(0.0, rise));\n    cov = wfFill(length(vec2(dx, (fract(rows) - 0.5) * cell)) - p_dotSize() * cell * 0.5, px) * lit;\n  }\n  return col * cov * wfFill(max(-along, along - len), px);\n}\n\nvec3 wall(vec2 p, float t) {\n  float sp = effSpeed() * mix(0.5, 1.5, u_opt.x);\n  vec2 uv = sUV(p + tiltD(0.4));\n  // ED-NEW-shader-effects-2: a still picture (an effect with no speed, or its speed at 0) drifts once round a small circle over the loop,\n  // its size Motion's (fract, so frame T is frame 0 to the bit), so every wallpaper moves (R-TEST-1) and the loop closes; a moving effect does not drift\n  float a = 6.283185307179586 * fract(t / T);\n  uv += (sp == 0.0 ? 0.06 * u_opt.x : 0.0) * vec2(cos(a) - 1.0, sin(a));\n  vec3 c = mix(eff(uv, t * sp), eff(uv, (t - T) * sp), t / T);\n  return lin2srgb(shoulder(max(c * mix(0.7, 1.3, u_opt.y), vec3(0.0))));\n}\n",
+   "props": [
+    {
+     "id": "style",
+     "label": "Style",
+     "kind": "select",
+     "options": [
+      "Bars",
+      "Wave",
+      "Line",
+      "Dots"
+     ],
+     "default": 0,
+     "detail": "How the signal is drawn"
+    },
+    {
+     "id": "colorA",
+     "label": "Colour A",
+     "kind": "color",
+     "default": "#3b5bff",
+     "detail": "At the start"
+    },
+    {
+     "id": "colorB",
+     "label": "Colour B",
+     "kind": "color",
+     "default": "#ff3bd4",
+     "detail": "At the end"
+    },
+    {
+     "id": "colorSpace",
+     "label": "Colour space",
+     "kind": "select",
+     "options": [
+      "Linear",
+      "OKLab"
+     ],
+     "default": 1,
+     "detail": "The space the colours mix in"
+    },
+    {
+     "id": "fromX",
+     "label": "Start X",
+     "kind": "number",
+     "min": 0,
+     "max": 1,
+     "step": 0.01,
+     "default": 0,
+     "detail": "Where it starts, left to right"
+    },
+    {
+     "id": "fromY",
+     "label": "Start Y",
+     "kind": "number",
+     "min": 0,
+     "max": 1,
+     "step": 0.01,
+     "default": 0.5,
+     "detail": "Where it starts, top to bottom"
+    },
+    {
+     "id": "toX",
+     "label": "End X",
+     "kind": "number",
+     "min": 0,
+     "max": 1,
+     "step": 0.01,
+     "default": 1,
+     "detail": "Where it ends, left to right"
+    },
+    {
+     "id": "toY",
+     "label": "End Y",
+     "kind": "number",
+     "min": 0,
+     "max": 1,
+     "step": 0.01,
+     "default": 0.5,
+     "detail": "Where it ends, top to bottom"
+    },
+    {
+     "id": "amplitude",
+     "label": "Amplitude",
+     "kind": "number",
+     "min": 0,
+     "max": 2,
+     "step": 0.01,
+     "default": 1,
+     "detail": "The signal level"
+    },
+    {
+     "id": "frequency",
+     "label": "Frequency",
+     "kind": "number",
+     "min": 0.2,
+     "max": 3,
+     "step": 0.01,
+     "default": 1,
+     "detail": "How busy the signal is"
+    },
+    {
+     "id": "height",
+     "label": "Height",
+     "kind": "number",
+     "min": 0.05,
+     "max": 1,
+     "step": 0.01,
+     "default": 0.6,
+     "detail": "How tall it can grow"
+    },
+    {
+     "id": "align",
+     "label": "Align",
+     "kind": "select",
+     "options": [
+      "Mirrored",
+      "Top",
+      "Bottom"
+     ],
+     "default": 0,
+     "detail": "Which side of the baseline it grows on"
+    },
+    {
+     "id": "count",
+     "label": "Count",
+     "kind": "number",
+     "min": 4,
+     "max": 128,
+     "step": 1,
+     "default": 32,
+     "detail": "How many bars or dot columns"
+    },
+    {
+     "id": "barWidth",
+     "label": "Bar width",
+     "kind": "number",
+     "min": 0.1,
+     "max": 1,
+     "step": 0.01,
+     "default": 0.6,
+     "detail": "How wide each bar is",
+     "probe": {
+      "count": 6
+     }
+    },
+    {
+     "id": "rounding",
+     "label": "Rounding",
+     "kind": "number",
+     "min": 0,
+     "max": 1,
+     "step": 0.01,
+     "default": 1,
+     "detail": "How round the bar ends are",
+     "probe": {
+      "count": 4,
+      "barWidth": 1
+     }
+    },
+    {
+     "id": "dotSize",
+     "label": "Dot size",
+     "kind": "number",
+     "min": 0.2,
+     "max": 1,
+     "step": 0.01,
+     "default": 0.7,
+     "detail": "How big each dot is",
+     "probe": {
+      "style": 3,
+      "count": 6
+     }
+    },
+    {
+     "id": "lineWidth",
+     "label": "Line width",
+     "kind": "number",
+     "min": 0.001,
+     "max": 0.05,
+     "step": 0.001,
+     "default": 0.006,
+     "detail": "How thick the line is",
+     "probe": {
+      "style": 2
+     }
+    },
+    {
+     "id": "softness",
+     "label": "Softness",
+     "kind": "number",
+     "min": 0,
+     "max": 1,
+     "step": 0.01,
+     "default": 0,
+     "detail": "How soft the wave's edge is",
+     "probe": {
+      "style": 1
+     }
+    },
+    {
+     "id": "speed",
+     "label": "Speed",
+     "kind": "number",
+     "min": 0,
+     "max": 3,
+     "step": 0.01,
+     "default": 1,
+     "detail": "How fast the signal moves"
+    },
+    {
+     "id": "seed",
+     "label": "Seed",
+     "kind": "number",
+     "min": 0,
+     "max": 100,
+     "step": 1,
+     "default": 1,
+     "detail": "Which signal"
+    }
+   ]
   }
  ]
 }
