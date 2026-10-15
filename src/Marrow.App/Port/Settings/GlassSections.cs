@@ -40,6 +40,9 @@ internal sealed class GlassSections
     internal CzToggleRow TranslucentSidebar { get; }
     internal CzSegmentRow Desktop { get; }
     internal CzCapsuleButton Reset { get; }
+    internal CzSegmentRow Engine { get; }
+    internal CzSegmentRow RizzyPreset { get; }
+    internal IReadOnlyDictionary<string, CzSlider> RizzySliders { get; }
 
     /// <param name="read">The app's glass setting; read inside a tracked read by the page.</param>
     /// <param name="write">Puts a new glass setting in the app's settings (live: the material follows at once).</param>
@@ -55,6 +58,17 @@ internal sealed class GlassSections
         Preview = new GlassPreviewTile();
         rows.Add(Preview);
         glide = new CzNumber(new CzMotion(Preview), 0, Glided); // the tile lives and leaves with the section
+
+        // ED-NEW-glass-alive-5: the engine that draws every glass surface, and liquid-glass's own options below.
+        Engine = new CzSegmentRow(GlassText.Engine, GlassText.EngineDetail, GlassSettings.Engines.Select(e => (e.Id, e.Name)).ToArray(),
+            GlassSettings.IdOf(settings.Engine), id =>
+            {
+                if (GlassSettings.Engines.FirstOrDefault(e => e.Id == id) is not { Id: not null } engine) return;
+                if (glide.IsMoving) glide.Jump(1);
+                write(read() with { Engine = engine.Value });
+                commit();
+            });
+        rows.Add(Engine.Row);
 
         Look = new CzSegmentRow(GlassText.Look, GlassText.LookDetail(settings), GlassSettings.Looks.Select(l => (l.Id, l.Name)).ToArray(),
             settings.Look is { } look ? GlassSettings.IdOf(look) : "regular", Pick);
@@ -81,6 +95,27 @@ internal sealed class GlassSections
             rows.Add(new CzRow(knob.Name, knob.Description, slider, dimmed => slider.Dimmed = dimmed));
         }
         Sliders = sliders;
+
+        rows.Add(new CzCaptionRow(GlassText.RizzyCaption));
+        RizzyPreset = new CzSegmentRow(GlassText.RizzyPreset, GlassText.RizzyPresetDetail(settings.Rizzy), RizzyGlass.Presets.Select(p => (p.Id, p.Name)).ToArray(),
+            PresetId(settings.Rizzy) ?? "balanced", id =>
+            {
+                if (RizzyGlass.Presets.FirstOrDefault(p => p.Id == id) is not { Id: not null } preset) return;
+                var now = glide.IsMoving ? glideTo : read();
+                if (now.Rizzy != RizzyGlass.Of(preset.Value)) Glide(now with { Rizzy = RizzyGlass.Of(preset.Value) });
+            });
+        if (PresetId(settings.Rizzy) is null) RizzyPreset.Control.ShowNone();
+        rows.Add(RizzyPreset.Row);
+        var rizzySliders = new Dictionary<string, CzSlider>();
+        foreach (var knob in RizzyGlass.Knobs)
+        {
+            var id = knob.Id;
+            var slider = Slider(knob, settings.Rizzy.Get(id), value => write(read() with { Rizzy = read().Rizzy.With(id, value) }));
+            Avalonia.Automation.AutomationProperties.SetName(slider, GlassText.RizzyCaption + ", " + knob.Name);
+            rizzySliders[id] = slider;
+            rows.Add(new CzRow(knob.Name, knob.Description, slider, dimmed => slider.Dimmed = dimmed));
+        }
+        RizzySliders = rizzySliders;
 
         rows.Add(new CzCaptionRow(GlassText.BehaviourCaption));
         TintColour = new CzMenuButton(GlassText.TintColour, GlassSettings.TintColours.Select(c => (c.Id, c.Name)).ToArray(), IdOf(settings.TintColour), GlassText.TintColourDetail);
@@ -175,6 +210,22 @@ internal sealed class GlassSections
             if (TintColour.SelectedId != tint) TintColour.Show(tint);
             var motion = ReducedMotion(settings) ? "reduced" : "full";
             if (Motion.Control.SelectedId != motion) Motion.Apply(motion, GlassText.MotionDetail);
+            var engine = GlassSettings.IdOf(settings.Engine);
+            if (Engine.Control.SelectedId != engine) Engine.Apply(engine, GlassText.EngineDetail);
+            foreach (var (id, slider) in RizzySliders)
+            {
+                var value = settings.Rizzy.Get(id);
+                if (slider.Value != value) slider.Update(value, null);
+            }
+            if (PresetId(settings.Rizzy) is { } preset)
+            {
+                if (RizzyPreset.Control.SelectedId != preset) RizzyPreset.Apply(preset, GlassText.RizzyPresetDetail(settings.Rizzy));
+            }
+            else
+            {
+                RizzyPreset.Control.ShowNone();
+                RizzyPreset.Row.SetDetail(GlassText.RizzyPresetDetail(settings.Rizzy));
+            }
             var desktop = DesktopId(settings);
             if (Desktop.Control.SelectedId != desktop) Desktop.Apply(desktop, GlassText.DesktopDetail);
         }
@@ -184,6 +235,8 @@ internal sealed class GlassSections
         FineTuning.SetDetail(GlassText.FineTuningDetail(custom));
         Reset.Dimmed = read().Held() == GlassSettings.Default;
     }
+
+    private static string? PresetId(RizzyGlass rizzy) => rizzy.Preset is { } preset ? RizzyGlass.Presets.First(p => p.Value == preset).Id : null;
 
     private static string DesktopId(GlassSettings settings) => settings.Desktop == DesktopBackdrop.Frosted ? "frosted" : "clear";
 
@@ -253,6 +306,11 @@ internal static class GlassText
     internal const string DesktopDetail = "Clear shows the desktop as it is; Frosted lets Windows blur it.";
     internal const string DesktopClear = "Clear";
     internal const string DesktopFrosted = "Frosted";
+    internal const string Engine = "Engine";
+    internal const string EngineDetail = "Canvas is the approved material; liquid-glass is rizzytoday's lens, set with its own options.";
+    internal const string RizzyCaption = "liquid-glass";
+    internal const string RizzyPreset = "Preset";
+    internal static string RizzyPresetDetail(RizzyGlass rizzy) => rizzy.Preset is null ? "Custom" : "rizzytoday/liquid-glass's options, stepped around its own.";
     internal const string Defaults = "Defaults";
     internal const string Reset = "Reset to defaults";
     internal const string ResetDetail = "Regular, every value at its default, the switches following Windows.";
