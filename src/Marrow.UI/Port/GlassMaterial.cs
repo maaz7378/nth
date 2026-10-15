@@ -368,7 +368,7 @@ internal static partial class GlassMaterial
             // OD-0147: a surface set beside the effect (SwiftGlass.SurfaceProperty) when the effect names none
             var look = GlassLooks.Of(e.Surface is null && SwiftGlass.GetSurface(control) is { } beside ? e.OnSurface(beside) : e, Nested(control));
             // OD-0147: a piece that casts its own shadow draws none of the canvas's past its edge
-            if (look.Canvas is { } canvas && SwiftGlass.GetCastsOwnShadow(control)) look = GlassLook.Of(canvas.Kind, canvas.Tuning with { Shadow = 0 });
+            if (look.Canvas is { } canvas && SwiftGlass.GetCastsOwnShadow(control)) look = look with { Canvas = canvas with { Tuning = canvas.Tuning with { Shadow = 0 } } };
             if (look.Quiet) return null;
             var a = AttachmentFor(control);
             var (darkness, tint) = a.Appearance(control, this, e, resolved);
@@ -851,6 +851,8 @@ internal static partial class GlassMaterial
         // With one shape the scene's distance is the shape's own (no union): it is not evaluated twice.
         source.Append(n == 1 ? "float d = -raw;\n" : "float d = -sceneDistance(xy);\n");
         // OD-0147: a piece in the approved material draws it, and nothing below.
+        // ED-NEW-glass-alive-5: a piece drawn by liquid-glass (cvA.x 3).
+        source.Append("if (cvA.x > 2.5) return rzGlass(xy, d, at, extent, flags.x, flags.w, tint, ptr.w < 0.5 || raw > 0.0, cvA, cvB, cvC, cvD);\n");
         source.Append("if (cvA.x > 0.5) return cvGlass(xy, d, at, extent, ptr.xy, flags.w, tint, ptr.w < 0.5 || raw > 0.0, cvA, cvB, cvC, cvD, cvE, cvF, cvG, cvH, cvI);\n");
         source.Append("""
             // ED-NEW-glasslook-3: the look's depth (aura.y; 0 in the release look): a soft, wide, faint shadow under the glass, the shape blurred over
@@ -1167,6 +1169,50 @@ internal static partial class GlassMaterial
             // dither: no banding in the soft gradients
             P = float4(P.rgb + (fract(sin(dot(floor(xy / px), float2(12.9898, 78.233))) * 43758.5453) - 0.5) / 255.0 * P.a, P.a);
             return half4(P * a) + outside;
+        }
+        // ED-NEW-glass-alive-5: rizzytoday/liquid-glass (MIT; THIRD_PARTY_NOTICES "liquid-glass"), its buildDisplacementMap and SVG filter as one
+        // pass. The map: inside the piece, red falls from 1 at the left to 0 at the right and blue rises from 0 at the top to 1 at the bottom; over
+        // them lies the neutral centre, a grey of `lightness` at `alpha`, inset `border` of the smaller side and blurred by `blur` (the Gaussian's
+        // coverage in its logistic form); outside the piece the map is neutral grey. Each channel is read displaced by its own scale times the map less
+        // one half (feDisplacementMap, red x and blue y), the three are put together (the filter's screen of the three separated channels), then
+        // saturate() (the Filter Effects matrix), then the frost (the element's background over the filtered backdrop: black, white in a light
+        // appearance so text stays readable). A post-displacement blur reads the frost (the backdrop blurred by displaceBlur) instead of the sharp
+        // pixels. rA: 3, the corner (pt), the neutral inset (pt), the blur (pt); rB: the red, green and blue scales (pt), lightness 0 to 1;
+        // rC: alpha, frost, saturation, displaceBlur on; rD: darkness, one device pixel (pt), the piece's scale into the drawing.
+        half4 rzRead(float2 p, float blurred) {
+            float2 q = clamp(p, window.xy, window.zw);
+            return blurred > 0.5 ? backdrop.eval(q) : sharp.eval(q);
+        }
+        half4 rzGlass(float2 xy, float d, float2 at, float2 extent, float kind, float op, float4 tint, bool tinted,
+                      float4 rA, float4 rB, float4 rC, float4 rD) {
+            float aa = 0.7 * rD.y;
+            float mask = smoothstep(-aa, aa, d);
+            float a = mask * op;
+            if (stage < 0.5) return half4(0.0, 0.0, 0.0, half(a));
+            if (mask <= 0.0) return half4(0.0);
+            float2 m = float2(1.0 - clamp(at.x / max(extent.x, 1.0), 0.0, 1.0), clamp(at.y / max(extent.y, 1.0), 0.0, 1.0));
+            float b = rA.z;
+            float2 inner = max(extent - 2.0 * b, float2(0.001));
+            float sd = shapeDistance(at - float2(b), inner, float4(rA.y), kind, 0.0);
+            float cover = rA.w > 0.01 ? 1.0 / (1.0 + exp(1.702 * sd / rA.w)) : (sd <= 0.0 ? 1.0 : 0.0);
+            float k = rC.x * cover;
+            float2 map = float2(rB.w) * k + m * (1.0 - k) - 0.5;
+            float2 off = map * rD.z;
+            half4 r = rzRead(xy + off * rB.x, rC.w);
+            half4 g = rzRead(xy + off * rB.y, rC.w);
+            half4 bl = rzRead(xy + off * rB.z, rC.w);
+            float ar = float(r.a), ag = float(g.a), ab = float(bl.a);
+            float alpha = 1.0 - (1.0 - ar) * (1.0 - ag) * (1.0 - ab);
+            float3 c = float3(cvColour(r).r, cvColour(g).g, cvColour(bl).b);
+            float s = rC.z;
+            c = clamp(float3(
+                (0.213 + 0.787 * s) * c.r + (0.715 - 0.715 * s) * c.g + (0.072 - 0.072 * s) * c.b,
+                (0.213 - 0.213 * s) * c.r + (0.715 + 0.285 * s) * c.g + (0.072 - 0.072 * s) * c.b,
+                (0.213 - 0.213 * s) * c.r + (0.715 - 0.715 * s) * c.g + (0.072 + 0.928 * s) * c.b), 0.0, 1.0);
+            float4 P = float4(c * alpha, alpha);
+            if (rC.y > 0.0) P = cvOver(P, float3(1.0 - rD.x), rC.y);
+            if (tinted) P = cvOver(P, float3(tint.rgb), tint.a);
+            return half4(P * a);
         }
         half4 cvInterior(float2 xy, float2 at, float2 extent, float2 ptr, float op, float4 tint, bool tinted,
                          float4 cB, float4 cC, float4 cD, float4 cF, float4 cG, float4 cH, float4 cI) {
@@ -1861,6 +1907,7 @@ internal static partial class GlassMaterial
     private static float[][] CanvasUniforms(Region r, float scale)
     {
         if (r.Drawn.Canvas is not { } canvas) return NoCanvas;
+        if (canvas.Liquid) return LiquidUniforms(r, canvas, scale);
         var s = canvas.Spec(r.Smaller, r.Darkness, r.HoverAmount, r.PressAmount, 1 / Math.Max(scale, 0.01));
         var flat = canvas.Kind == GlassKind.Flat;
         // a flat control shows its own tint as a flat fill (unless its shape's fill draws it), and white under the pointer
@@ -1881,10 +1928,37 @@ internal static partial class GlassMaterial
         ];
     }
 
+    // ED-NEW-glass-alive-5: a liquid-glass piece's rows (the shader's rzGlass). The neutral inset is border times half the smaller side
+    // (buildDisplacementMap's borderPx); the corner is the piece's own, or the options' borderRadius for a piece with none; the scales are held to
+    // GlassCanvas.LiquidReach.
+    private static float[][] LiquidUniforms(Region r, GlassCanvas canvas, float scale)
+    {
+        var o = canvas.Rizzy.Held();
+        var (sr, sg, sb) = canvas.LiquidScales;
+        var own = Math.Max(Math.Max(r.Corners.TopLeft, r.Corners.TopRight), Math.Max(r.Corners.BottomRight, r.Corners.BottomLeft));
+        var corner = r.Shape.Kind != GlassShapeKind.RoundedRectangle ? Math.Min(r.Size.Width, r.Size.Height) / 2 : own > 0 ? own : o.BorderRadius;
+        var inset = Math.Min(r.Size.Width, r.Size.Height) * o.Border * 0.5;
+        var toDrawing = (float)Math.Sqrt(Math.Abs(r.Transform.M11 * r.Transform.M22 - r.Transform.M12 * r.Transform.M21));
+        return
+        [
+            [3f, (float)corner, (float)inset, (float)o.Blur],
+            [(float)sr, (float)sg, (float)sb, (float)(o.Lightness / 100)],
+            [(float)o.Alpha, (float)o.Frost, (float)o.Saturation, o.DisplaceBlur >= 0.05 ? 1f : 0f],
+            [(float)Math.Clamp(r.Darkness, 0, 1), 1 / Math.Max(scale, 0.01f), toDrawing, 0f],
+            new float[4], new float[4], new float[4], new float[4], new float[4],
+        ];
+    }
+
     // The approved material's lens: its bend and the red read's part of the fringe past the edge (the blur's reach), and its depth: past the
     // magnification (2.2 bezels), the full frost, the edge band and the soft inner light, it reads one texel (Inside, the shader's deep).
     private static Optics CanvasOptics(GlassCanvas canvas, double smaller)
     {
+        // ED-NEW-glass-alive-5: liquid-glass bends the whole piece (its centre too, by 1 - alpha): no inside reads one texel.
+        if (canvas.Liquid)
+        {
+            var (sr, sg, sb) = canvas.LiquidScales;
+            return new Optics(0.5 * Math.Max(Math.Abs(sr), Math.Max(Math.Abs(sg), Math.Abs(sb))), 0, double.MaxValue / 4, 0);
+        }
         var s = canvas.Spec(smaller, 1, 1, 1, 1);
         var deep = Math.Max(Math.Max(GlassCanvas.MagnifyWidth * s.Bezel, GlassCanvas.FullAt), Math.Max(s.Band, 12)) + s.Swell;
         return new Optics(s.Bend + s.Fringe, 0, deep, 0);
@@ -1896,6 +1970,7 @@ internal static partial class GlassMaterial
     private static SKRect? Inside(State state)
     {
         if (state.Regions is not [{ Shape.Kind: GlassShapeKind.RoundedRectangle, Transform: { M12: 0, M21: 0 } } r] || r.Drawn.Canvas?.Kind == GlassKind.Flat) return null;
+        if (r.Drawn.Canvas is { Liquid: true }) return null; // ED-NEW-glass-alive-5: liquid-glass bends its centre too
         var distanceScale = Math.Sqrt(Math.Abs(r.Transform.M11 * r.Transform.M22));
         if (distanceScale <= 0) return null;
         var deep = r.Lens.Deep / distanceScale;
@@ -1912,6 +1987,9 @@ internal static partial class GlassMaterial
         var blur = (int)Math.Ceiling(3 * radius) + 2; // the blur's 3 sigma (radius is the sigma) and the linear filter's pixel
         var bend = (int)Math.Ceiling(MaxReadDisplacement * scale) + 2; // the larger of the 50 pt lit bend and the 72 pt unlit band read
         var inner = SKRectI.Empty;
+        // ED-NEW-glass-alive-5: liquid-glass bends its whole piece, as far as GlassCanvas.LiquidReach: a change anywhere under it reaches that far.
+        if (state.Regions.Any(r => r.Drawn.Canvas is { Liquid: true }))
+            return new Spread(output, margin, inner, blur, Math.Max(bend, (int)Math.Ceiling(GlassCanvas.LiquidReach * scale) + 2), state.Regions.Any(r => r.OwnBackdrop));
         if (state.Regions is [{ Transform: { M12: 0, M21: 0 } } only])
         {
             // The band ends Optics.Deep in from the edge, at most 37.4 pt (3 + 3.12 * 11): 48 holds it with room. A corner's curve, Apple's included
