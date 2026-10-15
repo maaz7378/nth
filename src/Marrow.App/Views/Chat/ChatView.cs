@@ -69,6 +69,7 @@ public sealed class ChatView : Decorator
     private readonly Grid pane = new();
     private readonly Border timelineHost = new();
     private readonly Grid composerHost = new();
+    private readonly ComposerCentre centre;
     private readonly Panel floatingHost = new();
     private readonly Panel terminalHost = new();
     private readonly Dictionary<FloatingPanelID, (Control View, object Inputs)> mountedPanels = [];
@@ -181,6 +182,13 @@ public sealed class ChatView : Decorator
         });
         pane.SizeChanged += (_, _) => NotePaneSize(SettledPaneSize()); // :241-249
         composerHost.SizeChanged += (_, _) => NoteComposerAreaHeight(composerHost.Bounds.Height); // :129-138
+        // ED-NEW-composer-centre-1: the composer centred on a new page, gliding down when work starts
+        centre = new ComposerCentre(composerHost);
+        void PlaceComposer() => centre.Update(conversation.Bounds.Height, composerHost.Bounds.Height,
+            ComposerCentre.IsNewPage(this.runtime.Turns.Count, this.runtime.IsRunning, this.runtime.Draft.IsEmpty));
+        conversation.SizeChanged += (_, _) => PlaceComposer();
+        composerHost.SizeChanged += (_, _) => PlaceComposer();
+        this.Track(() => (this.runtime.Turns.Count, this.runtime.IsRunning, this.runtime.Draft.IsEmpty), _ => PlaceComposer());
         SizeChanged += (_, _) =>
         {
             if (columnHeight == Bounds.Height) return;

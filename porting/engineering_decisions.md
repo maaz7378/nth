@@ -14148,3 +14148,7 @@ Row #87 (Maaz, 2026-10-15: on a fresh profile nothing changed on screen). The en
 ## ED-NEW-glass-alive-9
 
 Row #87 (Maaz, 2026-10-15). A fresh profile (no wallpaper choice, no picture of its own) starts once on the library's Borealis live wallpaper, so the glass has something to bend; a later choice, None included, sticks. The default backdrop opacity is 0.8 (was 0.5): the desktop shows faintly behind nth's wallpaper, the three layers Maaz described.
+
+## ED-NEW-composer-centre-1
+
+Row #87 (phase 2; Maaz, 2026-10-15). On a new thread (no turn, no run, an empty draft) the composer stands in the middle of the conversation pane, its middle on the pane's middle, and glides down to the bottom (Apple's smooth spring, 0.5 s) at the first letter, an attachment, a turn or a run; a cleared draft on a thread with no turns brings it back up. Only a translation of the composer's host moves: no layout pass, no new glass program, nothing drawn at rest; under Reduce Motion it is placed at once (OD-0076). A resize follows at once.
