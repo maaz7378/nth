@@ -14152,3 +14152,7 @@ Row #87 (Maaz, 2026-10-15). A fresh profile (no wallpaper choice, no picture of 
 ## ED-NEW-composer-centre-1
 
 Row #87 (phase 2; Maaz, 2026-10-15). On a new thread (no turn, no run, an empty draft) the composer stands in the middle of the conversation pane, its middle on the pane's middle, and glides down to the bottom (Apple's smooth spring, 0.5 s) at the first letter, an attachment, a turn or a run; a cleared draft on a thread with no turns brings it back up. Only a translation of the composer's host moves: no layout pass, no new glass program, nothing drawn at rest; under Reduce Motion it is placed at once (OD-0076). A resize follows at once.
+
+## ED-NEW-jelly-pill-1
+
+Row #87 (phase 3; Maaz, 2026-10-15; plasma-ui's jelly selector, MIT, its idea only, no code). The pill of CzSegmentedControl, which every segmented selector on every Settings page is, becomes a drop of liquid glass (a GlassSurface.Inner piece: under the liquid engines it reads the card's and the sheet's glass and bends them again, the third lens). When the pick moves it stretches along its travel, the volume kept (x 1 + 0.16 j, y its inverse), and settles on a spring (response 0.42 s, damping 0.45); it can be dragged along the track (the press is tunnelled so a press on the segment under it grabs it) and lands on the segment under its middle, which picks it. Arrow keys move it as before. Under Reduce Motion it moves at once and never stretches. With the classic canvas or Reduce transparency the track keeps its flat pill fill. No new program or pass; nothing moves at rest.
